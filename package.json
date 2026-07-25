@@ -60,6 +60,8 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.0.0",
     "@types/passport-jwt": "^4.0.1",
+    "@types/passport-google-oauth20": "^2.0.16",
+    "@types/passport-github2": "^1.2.9",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "@vitest/coverage-v8": "^2.1.0",
