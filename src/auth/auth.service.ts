@@ -9,13 +9,16 @@ import { createHash } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+import { OAuthProfile } from './strategies/google.strategy';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({
@@ -40,9 +43,55 @@ export class AuthService {
       where: { email: dto.email },
     });
 
-    if (!user || !(await bcrypt.compare(dto.password, user.passwordHash))) {
+    if (!user || !user.passwordHash) {
       throw new UnauthorizedException('Credenciais inválidas');
     }
+
+    if (!(await bcrypt.compare(dto.password, user.passwordHash))) {
+      throw new UnauthorizedException('Credenciais inválidas');
+    }
+
+    return this.issueTokens(user.id, user.email, user.role);
+  }
+
+  async validateOAuthLogin(profile: OAuthProfile) {
+    const linkedAccount = await this.prisma.oAuthAccount.findUnique({
+      where: {
+        provider_providerUserId: {
+          provider: profile.provider,
+          providerUserId: profile.providerUserId,
+        },
+      },
+      include: { user: true },
+    });
+
+    if (linkedAccount) {
+      return this.issueTokens(
+        linkedAccount.user.id,
+        linkedAccount.user.email,
+        linkedAccount.user.role,
+      );
+    }
+
+    let user = await this.prisma.user.findUnique({ where: { email: profile.email } });
+
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          name: profile.name,
+          email: profile.email,
+          emailVerifiedAt: new Date(),
+        },
+      });
+    }
+
+    await this.prisma.oAuthAccount.create({
+      data: {
+        provider: profile.provider,
+        providerUserId: profile.providerUserId,
+        userId: user.id,
+      },
+    });
 
     return this.issueTokens(user.id, user.email, user.role);
   }
