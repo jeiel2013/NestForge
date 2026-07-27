@@ -109,7 +109,7 @@ Permissions são granulares (`user:create`, `user:delete`, `report:read`, etc) e
 - [x] Refresh Token
 - [x] Docker
 - [x] CI (build, lint, test)
-- [ ] OAuth (Google/GitHub)
+- [x] OAuth (Google/GitHub)
 - [ ] Upload de arquivos
 - [ ] Filas (BullMQ)
 - [ ] E-mails transacionais
@@ -118,6 +118,25 @@ Permissions são granulares (`user:create`, `user:delete`, `report:read`, etc) e
 - [ ] Documentação completa (Swagger + guia de arquitetura)
 
 Veja o [ROADMAP.md](ROADMAP.md) detalhado.
+
+### Configurando o login social (OAuth)
+
+Para habilitar login via Google e GitHub, crie um OAuth App em cada provedor e preencha no `.env`:
+
+\`\`\`bash
+APP_URL=http://localhost:3000
+
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+\`\`\`
+
+- **Google**: crie as credenciais no [Google Cloud Console](https://console.cloud.google.com/apis/credentials) e configure a URL de callback como `{APP_URL}/auth/google/callback`.
+- **GitHub**: crie um OAuth App em `Settings > Developer settings > OAuth Apps` e configure a mesma URL de callback, trocando para `{APP_URL}/auth/github/callback`.
+
+Depois é só acessar `GET /auth/google` ou `GET /auth/github` que o fluxo de redirecionamento cuida do resto — o callback já devolve `accessToken` e `refreshToken` como no login tradicional. Se for a primeira vez do usuário, uma conta é criada automaticamente e vinculada ao provedor.
 
 ## 🤝 Contribuindo
 
@@ -129,4 +148,4 @@ Este projeto está sob a licença MIT — veja [LICENSE](LICENSE).
 
 ---
 
-Feito por [Jeiel Alves](https://github.com/jeiel2013) · [jeieldev.vercel.app](https://jeieldev.vercel.app)
+Feito por [Jeiel Alves](https://github.com/jeiel2013) · [jeieldev.vercel.app](https://jeieldev.com.br)
