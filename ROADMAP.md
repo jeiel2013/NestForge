@@ -10,8 +10,8 @@ Este roadmap existe para deixar claro o que já está pronto e onde dá pra cont
 - [ ] Forgot Password
 - [ ] Reset Password
 - [ ] Email Verification
-- [ ] OAuth Google
-- [ ] OAuth GitHub
+- [x] OAuth Google
+- [x] OAuth GitHub
 
 ## Usuários
 - [x] CRUD básico
