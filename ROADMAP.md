@@ -15,8 +15,8 @@ Este roadmap existe para deixar claro o que já está pronto e onde dá pra cont
 
 ## Usuários
 - [x] CRUD básico
-- [ ] Paginação e filtros avançados
-- [ ] Upload de avatar
+- [x] Paginação e filtros avançados
+- [x] Upload de avatar
 
 ## RBAC
 - [x] Roles (Admin, Manager, User)
