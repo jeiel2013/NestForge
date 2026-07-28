@@ -203,6 +203,22 @@ Todas as respostas de usuário passam por um `ClassSerializerInterceptor` global
 
 Sobre CSRF: esta API usa Bearer token (header `Authorization`), não cookie de sessão — então o ataque clássico de CSRF não se aplica por padrão. Mesmo assim, tem um middleware de double-submit cookie pronto em `src/common/middleware/csrf.middleware.ts`, desligado por padrão. Se você adaptar o boilerplate pra guardar o token em cookie, é só setar `ENABLE_CSRF=true` no `.env`.
 
+- 🪵 **Observabilidade** — logs estruturados com Pino, health checks (`/health`) e métricas Prometheus (`/metrics`)
+
+O seed cria três contas de teste, uma por role:
+
+| E-mail | Senha | Role |
+|---|---|---|
+| `admin@nestforge.dev` | `admin123` | ADMIN |
+| `manager@nestforge.dev` | `manager123` | MANAGER |
+| `user@nestforge.dev` | `user1234` | USER |
+
+## 📈 Observabilidade
+
+`GET /health` retorna o status agregado da API — banco (Prisma), Redis, memória (heap/RSS) e espaço em disco — usando `@nestjs/terminus`. Cada verificação aparece individualmente na resposta, então dá pra saber exatamente o que caiu.
+
+`GET /metrics` expõe métricas no formato do Prometheus (via `prom-client`): as métricas padrão de Node.js (CPU, memória, event loop) mais `http_request_duration_seconds` (histograma) e `http_requests_total` (contador), ambas com labels de `method`, `route` e `status_code`. Basta apontar um scrape job do Prometheus pra essa rota.
+
 ## 🤝 Contribuindo
 
 Contribuições são bem-vindas! Veja o [CONTRIBUTING.md](CONTRIBUTING.md) para o guia completo.
