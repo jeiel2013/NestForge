@@ -150,6 +150,26 @@ Todo cadastro (`POST /auth/register`) já dispara um e-mail de verificação aut
 
 Os tokens de reset e verificação expiram em 1 hora e 24 horas, respectivamente, e são de uso único.
 
+## 🔑 Roles & Permissions
+
+| Role | Descrição |
+|---|---|
+| `ADMIN` | acesso total ao sistema |
+| `MANAGER` | gerencia usuários e relatórios |
+| `USER` | acesso padrão |
+
+Cada role tem um conjunto fixo de permissões, mapeado em `src/common/constants/role-permissions.ts`:
+
+| Permission | ADMIN | MANAGER | USER |
+|---|:---:|:---:|:---:|
+| `user:create` | ✅ | ❌ | ❌ |
+| `user:read` | ✅ | ✅ | ✅ |
+| `user:update` | ✅ | ✅ | ❌ |
+| `user:delete` | ✅ | ❌ | ❌ |
+| `report:read` | ✅ | ✅ | ❌ |
+
+Nas rotas, use `@Permissions(Permission.UserCreate)` para exigir uma permissão específica, ou `@Roles(Role.ADMIN)` quando o controle por cargo já for suficiente. Os dois guards (`RolesGuard` e `PermissionsGuard`) rodam globalmente e só bloqueiam a rota se ela tiver o decorator correspondente.
+
 ## 🤝 Contribuindo
 
 Contribuições são bem-vindas! Veja o [CONTRIBUTING.md](CONTRIBUTING.md) para o guia completo.
