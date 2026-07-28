@@ -10,6 +10,7 @@ import { MailModule } from './mail/mail.module';
 import { HealthModule } from './health/health.module';
 import { CsrfMiddleware } from './common/middleware/csrf.middleware';
 import { validateEnv } from './config/env.validation';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { validateEnv } from './config/env.validation';
     UsersModule,
     MailModule,
     HealthModule,
+    MetricsModule
   ],
 })
 export class AppModule implements NestModule {
