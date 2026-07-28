@@ -5,17 +5,7 @@ import { PrismaService } from '../database/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FindUsersQueryDto } from './dto/find-users-query.dto';
-
-const SAFE_USER_SELECT = {
-  id: true,
-  name: true,
-  email: true,
-  role: true,
-  emailVerifiedAt: true,
-  avatarUrl: true,
-  createdAt: true,
-  updatedAt: true,
-} as const;
+import { UserEntity } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -29,10 +19,11 @@ export class UsersService {
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
-    return this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: { name: dto.name, email: dto.email, passwordHash, role: dto.role },
-      select: SAFE_USER_SELECT,
     });
+
+    return new UserEntity(user);
   }
 
   async findAll(query: FindUsersQueryDto) {
@@ -50,10 +41,9 @@ export class UsersService {
         : {}),
     };
 
-    const [data, total] = await this.prisma.$transaction([
+    const [users, total] = await this.prisma.$transaction([
       this.prisma.user.findMany({
         where,
-        select: SAFE_USER_SELECT,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
@@ -62,7 +52,7 @@ export class UsersService {
     ]);
 
     return {
-      data,
+      data: users.map((user) => new UserEntity(user)),
       meta: {
         total,
         page,
@@ -73,11 +63,11 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id }, select: SAFE_USER_SELECT });
+    const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
       throw new NotFoundException('Usuário não encontrado');
     }
-    return user;
+    return new UserEntity(user);
   }
 
   async update(id: string, dto: UpdateUserDto) {
@@ -89,21 +79,22 @@ export class UsersService {
       delete data.password;
     }
 
-    return this.prisma.user.update({ where: { id }, data, select: SAFE_USER_SELECT });
-  }
-
-  async updateAvatar(id: string, avatarUrl: string) {
-    await this.findOne(id);
-    return this.prisma.user.update({
-      where: { id },
-      data: { avatarUrl },
-      select: SAFE_USER_SELECT,
-    });
+    const user = await this.prisma.user.update({ where: { id }, data });
+    return new UserEntity(user);
   }
 
   async remove(id: string) {
     await this.findOne(id);
     await this.prisma.user.delete({ where: { id } });
     return { message: 'Usuário removido com sucesso' };
+  }
+
+  async updateAvatar(id: string, avatarUrl: string) {
+    await this.findOne(id);
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: { avatarUrl },
+    });
+    return new UserEntity(user);
   }
 }
