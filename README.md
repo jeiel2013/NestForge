@@ -110,7 +110,7 @@ Permissions são granulares (`user:create`, `user:delete`, `report:read`, etc) e
 - [x] Docker
 - [x] CI (build, lint, test)
 - [x] OAuth (Google/GitHub)
-- [ ] Upload de arquivos
+- [x] Upload de arquivos
 - [x] Filas (BullMQ)
 - [x] E-mails transacionais
 - [ ] RBAC completo (permissions granulares)
@@ -123,7 +123,7 @@ Veja o [ROADMAP.md](ROADMAP.md) detalhado.
 
 Para habilitar login via Google e GitHub, crie um OAuth App em cada provedor e preencha no `.env`:
 
-\`\`\`bash
+```bash
 APP_URL=http://localhost:3000
 
 GOOGLE_CLIENT_ID=
@@ -131,7 +131,7 @@ GOOGLE_CLIENT_SECRET=
 
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
-\`\`\`
+```
 
 - **Google**: crie as credenciais no [Google Cloud Console](https://console.cloud.google.com/apis/credentials) e configure a URL de callback como `{APP_URL}/auth/google/callback`.
 - **GitHub**: crie um OAuth App em `Settings > Developer settings > OAuth Apps` e configure a mesma URL de callback, trocando para `{APP_URL}/auth/github/callback`.
@@ -169,6 +169,33 @@ Cada role tem um conjunto fixo de permissões, mapeado em `src/common/constants/
 | `report:read` | ✅ | ✅ | ❌ |
 
 Nas rotas, use `@Permissions(Permission.UserCreate)` para exigir uma permissão específica, ou `@Roles(Role.ADMIN)` quando o controle por cargo já for suficiente. Os dois guards (`RolesGuard` e `PermissionsGuard`) rodam globalmente e só bloqueiam a rota se ela tiver o decorator correspondente.
+
+## 👥 Usuários: paginação, filtros e avatar
+
+`GET /users` aceita query params pra paginar e filtrar a listagem:
+
+```bash
+GET /users?page=2&limit=20&search=jeiel&role=ADMIN
+```
+
+| Parâmetro | Descrição |
+|---|---|
+| `page` | página atual (padrão: 1) |
+| `limit` | itens por página, até 100 (padrão: 10) |
+| `search` | busca por nome ou e-mail (case-insensitive) |
+| `role` | filtra por `ADMIN`, `MANAGER` ou `USER` |
+
+A resposta vem no formato `{ data, meta: { total, page, limit, totalPages } }`.
+
+Pra trocar o avatar do usuário autenticado:
+
+```bash
+curl -X POST http://localhost:3000/users/me/avatar \
+  -H "Authorization: Bearer <accessToken>" \
+  -F "file=@/caminho/da/foto.png"
+```
+
+Aceita PNG, JPEG e WEBP até 2MB; o arquivo fica salvo em `./uploads/avatars` e é servido em `/uploads/avatars/<arquivo>`.
 
 ## 🤝 Contribuindo
 
