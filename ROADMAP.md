@@ -20,8 +20,8 @@ Este roadmap existe para deixar claro o que já está pronto e onde dá pra cont
 
 ## RBAC
 - [x] Roles (Admin, Manager, User)
-- [ ] Permissions granulares (`user:create`, `report:read`, etc)
-- [ ] Guard combinando roles + permissions
+- [x] Permissions granulares (`user:create`, `report:read`, etc)
+- [x] Guard combinando roles + permissions
 
 ## Segurança
 - [x] Helmet
