@@ -3,7 +3,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
-import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -17,6 +18,7 @@ async function bootstrap() {
 
   app.useLogger(app.get(Logger));
   app.use(helmet());
+  app.use(cookieParser());
   app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({
