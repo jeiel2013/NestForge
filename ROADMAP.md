@@ -35,7 +35,7 @@ Este roadmap existe para deixar claro o que já está pronto e onde dá pra cont
 - [x] Prisma
 - [x] PostgreSQL
 - [x] Migrations
-- [ ] Seed completo (roles, permissions, usuário admin)
+- [x] Seed completo (roles, permissions, usuário admin)
 
 ## Infra
 - [x] Docker / docker-compose (API, Postgres, Redis, Mailpit)
@@ -44,8 +44,8 @@ Este roadmap existe para deixar claro o que já está pronto e onde dá pra cont
 
 ## Observabilidade
 - [x] Logs estruturados com Pino
-- [ ] Health checks (`/health`)
-- [ ] Métricas (Prometheus opcional)
+- [x] Health checks (`/health`)
+- [x] Métricas (Prometheus opcional)
 
 ## Jobs & E-mail
 - [ ] Fila com BullMQ
