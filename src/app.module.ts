@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { BullModule } from '@nestjs/bullmq';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PrismaModule } from './database/prisma.module';
+import { MailModule } from './mail/mail.module';
 import { validateEnv } from './config/env.validation';
 
 @Module({
@@ -28,9 +30,16 @@ import { validateEnv } from './config/env.validation';
         limit: Number(process.env.THROTTLE_LIMIT ?? 100),
       },
     ]),
+    BullModule.forRoot({
+      connection: {
+        host: process.env.REDIS_HOST ?? 'localhost',
+        port: Number(process.env.REDIS_PORT ?? 6379),
+      },
+    }),
     PrismaModule,
     AuthModule,
     UsersModule,
+    MailModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
