@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { BullModule } from '@nestjs/bullmq';
@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PrismaModule } from './database/prisma.module';
 import { MailModule } from './mail/mail.module';
+import { CsrfMiddleware } from './common/middleware/csrf.middleware';
 import { validateEnv } from './config/env.validation';
 
 @Module({
@@ -42,4 +43,10 @@ import { validateEnv } from './config/env.validation';
     MailModule,
   ],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    if (process.env.ENABLE_CSRF === 'true') {
+      consumer.apply(CsrfMiddleware).forRoutes('*');
+    }
+  }
+}
