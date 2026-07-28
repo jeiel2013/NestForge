@@ -197,6 +197,12 @@ curl -X POST http://localhost:3000/users/me/avatar \
 
 Aceita PNG, JPEG e WEBP até 2MB; o arquivo fica salvo em `./uploads/avatars` e é servido em `/uploads/avatars/<arquivo>`.
 
+## 🛡️ Segurança: serialização e CSRF
+
+Todas as respostas de usuário passam por um `ClassSerializerInterceptor` global antes de virar JSON. A classe `UserEntity` marca `passwordHash` com `@Exclude()`, então mesmo que uma query no futuro esqueça de fazer `select`, o hash da senha nunca é serializado na resposta.
+
+Sobre CSRF: esta API usa Bearer token (header `Authorization`), não cookie de sessão — então o ataque clássico de CSRF não se aplica por padrão. Mesmo assim, tem um middleware de double-submit cookie pronto em `src/common/middleware/csrf.middleware.ts`, desligado por padrão. Se você adaptar o boilerplate pra guardar o token em cookie, é só setar `ENABLE_CSRF=true` no `.env`.
+
 ## 🤝 Contribuindo
 
 Contribuições são bem-vindas! Veja o [CONTRIBUTING.md](CONTRIBUTING.md) para o guia completo.
@@ -207,4 +213,4 @@ Este projeto está sob a licença MIT — veja [LICENSE](LICENSE).
 
 ---
 
-Feito por [Jeiel Alves](https://github.com/jeiel2013) · [jeieldev.vercel.app](https://jeieldev.com.br)
+Feito por [Jeiel Alves](https://github.com/jeiel2013) · [jeieldev.com.br](https://jeieldev.com.br)
