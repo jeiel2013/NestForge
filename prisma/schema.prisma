@@ -20,6 +20,7 @@ model User {
   passwordHash             String?
   role                     Role     @default(USER)
   emailVerifiedAt          DateTime?
+  avatarUrl                String?
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
 
