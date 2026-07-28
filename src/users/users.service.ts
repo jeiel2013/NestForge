@@ -12,6 +12,7 @@ const SAFE_USER_SELECT = {
   email: true,
   role: true,
   emailVerifiedAt: true,
+  avatarUrl: true,
   createdAt: true,
   updatedAt: true,
 } as const;
@@ -89,6 +90,15 @@ export class UsersService {
     }
 
     return this.prisma.user.update({ where: { id }, data, select: SAFE_USER_SELECT });
+  }
+
+  async updateAvatar(id: string, avatarUrl: string) {
+    await this.findOne(id);
+    return this.prisma.user.update({
+      where: { id },
+      data: { avatarUrl },
+      select: SAFE_USER_SELECT,
+    });
   }
 
   async remove(id: string) {

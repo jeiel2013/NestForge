@@ -7,6 +7,8 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -16,6 +18,11 @@ import { FindUsersQueryDto } from './dto/find-users-query.dto';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { Permission } from '../common/constants/permissions';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import {
+  AVATAR_MAX_SIZE_BYTES,
+  avatarFileFilter,
+  avatarStorage,
+} from '../common/utils/avatar-storage.util';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -28,6 +35,23 @@ export class UsersController {
   @ApiOperation({ summary: 'Cria um usuário (requer permissão user:create)' })
   create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
+  }
+
+  @Post('me/avatar')
+  @ApiOperation({ summary: 'Faz upload do avatar do usuário autenticado' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: avatarStorage,
+      fileFilter: avatarFileFilter,
+      limits: { fileSize: AVATAR_MAX_SIZE_BYTES },
+    }),
+  )
+  uploadAvatar(
+    @CurrentUser() user: { id: string },
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.usersService.updateAvatar(user.id, `/uploads/avatars/${file.filename}`);
   }
 
   @Get()
