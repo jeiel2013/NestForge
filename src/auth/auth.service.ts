@@ -5,10 +5,9 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { createHash } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
+import { MailService } from '../mail/mail.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { OAuthProfile } from './strategies/google.strategy';
@@ -18,6 +17,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) { }
 
   async register(dto: RegisterDto) {
@@ -34,6 +34,8 @@ export class AuthService {
     const user = await this.prisma.user.create({
       data: { name: dto.name, email: dto.email, passwordHash },
     });
+
+    await this.sendEmailVerification(user.id, user.email, user.name);
 
     return this.issueTokens(user.id, user.email, user.role);
   }
@@ -108,7 +110,6 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token inválido ou expirado');
     }
 
-    // rotação: revoga o antigo e emite um novo par
     await this.prisma.refreshToken.update({
       where: { id: stored.id },
       data: { revokedAt: new Date() },
@@ -126,6 +127,106 @@ export class AuthService {
     });
 
     return { message: 'Logout realizado com sucesso' };
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    const genericResponse = {
+      message: 'Se o e-mail existir, enviaremos instruções de redefinição de senha',
+    };
+
+    if (!user) {
+      return genericResponse;
+    }
+
+    const rawToken = randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1);
+
+    await this.prisma.passwordResetToken.create({
+      data: {
+        tokenHash: this.hashToken(rawToken),
+        userId: user.id,
+        expiresAt,
+      },
+    });
+
+    await this.mailService.queuePasswordResetEmail(user.email, user.name, rawToken);
+
+    return genericResponse;
+  }
+
+  async resetPassword(rawToken: string, newPassword: string) {
+    const tokenHash = this.hashToken(rawToken);
+
+    const stored = await this.prisma.passwordResetToken.findUnique({
+      where: { tokenHash },
+    });
+
+    if (!stored || stored.usedAt || stored.expiresAt < new Date()) {
+      throw new UnauthorizedException('Token de redefinição inválido ou expirado');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: stored.userId },
+        data: { passwordHash },
+      }),
+      this.prisma.passwordResetToken.update({
+        where: { id: stored.id },
+        data: { usedAt: new Date() },
+      }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId: stored.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
+
+    return { message: 'Senha redefinida com sucesso' };
+  }
+
+  async verifyEmail(rawToken: string) {
+    const tokenHash = this.hashToken(rawToken);
+
+    const stored = await this.prisma.emailVerificationToken.findUnique({
+      where: { tokenHash },
+    });
+
+    if (!stored || stored.usedAt || stored.expiresAt < new Date()) {
+      throw new UnauthorizedException('Token de verificação inválido ou expirado');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: stored.userId },
+        data: { emailVerifiedAt: new Date() },
+      }),
+      this.prisma.emailVerificationToken.update({
+        where: { id: stored.id },
+        data: { usedAt: new Date() },
+      }),
+    ]);
+
+    return { message: 'E-mail verificado com sucesso' };
+  }
+
+  private async sendEmailVerification(userId: string, email: string, name: string) {
+    const rawToken = randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24);
+
+    await this.prisma.emailVerificationToken.create({
+      data: {
+        tokenHash: this.hashToken(rawToken),
+        userId,
+        expiresAt,
+      },
+    });
+
+    await this.mailService.queueVerificationEmail(email, name, rawToken);
   }
 
   private async issueTokens(userId: string, email: string, role: string) {
