@@ -14,17 +14,19 @@ enum Role {
 }
 
 model User {
-  id              String   @id @default(uuid())
-  name            String
-  email           String   @unique
-  passwordHash    String?
-  role            Role     @default(USER)
-  emailVerifiedAt DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                       String   @id @default(uuid())
+  name                     String
+  email                    String   @unique
+  passwordHash             String?
+  role                     Role     @default(USER)
+  emailVerifiedAt          DateTime?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 
-  refreshTokens   RefreshToken[]
-  oauthAccounts   OAuthAccount[]
+  refreshTokens            RefreshToken[]
+  oauthAccounts            OAuthAccount[]
+  passwordResetTokens      PasswordResetToken[]
+  emailVerificationTokens  EmailVerificationToken[]
 
   @@map("users")
 }
@@ -51,4 +53,28 @@ model OAuthAccount {
 
   @@unique([provider, providerUserId])
   @@map("oauth_accounts")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("password_reset_tokens")
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("email_verification_tokens")
 }
