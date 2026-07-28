@@ -8,29 +8,29 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Role } from '@prisma/client';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Roles } from '../common/decorators/roles.decorator';
+import { Permissions } from '../common/decorators/permissions.decorator';
+import { Permission } from '../common/constants/permissions';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('users')
 @ApiBearerAuth()
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Post()
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Cria um usuário (somente admin)' })
+  @Permissions(Permission.UserCreate)
+  @ApiOperation({ summary: 'Cria um usuário (requer permissão user:create)' })
   create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
   }
 
   @Get()
-  @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Lista usuários (admin ou manager)' })
+  @Permissions(Permission.UserRead)
+  @ApiOperation({ summary: 'Lista usuários (requer permissão user:read)' })
   findAll() {
     return this.usersService.findAll();
   }
@@ -42,22 +42,22 @@ export class UsersController {
   }
 
   @Get(':id')
-  @Roles(Role.ADMIN, Role.MANAGER)
-  @ApiOperation({ summary: 'Busca um usuário por id' })
+  @Permissions(Permission.UserRead)
+  @ApiOperation({ summary: 'Busca um usuário por id (requer permissão user:read)' })
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
 
   @Patch(':id')
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Atualiza um usuário (somente admin)' })
+  @Permissions(Permission.UserUpdate)
+  @ApiOperation({ summary: 'Atualiza um usuário (requer permissão user:update)' })
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.usersService.update(id, dto);
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Remove um usuário (somente admin)' })
+  @Permissions(Permission.UserDelete)
+  @ApiOperation({ summary: 'Remove um usuário (requer permissão user:delete)' })
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
