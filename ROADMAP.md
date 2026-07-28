@@ -28,8 +28,8 @@ Este roadmap existe para deixar claro o que já está pronto e onde dá pra cont
 - [x] CORS
 - [x] Rate Limit
 - [x] Validação (Zod)
-- [ ] Serialização (interceptor de output)
-- [ ] CSRF (quando necessário)
+- [x] Serialização (interceptor de output)
+- [x] CSRF (quando necessário)
 
 ## Banco de dados
 - [x] Prisma
