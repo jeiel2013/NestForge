@@ -111,8 +111,8 @@ Permissions são granulares (`user:create`, `user:delete`, `report:read`, etc) e
 - [x] CI (build, lint, test)
 - [x] OAuth (Google/GitHub)
 - [ ] Upload de arquivos
-- [ ] Filas (BullMQ)
-- [ ] E-mails transacionais
+- [x] Filas (BullMQ)
+- [x] E-mails transacionais
 - [ ] RBAC completo (permissions granulares)
 - [ ] Testes de integração completos
 - [ ] Documentação completa (Swagger + guia de arquitetura)
@@ -137,6 +137,18 @@ GITHUB_CLIENT_SECRET=
 - **GitHub**: crie um OAuth App em `Settings > Developer settings > OAuth Apps` e configure a mesma URL de callback, trocando para `{APP_URL}/auth/github/callback`.
 
 Depois é só acessar `GET /auth/google` ou `GET /auth/github` que o fluxo de redirecionamento cuida do resto — o callback já devolve `accessToken` e `refreshToken` como no login tradicional. Se for a primeira vez do usuário, uma conta é criada automaticamente e vinculada ao provedor.
+
+### Recuperação de senha e verificação de e-mail
+
+Todo cadastro (`POST /auth/register`) já dispara um e-mail de verificação automaticamente. Os e-mails são enfileirados com BullMQ/Redis e processados por um worker que envia via SMTP — em desenvolvimento, tudo cai no Mailpit (`http://localhost:8025`), então nada sai pra internet de verdade.
+
+| Rota | O que faz |
+|---|---|
+| `POST /auth/forgot-password` | Recebe um `email` e enfileira o envio do link de redefinição (resposta sempre genérica, não revela se o e-mail existe) |
+| `POST /auth/reset-password` | Recebe `token` + `password` e troca a senha; também revoga todas as sessões ativas do usuário |
+| `GET /auth/verify-email?token=...` | Confirma o e-mail a partir do link recebido |
+
+Os tokens de reset e verificação expiram em 1 hora e 24 horas, respectivamente, e são de uso único.
 
 ## 🤝 Contribuindo
 
