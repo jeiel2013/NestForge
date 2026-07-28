@@ -7,9 +7,9 @@ Este roadmap existe para deixar claro o que já está pronto e onde dá pra cont
 - [x] Cadastro
 - [x] Logout
 - [x] Refresh Token
-- [ ] Forgot Password
-- [ ] Reset Password
-- [ ] Email Verification
+- [x] Forgot Password
+- [x] Reset Password
+- [x] Email Verification
 - [x] OAuth Google
 - [x] OAuth GitHub
 
