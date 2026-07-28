@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PrismaModule } from './database/prisma.module';
 import { MailModule } from './mail/mail.module';
+import { HealthModule } from './health/health.module';
 import { CsrfMiddleware } from './common/middleware/csrf.middleware';
 import { validateEnv } from './config/env.validation';
 
@@ -41,6 +42,7 @@ import { validateEnv } from './config/env.validation';
     AuthModule,
     UsersModule,
     MailModule,
+    HealthModule,
   ],
 })
 export class AppModule implements NestModule {
