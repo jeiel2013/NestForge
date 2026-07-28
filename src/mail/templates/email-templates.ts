@@ -1,23 +1,27 @@
-import { Injectable } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
+const appUrl = process.env.APP_URL ?? 'http://localhost:3000';
 
-export const MAIL_QUEUE = 'mail';
+export function verifyEmailTemplate(name: string, token: string): string {
+    const link = `${appUrl}/auth/verify-email?token=${token}`;
 
-export enum MailJob {
-    VerifyEmail = 'verify-email',
-    ResetPassword = 'reset-password',
+    return `
+    <div style="font-family: sans-serif; line-height: 1.5;">
+      <h2>Olá, ${name}!</h2>
+      <p>Confirme seu e-mail clicando no link abaixo:</p>
+      <p><a href="${link}">${link}</a></p>
+      <p>Esse link expira em 24 horas.</p>
+    </div>
+  `;
 }
 
-@Injectable()
-export class MailService {
-    constructor(@InjectQueue(MAIL_QUEUE) private readonly mailQueue: Queue) { }
+export function resetPasswordTemplate(name: string, token: string): string {
+    const link = `${appUrl}/auth/reset-password?token=${token}`;
 
-    queueVerificationEmail(to: string, name: string, token: string) {
-        return this.mailQueue.add(MailJob.VerifyEmail, { to, name, token });
-    }
-
-    queuePasswordResetEmail(to: string, name: string, token: string) {
-        return this.mailQueue.add(MailJob.ResetPassword, { to, name, token });
-    }
+    return `
+    <div style="font-family: sans-serif; line-height: 1.5;">
+      <h2>Olá, ${name}!</h2>
+      <p>Recebemos um pedido para redefinir sua senha. Clique no link abaixo para continuar:</p>
+      <p><a href="${link}">${link}</a></p>
+      <p>Se você não pediu isso, pode ignorar este e-mail. O link expira em 1 hora.</p>
+    </div>
+  `;
 }
