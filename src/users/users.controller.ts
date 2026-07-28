@@ -6,11 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FindUsersQueryDto } from './dto/find-users-query.dto';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { Permission } from '../common/constants/permissions';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -33,6 +35,13 @@ export class UsersController {
   @ApiOperation({ summary: 'Lista usuários (requer permissão user:read)' })
   findAll() {
     return this.usersService.findAll();
+  }
+
+  @Get()
+  @Permissions(Permission.UserRead)
+  @ApiOperation({ summary: 'Lista usuários com paginação e filtros (requer permissão user:read)' })
+  findAll(@Query() query: FindUsersQueryDto) {
+    return this.usersService.findAll(query);
   }
 
   @Get('me')
