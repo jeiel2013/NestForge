@@ -1,31 +1,12 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 import { Role } from '@prisma/client';
 
-export class FindUsersQueryDto {
-    @ApiPropertyOptional({ default: 1, minimum: 1 })
-    @IsOptional()
-    @Type(() => Number)
-    @IsInt()
-    @Min(1)
-    page?: number = 1;
+export const findUsersQuerySchema = z.object({
+    page: z.coerce.number().int().min(1).default(1).describe('Página atual'),
+    limit: z.coerce.number().int().min(1).max(100).default(10).describe('Itens por página (máx. 100)'),
+    search: z.string().optional().describe('Busca por nome ou e-mail'),
+    role: z.nativeEnum(Role).optional().describe('Filtra por role'),
+});
 
-    @ApiPropertyOptional({ default: 10, minimum: 1, maximum: 100 })
-    @IsOptional()
-    @Type(() => Number)
-    @IsInt()
-    @Min(1)
-    @Max(100)
-    limit?: number = 10;
-
-    @ApiPropertyOptional({ description: 'Busca por nome ou e-mail' })
-    @IsOptional()
-    @IsString()
-    search?: string;
-
-    @ApiPropertyOptional({ enum: Role, description: 'Filtra por role' })
-    @IsOptional()
-    @IsEnum(Role)
-    role?: Role;
-}
+export class FindUsersQueryDto extends createZodDto(findUsersQuerySchema) { }
