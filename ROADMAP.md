@@ -55,7 +55,6 @@ Este roadmap existe para deixar claro o que já está pronto e onde dá pra cont
 ## Testes
 - [x] Estrutura de testes unitários (Vitest)
 - [x] Testes de integração (auth + users)
-- [ ] Cobertura mínima de 80% no core
 
 ## Documentação
 - [x] README inicial

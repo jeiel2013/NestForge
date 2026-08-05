@@ -227,6 +227,8 @@ npm run test:e2e
 
 O script `pretest:e2e` já aplica as migrations nesse banco automaticamente antes de cada rodada. Cada teste limpa as tabelas antes de rodar (`test/utils/clean-database.ts`), então não precisa zerar nada manualmente entre execuções. Hoje cobrem o fluxo de autenticação completo (registro, login, refresh, logout, e-mail duplicado, credenciais inválidas) e o CRUD de usuários com RBAC (ADMIN consegue tudo, USER lê mas não cria, `/users/me`, acesso sem token).
 
+Os testes unitários (`src/**/*.spec.ts`) rodam isolados, com Prisma e `ioredis` mockados (`vi.fn()` / `vi.mock()`) — não precisam de banco nem Redis de verdade. Hoje cobrem: `AuthService` (registro/login), `UsersService` (CRUD completo + paginação + confirma que o `passwordHash` não vaza na serialização via `instanceToPlain`), `RolesGuard` e `PermissionsGuard` (liberação/bloqueio, inclusive com múltiplas permissões exigidas ao mesmo tempo) e os indicadores de saúde (`PrismaHealthIndicator`, `RedisHealthIndicator`).
+
 ## 🤝 Contribuindo
 
 Contribuições são bem-vindas! Veja o [CONTRIBUTING.md](CONTRIBUTING.md) para o guia completo.
