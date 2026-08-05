@@ -1,13 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class LoginDto {
-  @ApiProperty({ example: 'jeiel@example.com' })
-  @IsEmail()
-  email: string;
+export const loginSchema = z.object({
+  email: z.string().email().describe('E-mail do usuário'),
+  password: z.string().min(8).describe('Senha'),
+});
 
-  @ApiProperty({ example: 'senhaForte123' })
-  @IsString()
-  @MinLength(8)
-  password: string;
-}
+export class LoginDto extends createZodDto(loginSchema) { }

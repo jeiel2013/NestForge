@@ -1,13 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MinLength } from 'class-validator';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class ResetPasswordDto {
-    @ApiProperty()
-    @IsString()
-    token: string;
+export const resetPasswordSchema = z.object({
+    token: z.string().describe('Token recebido por e-mail'),
+    password: z.string().min(8).describe('Nova senha (mínimo 8 caracteres)'),
+});
 
-    @ApiProperty({ example: 'novaSenhaForte123' })
-    @IsString()
-    @MinLength(8)
-    password: string;
-}
+export class ResetPasswordDto extends createZodDto(resetPasswordSchema) { }
