@@ -48,9 +48,9 @@ Este roadmap existe para deixar claro o que já está pronto e onde dá pra cont
 - [x] Métricas (Prometheus opcional)
 
 ## Jobs & E-mail
-- [ ] Fila com BullMQ
-- [ ] Envio de e-mail transacional (Mailpit em dev)
-- [ ] Templates de e-mail
+- [x] Fila com BullMQ
+- [x] Envio de e-mail transacional (Mailpit em dev)
+- [x] Templates de e-mail
 
 ## Testes
 - [x] Estrutura de testes unitários (Vitest)
