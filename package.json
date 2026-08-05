@@ -16,7 +16,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
-    "test:e2e": "vitest run --config ./vitest.e2e.config.ts",
+    "pretest:e2e": "dotenv -e .env.test -- npx prisma migrate deploy",
+    "test:e2e": "dotenv -e .env.test -- vitest run --config ./vitest.e2e.config.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
@@ -78,6 +79,8 @@
     "prettier": "^3.3.3",
     "prisma": "^6.0.0",
     "supertest": "^7.0.0",
+    "@types/supertest": "^6.0.2",
+    "dotenv-cli": "^7.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
