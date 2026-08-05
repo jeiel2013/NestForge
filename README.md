@@ -32,7 +32,7 @@ NestForge é um boilerplate de NestJS pensado para acelerar o início de projeto
 | Banco | PostgreSQL |
 | Cache / Filas | Redis + BullMQ |
 | Autenticação | JWT + Better Auth |
-| Validação | Zod |
+| Validação | Zod + nestjs-zod (schemas viram DTO + Swagger automaticamente) |
 | Docs | Swagger |
 | E-mail (dev) | Mailpit |
 | Testes | Vitest |
@@ -199,9 +199,7 @@ Aceita PNG, JPEG e WEBP até 2MB; o arquivo fica salvo em `./uploads/avatars` e 
 
 ## 🛡️ Segurança: serialização e CSRF
 
-Todas as respostas de usuário passam por um `ClassSerializerInterceptor` global antes de virar JSON. A classe `UserEntity` marca `passwordHash` com `@Exclude()`, então mesmo que uma query no futuro esqueça de fazer `select`, o hash da senha nunca é serializado na resposta.
-
-Sobre CSRF: esta API usa Bearer token (header `Authorization`), não cookie de sessão — então o ataque clássico de CSRF não se aplica por padrão. Mesmo assim, tem um middleware de double-submit cookie pronto em `src/common/middleware/csrf.middleware.ts`, desligado por padrão. Se você adaptar o boilerplate pra guardar o token em cookie, é só setar `ENABLE_CSRF=true` no `.env`.
+Toda validação de entrada (`body`, `query`) usa **Zod** via [`nestjs-zod`](https://github.com/BenLorantfy/nestjs-zod): cada DTO é um `z.object({...})` transformado em classe com `createZodDto(schema)`, validado globalmente pelo `ZodValidationPipe`. O `patchNestJsSwagger()` no bootstrap ensina o Swagger a ler esses schemas automaticamente — não precisa duplicar validação (Zod) e documentação (`@ApiProperty`) como no `class-validator`. Os schemas exportados (ex.: `createUserSchema`) também podem ser reaproveitados/combinados (como o `updateUserSchema`, que é só um `createUserSchema.partial()`).
 
 - 🪵 **Observabilidade** — logs estruturados com Pino, health checks (`/health`) e métricas Prometheus (`/metrics`)
 
