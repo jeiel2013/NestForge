@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiExcludeEndpoint, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -12,6 +12,11 @@ import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GithubAuthGuard } from './guards/github-auth.guard';
 import { OAuthProfile } from './strategies/google.strategy';
 
+const TOKENS_EXAMPLE = {
+  accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+  refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+};
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -20,6 +25,8 @@ export class AuthController {
   @Public()
   @Post('register')
   @ApiOperation({ summary: 'Cria uma nova conta' })
+  @ApiResponse({ status: 201, description: 'Conta criada com sucesso', schema: { example: TOKENS_EXAMPLE } })
+  @ApiResponse({ status: 409, description: 'E-mail já cadastrado', schema: { example: { statusCode: 409, message: 'E-mail já cadastrado' } } })
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
@@ -28,6 +35,8 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Autentica e retorna access/refresh token' })
+  @ApiResponse({ status: 200, description: 'Login realizado com sucesso', schema: { example: TOKENS_EXAMPLE } })
+  @ApiResponse({ status: 401, description: 'Credenciais inválidas', schema: { example: { statusCode: 401, message: 'Credenciais inválidas' } } })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
@@ -36,6 +45,8 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Renova o access token usando o refresh token' })
+  @ApiResponse({ status: 200, description: 'Novo par de tokens emitido', schema: { example: TOKENS_EXAMPLE } })
+  @ApiResponse({ status: 401, description: 'Refresh token inválido, expirado ou já usado', schema: { example: { statusCode: 401, message: 'Refresh token inválido ou expirado' } } })
   refresh(@Body() dto: RefreshTokenDto) {
     return this.authService.refresh(dto.refreshToken);
   }
@@ -44,6 +55,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Revoga o refresh token informado' })
+  @ApiResponse({ status: 200, description: 'Logout realizado', schema: { example: { message: 'Logout realizado com sucesso' } } })
   logout(@Body() dto: RefreshTokenDto) {
     return this.authService.logout(dto.refreshToken);
   }
@@ -52,6 +64,11 @@ export class AuthController {
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Envia um e-mail com instruções para redefinir a senha' })
+  @ApiResponse({
+    status: 200,
+    description: 'Resposta genérica — sempre a mesma, exista ou não o e-mail (evita enumeração de contas)',
+    schema: { example: { message: 'Se o e-mail existir, enviaremos instruções de redefinição de senha' } },
+  })
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto.email);
   }
@@ -60,6 +77,8 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Redefine a senha usando o token recebido por e-mail' })
+  @ApiResponse({ status: 200, description: 'Senha redefinida', schema: { example: { message: 'Senha redefinida com sucesso' } } })
+  @ApiResponse({ status: 401, description: 'Token inválido, expirado ou já usado', schema: { example: { statusCode: 401, message: 'Token de redefinição inválido ou expirado' } } })
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto.token, dto.password);
   }
@@ -67,6 +86,8 @@ export class AuthController {
   @Public()
   @Get('verify-email')
   @ApiOperation({ summary: 'Confirma o e-mail usando o token recebido' })
+  @ApiResponse({ status: 200, description: 'E-mail verificado', schema: { example: { message: 'E-mail verificado com sucesso' } } })
+  @ApiResponse({ status: 401, description: 'Token inválido, expirado ou já usado', schema: { example: { statusCode: 401, message: 'Token de verificação inválido ou expirado' } } })
   verifyEmail(@Query('token') token: string) {
     return this.authService.verifyEmail(token);
   }
