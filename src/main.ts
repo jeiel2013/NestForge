@@ -4,7 +4,8 @@ import { join } from 'path';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor } from '@nestjs/common';
+import { ZodValidationPipe, patchNestJsSwagger } from 'nestjs-zod';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -20,15 +21,11 @@ async function bootstrap() {
   app.use(helmet());
   app.use(cookieParser());
   app.enableCors();
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
+  app.useGlobalPipes(new ZodValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
+  patchNestJsSwagger();
 
   const config = new DocumentBuilder()
     .setTitle('NestForge API')
