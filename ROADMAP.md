@@ -58,6 +58,6 @@ Este roadmap existe para deixar claro o que já está pronto e onde dá pra cont
 
 ## Documentação
 - [x] README inicial
-- [ ] Swagger completo com exemplos de request/response
-- [ ] Guia de arquitetura (ADR / decisões de design)
-- [ ] Guia "como adicionar um novo módulo"
+- [x] Swagger completo com exemplos de request/response
+- [x] Guia de arquitetura (ADR / decisões de design)
+- [x] Guia "como adicionar um novo módulo"
