@@ -85,14 +85,6 @@ npm run start:dev
 
 A documentação Swagger fica disponível em `http://localhost:3000/docs`.
 
-## 🧪 Testes
-
-```bash
-npm run test          # unitários
-npm run test:e2e      # integração
-npm run test:cov      # cobertura
-```
-
 ## 🔑 Roles & Permissions
 
 | Role | Descrição |
