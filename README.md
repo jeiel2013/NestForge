@@ -217,6 +217,24 @@ O seed cria três contas de teste, uma por role:
 
 `GET /metrics` expõe métricas no formato do Prometheus (via `prom-client`): as métricas padrão de Node.js (CPU, memória, event loop) mais `http_request_duration_seconds` (histograma) e `http_requests_total` (contador), ambas com labels de `method`, `route` e `status_code`. Basta apontar um scrape job do Prometheus pra essa rota.
 
+## 🧪 Testes
+
+```bash
+npm run test          # unitários
+npm run test:e2e      # integração (e2e)
+npm run test:cov      # cobertura
+```
+
+Os testes e2e (`test/*.e2e-spec.ts`) sobem a aplicação real (Nest + Prisma + Redis) e batem nos endpoints com `supertest`, usando um banco isolado (`.env.test`, banco `nestforge_test` — nunca o de desenvolvimento). Antes de rodar pela primeira vez:
+
+```bash
+createdb nestforge_test   # ou: psql -U nestforge -c "CREATE DATABASE nestforge_test;"
+docker compose up -d postgres redis
+npm run test:e2e
+```
+
+O script `pretest:e2e` já aplica as migrations nesse banco automaticamente antes de cada rodada. Cada teste limpa as tabelas antes de rodar (`test/utils/clean-database.ts`), então não precisa zerar nada manualmente entre execuções. Hoje cobrem o fluxo de autenticação completo (registro, login, refresh, logout, e-mail duplicado, credenciais inválidas) e o CRUD de usuários com RBAC (ADMIN consegue tudo, USER lê mas não cria, `/users/me`, acesso sem token).
+
 ## 🤝 Contribuindo
 
 Contribuições são bem-vindas! Veja o [CONTRIBUTING.md](CONTRIBUTING.md) para o guia completo.
