@@ -27,7 +27,7 @@ Este roadmap existe para deixar claro o que já está pronto e onde dá pra cont
 - [x] Helmet
 - [x] CORS
 - [x] Rate Limit
-- [x] Validação (Zod)
+- [x] Validação (Zod + nestjs-zod, integrado ao Swagger via `createZodDto`)
 - [x] Serialização (interceptor de output)
 - [x] CSRF (quando necessário)
 
