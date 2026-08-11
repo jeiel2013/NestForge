@@ -1,12 +1,12 @@
 {
-  "name": "create-nestforge",
+  "name": "nestforge",
   "version": "0.1.0",
   "description": "CLI para gerar um projeto NestJS a partir do boilerplate NestForge",
   "license": "MIT",
   "author": "Jeiel Alves <https://github.com/jeiel2013>",
   "type": "module",
   "bin": {
-    "create-nestforge": "./dist/index.js"
+    "nestforge": "./dist/index.js"
   },
   "files": [
     "dist",
