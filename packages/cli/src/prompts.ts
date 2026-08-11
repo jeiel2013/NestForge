@@ -3,9 +3,11 @@ import gradient from 'gradient-string';
 import pc from 'picocolors';
 
 export type OrmChoice = 'prisma' | 'typeorm' | 'drizzle' | 'none';
+export type LanguageChoice = 'typescript' | 'javascript';
 
 export interface ProjectOptions {
     projectName: string;
+    language: LanguageChoice;
     orm: OrmChoice;
     features: string[];
 }
@@ -38,7 +40,17 @@ export async function runPrompts(): Promise<ProjectOptions> {
     });
     handleCancel(projectName);
 
-    // 2. Escolha do ORM
+    // 2. Linguagem
+    const language = await select({
+        message: '🧠 TypeScript ou JavaScript?',
+        options: [
+            { value: 'typescript', label: 'TypeScript', hint: 'Recomendado' },
+            { value: 'javascript', label: 'JavaScript', hint: 'em breve' },
+        ],
+    });
+    handleCancel(language);
+
+    // 3. Escolha do ORM
     const orm = await select({
         message: '🗄️  Escolha o ORM/Query Builder:',
         options: [
@@ -50,7 +62,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
     });
     handleCancel(orm);
 
-    // 3. Recursos adicionais
+    // 4. Recursos adicionais
     const features = await multiselect({
         message: '✨ Selecione os recursos adicionais:',
         options: [
@@ -67,6 +79,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
 
     return {
         projectName: projectName as string,
+        language: language as LanguageChoice,
         orm: orm as OrmChoice,
         features: features as string[],
     };
