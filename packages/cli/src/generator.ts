@@ -9,9 +9,10 @@ const TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
 // só isso está de fato pronto por enquanto — ver packages/cli/README.md
 const IMPLEMENTED_ORMS = ['prisma'];
 const IMPLEMENTED_LANGUAGES = ['typescript'];
+const IMPLEMENTED_DATABASES = ['postgres'];
 
 export async function generateProject(options: ProjectOptions): Promise<string> {
-    const { projectName, language, orm, features } = options;
+    const { projectName, language, orm, database, features } = options;
 
     if (!IMPLEMENTED_LANGUAGES.includes(language)) {
         throw new Error(
@@ -21,6 +22,18 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
 
     if (orm === 'none') {
         throw new Error('Ainda não existe um template sem ORM. Escolha "prisma" por enquanto.');
+    }
+
+    if (!IMPLEMENTED_ORMS.includes(orm)) {
+        throw new Error(
+            `O template para "${orm}" ainda não está pronto — só "prisma" está implementado por enquanto. Contribuições são bem-vindas!`,
+        );
+    }
+
+    if (!IMPLEMENTED_DATABASES.includes(database)) {
+        throw new Error(
+            `O banco "${database}" ainda não está pronto — só "postgres" está implementado por enquanto. Contribuições são bem-vindas!`,
+        );
     }
 
     const templateDir = path.join(TEMPLATES_ROOT, orm);
