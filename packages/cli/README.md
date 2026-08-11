@@ -1,9 +1,9 @@
-# create-nestforge
+# nestforge
 
 CLI interativa que gera um projeto NestJS a partir do boilerplate [NestForge](../../templates/prisma).
 
 ```bash
-npx create-nestforge
+npx nestforge
 ```
 
 ## O que já funciona (v0.1.0)
@@ -39,7 +39,7 @@ Pra testar como se fosse instalada de verdade:
 ```bash
 npm run build
 npm link
-create-nestforge   # em qualquer pasta
+nestforge   # em qualquer pasta
 ```
 
 ## Publicando
