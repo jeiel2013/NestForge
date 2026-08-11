@@ -4,11 +4,13 @@ import pc from 'picocolors';
 
 export type OrmChoice = 'prisma' | 'typeorm' | 'drizzle' | 'none';
 export type LanguageChoice = 'typescript' | 'javascript';
+export type DatabaseChoice = 'postgres' | 'mysql' | 'sqlite' | 'mongodb';
 
 export interface ProjectOptions {
     projectName: string;
     language: LanguageChoice;
     orm: OrmChoice;
+    database: DatabaseChoice;
     features: string[];
 }
 
@@ -62,7 +64,19 @@ export async function runPrompts(): Promise<ProjectOptions> {
     });
     handleCancel(orm);
 
-    // 4. Recursos adicionais (um a um, sim ou não)
+    // 4. Banco de dados
+    const database = await select({
+        message: '🗃️  Qual banco de dados você quer usar?',
+        options: [
+            { value: 'postgres', label: 'PostgreSQL', hint: 'Recomendado' },
+            { value: 'mysql', label: 'MySQL', hint: 'em breve' },
+            { value: 'sqlite', label: 'SQLite', hint: 'em breve' },
+            { value: 'mongodb', label: 'MongoDB', hint: 'em breve' },
+        ],
+    });
+    handleCancel(database);
+
+    // 5. Recursos adicionais (um a um, sim ou não)
     const features: string[] = [];
 
     const wantsDocker = await confirm({
@@ -99,6 +113,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
         projectName: projectName as string,
         language: language as LanguageChoice,
         orm: orm as OrmChoice,
+        database: database as DatabaseChoice,
         features,
     };
 }
