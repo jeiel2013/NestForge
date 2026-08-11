@@ -24,7 +24,7 @@ async function main() {
             'Próximos passos',
         );
 
-        outro(pc.green(`Projeto "${options.projectName}" criado com sucesso!`));
+        outro(pc.green(`✅ Projeto "${options.projectName}" criado com sucesso!`));
     } catch (error) {
         log.error(error instanceof Error ? error.message : String(error));
         process.exit(1);

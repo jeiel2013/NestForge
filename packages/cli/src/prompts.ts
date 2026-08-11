@@ -1,4 +1,5 @@
 import { intro, outro, text, select, multiselect, isCancel, cancel } from '@clack/prompts';
+import gradient from 'gradient-string';
 import pc from 'picocolors';
 
 export type OrmChoice = 'prisma' | 'typeorm' | 'drizzle' | 'none';
@@ -9,6 +10,15 @@ export interface ProjectOptions {
     features: string[];
 }
 
+// vermelho -> laranja, as cores do NestJS
+const nestforgeGradient = gradient(['#e0234e', '#ff8a65']);
+
+function showBanner(): void {
+    console.log();
+    console.log(nestforgeGradient.multiline('N E S T F O R G E'));
+    console.log(pc.dim('  Gere um projeto NestJS pronto pra produção em segundos\n'));
+}
+
 function handleCancel(value: unknown): void {
     if (isCancel(value)) {
         cancel('Operação cancelada.');
@@ -17,11 +27,12 @@ function handleCancel(value: unknown): void {
 }
 
 export async function runPrompts(): Promise<ProjectOptions> {
-    intro(pc.bgCyan(pc.black(' create-nestforge ')));
+    showBanner();
+    intro(pc.bgMagenta(pc.black(' 🔥 nestforge ')));
 
     // 1. Nome do projeto
     const projectName = await text({
-        message: 'Qual o nome do seu projeto?',
+        message: '📦 Qual o nome do seu projeto?',
         placeholder: 'my-nest-api',
         defaultValue: 'my-nest-api',
     });
@@ -29,7 +40,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
 
     // 2. Escolha do ORM
     const orm = await select({
-        message: 'Escolha o ORM/Query Builder:',
+        message: '🗄️  Escolha o ORM/Query Builder:',
         options: [
             { value: 'prisma', label: 'Prisma', hint: 'Recomendado' },
             { value: 'typeorm', label: 'TypeORM', hint: 'em breve' },
@@ -41,7 +52,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
 
     // 3. Recursos adicionais
     const features = await multiselect({
-        message: 'Selecione os recursos adicionais:',
+        message: '✨ Selecione os recursos adicionais:',
         options: [
             { value: 'docker', label: 'Docker & Docker Compose', hint: 'Configuração pronta' },
             { value: 'swagger', label: 'Documentação Swagger/OpenAPI' },
@@ -52,7 +63,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
     });
     handleCancel(features);
 
-    outro(pc.green('Prontinho! Gerando o projeto...'));
+    outro(pc.green('🚀 Prontinho! Gerando o projeto...'));
 
     return {
         projectName: projectName as string,
