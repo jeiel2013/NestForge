@@ -8,14 +8,15 @@ npx nestforge
 
 ## O que já funciona (v0.1.0)
 
-- Prompts interativos (nome do projeto, ORM, recursos adicionais) via `@clack/prompts`
-- Template **Prisma** completo — é o boilerplate inteiro que já existe em `templates/prisma`: auth (JWT + OAuth Google/GitHub), RBAC + Permissions granulares, forgot/reset password, verificação de e-mail, upload de avatar, paginação/filtros, health checks, métricas Prometheus, testes unitários e e2e
+- Prompts interativos (nome do projeto, linguagem, ORM, recursos adicionais) via `@clack/prompts`
+- Template **Prisma + TypeScript** completo — é o boilerplate inteiro que já existe em `templates/prisma`: auth (JWT + OAuth Google/GitHub), RBAC + Permissions granulares, forgot/reset password, verificação de e-mail, upload de avatar, paginação/filtros, health checks, métricas Prometheus, testes unitários e e2e
 - Toggle real do recurso **Docker**: se você desmarcar, o `Dockerfile` e o `docker-compose.yml` simplesmente não vão pro projeto gerado
 
 ## O que ainda é placeholder
 
 | Escolha | Status |
 |---|---|
+| Linguagem: JavaScript | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | ORM: TypeORM | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | ORM: Drizzle | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | ORM: Nenhum | ❌ não implementado |
