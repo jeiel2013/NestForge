@@ -1,4 +1,4 @@
-import { intro, outro, text, select, multiselect, isCancel, cancel } from '@clack/prompts';
+import { intro, outro, text, select, confirm, isCancel, cancel } from '@clack/prompts';
 import gradient from 'gradient-string';
 import pc from 'picocolors';
 
@@ -62,18 +62,36 @@ export async function runPrompts(): Promise<ProjectOptions> {
     });
     handleCancel(orm);
 
-    // 4. Recursos adicionais
-    const features = await multiselect({
-        message: '✨ Selecione os recursos adicionais:',
-        options: [
-            { value: 'docker', label: 'Docker & Docker Compose', hint: 'Configuração pronta' },
-            { value: 'swagger', label: 'Documentação Swagger/OpenAPI' },
-            { value: 'jwt', label: 'Módulo de Autenticação JWT', hint: 'inclui RBAC e Permissions' },
-            { value: 'redis', label: 'Redis', hint: 'cache/filas + e-mail transacional via BullMQ' },
-        ],
-        required: false,
+    // 4. Recursos adicionais (um a um, sim ou não)
+    const features: string[] = [];
+
+    const wantsDocker = await confirm({
+        message: '🐳 Deseja adicionar Docker?',
+        initialValue: true,
     });
-    handleCancel(features);
+    handleCancel(wantsDocker);
+    if (wantsDocker) features.push('docker');
+
+    const wantsSwagger = await confirm({
+        message: '📄 Deseja incluir documentação Swagger/OpenAPI?',
+        initialValue: true,
+    });
+    handleCancel(wantsSwagger);
+    if (wantsSwagger) features.push('swagger');
+
+    const wantsJwt = await confirm({
+        message: '🔐 Deseja incluir o módulo de Autenticação JWT?',
+        initialValue: true,
+    });
+    handleCancel(wantsJwt);
+    if (wantsJwt) features.push('jwt');
+
+    const wantsRedis = await confirm({
+        message: '🧵 Deseja incluir Redis (cache/filas + e-mail via BullMQ)?',
+        initialValue: true,
+    });
+    handleCancel(wantsRedis);
+    if (wantsRedis) features.push('redis');
 
     outro(pc.green('🚀 Prontinho! Gerando o projeto...'));
 
@@ -81,6 +99,6 @@ export async function runPrompts(): Promise<ProjectOptions> {
         projectName: projectName as string,
         language: language as LanguageChoice,
         orm: orm as OrmChoice,
-        features: features as string[],
+        features,
     };
 }
