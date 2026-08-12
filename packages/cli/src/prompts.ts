@@ -12,6 +12,7 @@ export interface ProjectOptions {
     orm: OrmChoice;
     database: DatabaseChoice;
     features: string[];
+    createEnv: boolean;
 }
 
 // vermelho -> laranja, as cores do NestJS
@@ -107,6 +108,13 @@ export async function runPrompts(): Promise<ProjectOptions> {
     handleCancel(wantsRedis);
     if (wantsRedis) features.push('redis');
 
+    // 6. Criação automática do .env
+    const createEnv = await confirm({
+        message: '📝 Deseja criar o arquivo .env automaticamente (a partir do .env.example)?',
+        initialValue: true,
+    });
+    handleCancel(createEnv);
+
     outro(pc.green('🚀 Prontinho! Gerando o projeto...'));
 
     return {
@@ -115,5 +123,6 @@ export async function runPrompts(): Promise<ProjectOptions> {
         orm: orm as OrmChoice,
         database: database as DatabaseChoice,
         features,
+        createEnv: createEnv as boolean,
     };
 }
