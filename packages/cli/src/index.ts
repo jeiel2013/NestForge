@@ -12,17 +12,16 @@ async function main() {
         const targetDir = await generateProject(options);
         const relativeDir = path.relative(process.cwd(), targetDir) || '.';
 
-        note(
-            [
-                `cd ${relativeDir}`,
-                'cp .env.example .env',
-                'npm install',
-                'docker compose up -d postgres redis',
-                'npx prisma migrate dev',
-                'npm run start:dev',
-            ].join('\n'),
-            'Próximos passos',
-        );
+        const steps = [
+            `cd ${relativeDir}`,
+            ...(options.createEnv ? [] : ['cp .env.example .env']),
+            'npm install',
+            'docker compose up -d postgres redis',
+            'npx prisma migrate dev',
+            'npm run start:dev',
+        ];
+
+        note(steps.join('\n'), 'Próximos passos');
 
         outro(pc.green(`✅ Projeto "${options.projectName}" criado com sucesso!`));
     } catch (error) {
