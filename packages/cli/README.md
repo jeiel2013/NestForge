@@ -8,9 +8,10 @@ npx nestforge
 
 ## O que já funciona (v0.1.0)
 
-- Prompts interativos (nome do projeto, linguagem, ORM, banco de dados, recursos adicionais) via `@clack/prompts`
-- Template **Prisma + TypeScript + PostgreSQL** completo — é o boilerplate inteiro que já existe em `templates/prisma`: auth (JWT + OAuth Google/GitHub), RBAC + Permissions granulares, forgot/reset password, verificação de e-mail, upload de avatar, paginação/filtros, health checks, métricas Prometheus, testes unitários e e2e
+- Prompts interativos (nome do projeto, linguagem, ORM, banco de dados, recursos adicionais, estratégia de autenticação, controle de acesso, criação do `.env`) via `@clack/prompts`
+- Template **Prisma + TypeScript + PostgreSQL + JWT** completo — é o boilerplate inteiro que já existe em `templates/prisma`: auth (JWT + OAuth Google/GitHub), RBAC + Permissions granulares, forgot/reset password, verificação de e-mail, upload de avatar, paginação/filtros, health checks, métricas Prometheus, testes unitários e e2e
 - Toggle real do recurso **Docker**: se você desmarcar, o `Dockerfile` e o `docker-compose.yml` simplesmente não vão pro projeto gerado
+- Criação automática do **`.env`** a partir do `.env.example`, se você pedir
 
 ## O que ainda é placeholder
 
@@ -23,11 +24,14 @@ npx nestforge
 | Banco: MySQL | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | Banco: SQLite | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | Banco: MongoDB | ❌ não implementado — a CLI recusa com uma mensagem clara |
+| Auth: Session/Cookies | ❌ não implementado — a CLI recusa com uma mensagem clara |
+| Auth: OAuth apenas (sem JWT) | ❌ não implementado — hoje OAuth só existe junto do JWT |
+| Auth: Nenhuma | ❌ não implementado — ainda não existe variante do template sem auth |
 | Recurso: Swagger | ⚠️ sempre incluído (não dá pra desligar ainda) |
-| Recurso: JWT | ⚠️ sempre incluído (não dá pra desligar ainda) |
 | Recurso: Redis | ⚠️ sempre incluído (não dá pra desligar ainda) |
+| Controle de acesso (RBAC/Permissions) | ⚠️ sempre incluído junto do JWT (a resposta é guardada mas ainda não desliga nada) |
 
-Desligar de verdade `swagger`/`jwt`/`redis` exige remover módulos, rotas, imports e dependências interligadas no template — é um trabalho de "template engine" mais sério que copiar/apagar arquivo, e é o próximo passo natural do gerador (`packages/cli/src/generator.ts`).
+Desligar de verdade `swagger`/`redis`/RBAC exige remover módulos, rotas, imports e dependências interligadas no template — é um trabalho de "template engine" mais sério que copiar/apagar arquivo, e é o próximo passo natural do gerador (`packages/cli/src/generator.ts`).
 
 ## Desenvolvimento local
 
