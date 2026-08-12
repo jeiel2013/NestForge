@@ -14,6 +14,7 @@ export interface ProjectOptions {
     database: DatabaseChoice;
     features: string[];
     authStrategy: AuthStrategyChoice;
+    accessControl: boolean;
     createEnv: boolean;
 }
 
@@ -115,7 +116,18 @@ export async function runPrompts(): Promise<ProjectOptions> {
     });
     handleCancel(authStrategy);
 
-    // 7. Criação automática do .env
+    // 7. Controle de acesso (só faz sentido se houver autenticação)
+    let accessControl = false;
+    if (authStrategy !== 'none') {
+        const wantsAccessControl = await confirm({
+            message: '🛡️  Deseja incluir controle de acesso (RBAC + Permissions)?',
+            initialValue: true,
+        });
+        handleCancel(wantsAccessControl);
+        accessControl = wantsAccessControl as boolean;
+    }
+
+    // 8. Criação automática do .env
     const createEnv = await confirm({
         message: '📝 Deseja criar o arquivo .env automaticamente (a partir do .env.example)?',
         initialValue: true,
@@ -131,6 +143,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
         database: database as DatabaseChoice,
         features,
         authStrategy: authStrategy as AuthStrategyChoice,
+        accessControl,
         createEnv: createEnv as boolean,
     };
 }
