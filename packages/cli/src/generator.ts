@@ -12,7 +12,7 @@ const IMPLEMENTED_LANGUAGES = ['typescript'];
 const IMPLEMENTED_DATABASES = ['postgres'];
 
 export async function generateProject(options: ProjectOptions): Promise<string> {
-    const { projectName, language, orm, database, features } = options;
+    const { projectName, language, orm, database, features, createEnv } = options;
 
     if (!IMPLEMENTED_LANGUAGES.includes(language)) {
         throw new Error(
@@ -48,6 +48,10 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
     await applyFeatureToggles(targetDir, features);
     await renameProject(targetDir, projectName);
 
+    if (createEnv) {
+        await generateEnvFile(targetDir);
+    }
+
     return targetDir;
 }
 
@@ -73,4 +77,15 @@ async function renameProject(targetDir: string, projectName: string): Promise<vo
         const updated = readme.replace(/^# NestForge/m, `# ${projectName}`);
         await fs.writeFile(readmePath, updated, 'utf-8');
     }
+}
+
+async function generateEnvFile(targetDir: string): Promise<void> {
+    const examplePath = path.join(targetDir, '.env.example');
+    const envPath = path.join(targetDir, '.env');
+
+    if (!(await fs.pathExists(examplePath))) {
+        return;
+    }
+
+    await fs.copy(examplePath, envPath);
 }
