@@ -103,7 +103,19 @@ export async function runPrompts(): Promise<ProjectOptions> {
     handleCancel(wantsRedis);
     if (wantsRedis) features.push('redis');
 
-    // 6. Criação automática do .env
+    // 6. Estratégia de autenticação
+    const authStrategy = await select({
+        message: '🔐 Qual estratégia de autenticação você quer usar?',
+        options: [
+            { value: 'jwt', label: 'JWT', hint: 'Recomendado — já inclui OAuth Google/GitHub' },
+            { value: 'session', label: 'Session/Cookies', hint: 'em breve' },
+            { value: 'oauth', label: 'OAuth (Google/GitHub) apenas', hint: 'em breve' },
+            { value: 'none', label: 'Nenhuma' },
+        ],
+    });
+    handleCancel(authStrategy);
+
+    // 7. Criação automática do .env
     const createEnv = await confirm({
         message: '📝 Deseja criar o arquivo .env automaticamente (a partir do .env.example)?',
         initialValue: true,
@@ -118,6 +130,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
         orm: orm as OrmChoice,
         database: database as DatabaseChoice,
         features,
+        authStrategy: authStrategy as AuthStrategyChoice,
         createEnv: createEnv as boolean,
     };
 }
