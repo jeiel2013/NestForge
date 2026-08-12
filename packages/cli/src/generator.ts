@@ -10,9 +10,10 @@ const TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
 const IMPLEMENTED_ORMS = ['prisma'];
 const IMPLEMENTED_LANGUAGES = ['typescript'];
 const IMPLEMENTED_DATABASES = ['postgres'];
+const IMPLEMENTED_AUTH_STRATEGIES = ['jwt'];
 
 export async function generateProject(options: ProjectOptions): Promise<string> {
-    const { projectName, language, orm, database, features, createEnv } = options;
+    const { projectName, language, orm, database, features, authStrategy, createEnv } = options;
 
     if (!IMPLEMENTED_LANGUAGES.includes(language)) {
         throw new Error(
@@ -33,6 +34,12 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
     if (!IMPLEMENTED_DATABASES.includes(database)) {
         throw new Error(
             `O banco "${database}" ainda não está pronto — só "postgres" está implementado por enquanto. Contribuições são bem-vindas!`,
+        );
+    }
+
+    if (!IMPLEMENTED_AUTH_STRATEGIES.includes(authStrategy)) {
+        throw new Error(
+            `A estratégia de autenticação "${authStrategy}" ainda não está pronta — só "jwt" está implementada por enquanto (já inclui OAuth Google/GitHub). Contribuições são bem-vindas!`,
         );
     }
 
@@ -61,8 +68,10 @@ async function applyFeatureToggles(targetDir: string, features: string[]): Promi
         await fs.remove(path.join(targetDir, 'docker-compose.yml'));
     }
 
-    // TODO: toggles reais de swagger/jwt/redis — remover módulos, rotas e
-    // imports relacionados quando o usuário não seleciona o recurso.
+    // TODO: toggles reais de swagger/redis — remover módulos, rotas e imports
+    // relacionados quando o usuário não seleciona o recurso.
+    // TODO: options.accessControl (RBAC/Permissions) ainda não é aplicado —
+    // hoje vem sempre junto da estratégia "jwt".
 }
 
 async function renameProject(targetDir: string, projectName: string): Promise<void> {
