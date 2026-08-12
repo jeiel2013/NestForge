@@ -94,13 +94,6 @@ export async function runPrompts(): Promise<ProjectOptions> {
     handleCancel(wantsSwagger);
     if (wantsSwagger) features.push('swagger');
 
-    const wantsJwt = await confirm({
-        message: '🔐 Deseja incluir o módulo de Autenticação JWT?',
-        initialValue: true,
-    });
-    handleCancel(wantsJwt);
-    if (wantsJwt) features.push('jwt');
-
     const wantsRedis = await confirm({
         message: '🧵 Deseja incluir Redis (cache/filas + e-mail via BullMQ)?',
         initialValue: true,
