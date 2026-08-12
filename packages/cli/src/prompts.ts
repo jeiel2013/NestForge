@@ -97,6 +97,13 @@ export async function runPrompts(): Promise<ProjectOptions> {
     handleCancel(wantsSwagger);
     if (wantsSwagger) features.push('swagger');
 
+    const wantsValidation = await confirm({
+        message: '✅ Deseja validação global (Zod) habilitada?',
+        initialValue: true,
+    });
+    handleCancel(wantsValidation);
+    if (wantsValidation) features.push('validation');
+
     const wantsRedis = await confirm({
         message: '🧵 Deseja incluir Redis (cache/filas + e-mail via BullMQ)?',
         initialValue: true,
