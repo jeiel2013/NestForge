@@ -5,6 +5,7 @@ import pc from 'picocolors';
 export type OrmChoice = 'prisma' | 'typeorm' | 'drizzle' | 'none';
 export type LanguageChoice = 'typescript' | 'javascript';
 export type DatabaseChoice = 'postgres' | 'mysql' | 'sqlite' | 'mongodb';
+export type AuthStrategyChoice = 'jwt' | 'session' | 'oauth' | 'none';
 
 export interface ProjectOptions {
     projectName: string;
@@ -12,6 +13,7 @@ export interface ProjectOptions {
     orm: OrmChoice;
     database: DatabaseChoice;
     features: string[];
+    authStrategy: AuthStrategyChoice;
     createEnv: boolean;
 }
 
