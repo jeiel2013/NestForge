@@ -13,6 +13,8 @@ npx nestforge
 - Toggle real do recurso **Docker**: se você desmarcar, o `Dockerfile` e o `docker-compose.yml` simplesmente não vão pro projeto gerado
 - Criação automática do **`.env`** a partir do `.env.example`, se você pedir
 
+> A pergunta "Deseja incluir documentação Swagger/OpenAPI?" cobre tanto o Swagger quanto a "documentação de API" — é a mesma coisa no template atual, não tem pergunta duplicada.
+
 ## O que ainda é placeholder
 
 | Escolha | Status |
@@ -27,11 +29,12 @@ npx nestforge
 | Auth: Session/Cookies | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | Auth: OAuth apenas (sem JWT) | ❌ não implementado — hoje OAuth só existe junto do JWT |
 | Auth: Nenhuma | ❌ não implementado — ainda não existe variante do template sem auth |
-| Recurso: Swagger | ⚠️ sempre incluído (não dá pra desligar ainda) |
+| Recurso: Swagger / documentação de API | ⚠️ sempre incluído (não dá pra desligar ainda) |
+| Recurso: Validação global (Zod) | ⚠️ sempre incluído (não dá pra desligar ainda) |
 | Recurso: Redis | ⚠️ sempre incluído (não dá pra desligar ainda) |
 | Controle de acesso (RBAC/Permissions) | ⚠️ sempre incluído junto do JWT (a resposta é guardada mas ainda não desliga nada) |
 
-Desligar de verdade `swagger`/`redis`/RBAC exige remover módulos, rotas, imports e dependências interligadas no template — é um trabalho de "template engine" mais sério que copiar/apagar arquivo, e é o próximo passo natural do gerador (`packages/cli/src/generator.ts`).
+Desligar de verdade `swagger`/`validation`/`redis`/RBAC exige remover módulos, rotas, imports e dependências interligadas no template — é um trabalho de "template engine" mais sério que copiar/apagar arquivo, e é o próximo passo natural do gerador (`packages/cli/src/generator.ts`).
 
 ## Desenvolvimento local
 
