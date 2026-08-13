@@ -1,0 +1,95 @@
+# Commit — `docs: adiciona README raiz do monorepo explicando a CLI e a estrutura`
+
+**Local:** `README.md` (novo, raiz do monorepo)
+
+````markdown
+# NestForge
+
+Monorepo do NestForge: uma **CLI interativa** (`nestforge`) que gera projetos NestJS prontos pra produção a partir de um boilerplate completo — auth, RBAC, banco, filas, observabilidade, testes e documentação já configurados.
+
+```bash
+npx nestforge
+```
+
+## Estrutura do repositório
+
+```
+/
+├── packages/
+│   └── cli/              → o pacote publicado no npm (nestforge)
+└── templates/
+    └── prisma/            → o boilerplate NestJS completo (Prisma + TypeScript + PostgreSQL)
+```
+
+- **`packages/cli`** — o código-fonte da CLI: prompts interativos, gerador de projeto, entrypoint. É isso que vira o pacote `nestforge` no npm.
+- **`templates/prisma`** — o boilerplate em si, um projeto NestJS completo e funcional por conta própria (tem README, ARCHITECTURE.md, ROADMAP.md e docs próprios). A CLI copia esse template pra gerar o projeto do usuário.
+
+## O que a CLI faz
+
+Ao rodar `npx nestforge`, você responde 11 perguntas e recebe um projeto NestJS pronto:
+
+| # | Pergunta | Opções | Status |
+|---|---|---|---|
+| 1 | Nome do projeto | texto livre | ✅ |
+| 2 | Linguagem | TypeScript / JavaScript | ✅ TypeScript · ⏳ JavaScript |
+| 3 | ORM / Query Builder | Prisma / TypeORM / Drizzle / Nenhum | ✅ Prisma · ⏳ demais |
+| 4 | Banco de dados | PostgreSQL / MySQL / SQLite / MongoDB | ✅ PostgreSQL · ⏳ demais |
+| 5 | Docker | sim/não | ✅ toggle real |
+| 6 | Documentação Swagger/OpenAPI | sim/não | ⚠️ sempre incluído |
+| 7 | Validação global (Zod) | sim/não | ⚠️ sempre incluído |
+| 8 | Redis (cache/filas + e-mail) | sim/não | ⚠️ sempre incluído |
+| 9 | Estratégia de autenticação | JWT / Session-Cookies / OAuth / Nenhuma | ✅ JWT (já inclui OAuth) · ⏳ demais |
+| 10 | Controle de acesso (RBAC/Permissions) | sim/não | ⚠️ resposta guardada, ainda não desliga nada |
+| 11 | Criar `.env` automaticamente | sim/não | ✅ toggle real |
+
+✅ = funciona de verdade hoje · ⚠️ = pergunta existe, mas o recurso sempre vem incluído (toggle ainda não desliga) · ⏳ = ainda não implementado, a CLI recusa com mensagem clara
+
+### O que o template Prisma já traz (quando tudo roda)
+
+- **Autenticação**: JWT (access + refresh token com rotação), OAuth Google e GitHub, forgot/reset password, verificação de e-mail
+- **RBAC + Permissions granulares**: roles (Admin/Manager/User) e permissions por ação (`user:create`, `user:delete`, etc.)
+- **Usuários**: CRUD completo, paginação e filtros, upload de avatar
+- **Banco**: Prisma + PostgreSQL, migrations, seed com um usuário por role
+- **Filas e e-mail**: BullMQ + Redis, templates de e-mail, Mailpit em dev
+- **Segurança**: Helmet, CORS, Rate Limiting, validação com Zod (`nestjs-zod`), serialização de output, CSRF opcional
+- **Observabilidade**: logs estruturados (Pino), health checks (`/health`), métricas Prometheus (`/metrics`)
+- **Docs**: Swagger com exemplos de request/response, guia de arquitetura, guia de como adicionar um módulo novo
+- **Testes**: unitários (Vitest) e e2e (Supertest, banco isolado)
+- **Docker & CI**: `docker-compose` com API/Postgres/Redis/Mailpit, GitHub Actions (build/lint/test/e2e)
+
+Detalhes de cada um desses recursos estão documentados dentro do próprio template: [`templates/prisma/README.md`](templates/prisma/README.md) e [`templates/prisma/ARCHITECTURE.md`](templates/prisma/ARCHITECTURE.md).
+
+## Desenvolvendo a CLI localmente
+
+```bash
+npm install                # na raiz, instala tudo via workspaces
+cd packages/cli
+npm run dev                 # roda a CLI direto do TypeScript, sem buildar
+```
+
+Testar como se estivesse instalada de verdade:
+
+```bash
+npm run build
+npm link
+nestforge                   # em qualquer pasta
+```
+
+Guia completo de teste (passo a passo de cada uma das 11 perguntas): ver o documento de testes da CLI compartilhado à parte, ou o resumo em [`packages/cli/README.md`](packages/cli/README.md).
+
+## Publicando
+
+```bash
+cd packages/cli
+npm run build       # compila TS + copia templates/ pra dentro do pacote publicado
+npm publish
+```
+
+## Roadmap da CLI
+
+O que já funciona de verdade vs. o que ainda é placeholder está sempre atualizado em [`packages/cli/README.md`](packages/cli/README.md) — é a fonte de verdade de status, pra não a documentação ficar prometendo algo que o código ainda não faz.
+
+## Licença
+
+MIT — ver [`templates/prisma/LICENSE`](templates/prisma/LICENSE).
+````
