@@ -1,8 +1,3 @@
-# Commit — `docs: adiciona README raiz do monorepo explicando a CLI e a estrutura`
-
-**Local:** `README.md` (novo, raiz do monorepo)
-
-````markdown
 # NestForge
 
 Monorepo do NestForge: uma **CLI interativa** (`nestforge`) que gera projetos NestJS prontos pra produção a partir de um boilerplate completo — auth, RBAC, banco, filas, observabilidade, testes e documentação já configurados.
@@ -92,4 +87,3 @@ O que já funciona de verdade vs. o que ainda é placeholder está sempre atuali
 ## Licença
 
 MIT — ver [`templates/prisma/LICENSE`](templates/prisma/LICENSE).
-````
