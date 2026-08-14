@@ -2,6 +2,8 @@ import fs from 'fs-extra';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { ProjectOptions } from './prompts.js';
+import { applyFeatureMarkers } from './features/markers.js';
+import { removeDisabledDependencies } from './features/dependencies.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
@@ -13,7 +15,8 @@ const IMPLEMENTED_DATABASES = ['postgres'];
 const IMPLEMENTED_AUTH_STRATEGIES = ['jwt'];
 
 export async function generateProject(options: ProjectOptions): Promise<string> {
-    const { projectName, language, orm, database, features, authStrategy, createEnv } = options;
+    const { projectName, language, orm, database, features, authStrategy, accessControl, createEnv } =
+        options;
 
     if (!IMPLEMENTED_LANGUAGES.includes(language)) {
         throw new Error(
@@ -52,7 +55,11 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
 
     await fs.copy(templateDir, targetDir);
 
-    await applyFeatureToggles(targetDir, features);
+    const enabledFeatures = buildEnabledFeatures(features, accessControl);
+
+    await applyDockerToggle(targetDir, enabledFeatures);
+    await applyFeatureMarkers(targetDir, enabledFeatures);
+    await removeDisabledDependencies(targetDir, enabledFeatures);
     await renameProject(targetDir, projectName);
 
     if (createEnv) {
@@ -62,16 +69,19 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
     return targetDir;
 }
 
-async function applyFeatureToggles(targetDir: string, features: string[]): Promise<void> {
-    if (!features.includes('docker')) {
-        await fs.remove(path.join(targetDir, 'Dockerfile'));
-        await fs.remove(path.join(targetDir, 'docker-compose.yml'));
+function buildEnabledFeatures(features: string[], accessControl: boolean): Set<string> {
+    const enabled = new Set(features);
+    if (accessControl) {
+        enabled.add('rbac');
     }
+    return enabled;
+}
 
-    // TODO: toggles reais de swagger/redis — remover módulos, rotas e imports
-    // relacionados quando o usuário não seleciona o recurso.
-    // TODO: options.accessControl (RBAC/Permissions) ainda não é aplicado —
-    // hoje vem sempre junto da estratégia "jwt".
+async function applyDockerToggle(targetDir: string, enabledFeatures: Set<string>): Promise<void> {
+    if (enabledFeatures.has('docker')) return;
+
+    await fs.remove(path.join(targetDir, 'Dockerfile'));
+    await fs.remove(path.join(targetDir, 'docker-compose.yml'));
 }
 
 async function renameProject(targetDir: string, projectName: string): Promise<void> {
