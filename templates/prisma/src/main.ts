@@ -5,7 +5,10 @@ import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { ClassSerializerInterceptor } from '@nestjs/common';
-import { ZodValidationPipe, patchNestJsSwagger } from 'nestjs-zod';
+// nestforge:feature:validation
+import { ZodValidationPipe } from 'nestjs-zod';
+// nestforge:feature:validation:end
+import { patchNestJsSwagger } from 'nestjs-zod';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -21,7 +24,9 @@ async function bootstrap() {
   app.use(helmet());
   app.use(cookieParser());
   app.enableCors();
+  // nestforge:feature:validation
   app.useGlobalPipes(new ZodValidationPipe());
+  // nestforge:feature:validation:end
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
