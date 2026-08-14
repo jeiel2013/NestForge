@@ -28,6 +28,7 @@ chore: atualiza dependências
 
 ## Padrões de código
 
+- Se o seu código for ligado a um recurso opcional da CLI (Swagger, Redis, RBAC, etc.), marque ele seguindo [`docs/feature-markers.md`](docs/feature-markers.md) — sem isso, a CLI não consegue remover o trecho quando alguém desliga o recurso.
 - TypeScript estrito (sem `any` sem justificativa)
 - Validação de entrada sempre via Zod (DTOs)
 - Nada de lógica de negócio no controller — controller só orquestra, service resolve
