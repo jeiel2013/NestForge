@@ -8,7 +8,10 @@ import path from 'node:path';
  */
 const FEATURE_DEPENDENCIES: Record<string, string[]> = {
     swagger: ['@nestjs/swagger'],
-    validation: ['nestjs-zod'],
+    // nestjs-zod NÃO entra aqui: os DTOs (RegisterDto, CreateUserDto, etc.) usam
+    // createZodDto() pra existir como classe, independente do ZodValidationPipe
+    // estar registrado globalmente ou não. Desligar "validação global" só tira
+    // o pipe do main.ts — a dependência continua necessária pro projeto compilar.
     redis: [
         '@nestjs/bullmq',
         'bullmq',
