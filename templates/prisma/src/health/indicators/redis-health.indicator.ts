@@ -1,3 +1,4 @@
+// nestforge:feature-file:redis
 import { Injectable } from '@nestjs/common';
 import { HealthIndicatorResult, HealthCheckError } from '@nestjs/terminus';
 import Redis from 'ioredis';
