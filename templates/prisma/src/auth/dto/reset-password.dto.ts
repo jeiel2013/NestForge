@@ -1,3 +1,4 @@
+// nestforge:feature-file:redis
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
