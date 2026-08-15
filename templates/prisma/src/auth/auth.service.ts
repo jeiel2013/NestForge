@@ -7,7 +7,9 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
+// nestforge:feature:redis
 import { MailService } from '../mail/mail.service';
+// nestforge:feature:redis:end
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { OAuthProfile } from './strategies/google.strategy';
@@ -17,7 +19,9 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    // nestforge:feature:redis
     private readonly mailService: MailService,
+    // nestforge:feature:redis:end
   ) { }
 
   async register(dto: RegisterDto) {
@@ -35,7 +39,9 @@ export class AuthService {
       data: { name: dto.name, email: dto.email, passwordHash },
     });
 
+    // nestforge:feature:redis
     await this.sendEmailVerification(user.id, user.email, user.name);
+    // nestforge:feature:redis:end
 
     return this.issueTokens(user.id, user.email, user.role);
   }
@@ -110,6 +116,7 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token inválido ou expirado');
     }
 
+    // rotação: revoga o antigo e emite um novo par
     await this.prisma.refreshToken.update({
       where: { id: stored.id },
       data: { revokedAt: new Date() },
@@ -129,9 +136,11 @@ export class AuthService {
     return { message: 'Logout realizado com sucesso' };
   }
 
+  // nestforge:feature:redis
   async forgotPassword(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
+    // resposta genérica sempre, pra não revelar se o e-mail existe na base
     const genericResponse = {
       message: 'Se o e-mail existir, enviaremos instruções de redefinição de senha',
     };
@@ -179,6 +188,7 @@ export class AuthService {
         where: { id: stored.id },
         data: { usedAt: new Date() },
       }),
+      // por segurança, revoga todas as sessões ativas ao trocar a senha
       this.prisma.refreshToken.updateMany({
         where: { userId: stored.userId, revokedAt: null },
         data: { revokedAt: new Date() },
@@ -228,6 +238,7 @@ export class AuthService {
 
     await this.mailService.queueVerificationEmail(email, name, rawToken);
   }
+  // nestforge:feature:redis:end
 
   private async issueTokens(userId: string, email: string, role: string) {
     const payload = { sub: userId, email, role };
