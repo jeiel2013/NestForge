@@ -1,3 +1,4 @@
+// nestforge:feature-file:redis
 const appUrl = process.env.APP_URL ?? 'http://localhost:3000';
 
 export function verifyEmailTemplate(name: string, token: string): string {

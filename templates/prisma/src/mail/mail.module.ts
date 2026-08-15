@@ -1,3 +1,4 @@
+// nestforge:feature-file:redis
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { MailService, MAIL_QUEUE } from './mail.service';

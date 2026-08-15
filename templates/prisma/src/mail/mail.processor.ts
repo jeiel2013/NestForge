@@ -1,3 +1,4 @@
+// nestforge:feature-file:redis
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
