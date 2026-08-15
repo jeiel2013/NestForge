@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { APP_GUARD } from '@nestjs/core';
+// nestforge:feature:redis
 import { MailModule } from '../mail/mail.module';
+// nestforge:feature:redis:end
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -13,7 +15,13 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 
 @Module({
-  imports: [PassportModule, JwtModule.register({}), MailModule],
+  imports: [
+    PassportModule,
+    JwtModule.register({}),
+    // nestforge:feature:redis
+    MailModule,
+    // nestforge:feature:redis:end
+  ],
   controllers: [AuthController],
   providers: [
     AuthService,
