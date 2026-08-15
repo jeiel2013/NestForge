@@ -1,16 +1,20 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+// nestforge:feature:redis
 import { BullModule } from '@nestjs/bullmq';
+// nestforge:feature:redis:end
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PrismaModule } from './database/prisma.module';
+// nestforge:feature:redis
 import { MailModule } from './mail/mail.module';
+// nestforge:feature:redis:end
 import { HealthModule } from './health/health.module';
+import { MetricsModule } from './metrics/metrics.module';
 import { CsrfMiddleware } from './common/middleware/csrf.middleware';
 import { validateEnv } from './config/env.validation';
-import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -33,18 +37,22 @@ import { MetricsModule } from './metrics/metrics.module';
         limit: Number(process.env.THROTTLE_LIMIT ?? 100),
       },
     ]),
+    // nestforge:feature:redis
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST ?? 'localhost',
         port: Number(process.env.REDIS_PORT ?? 6379),
       },
     }),
+    // nestforge:feature:redis:end
     PrismaModule,
     AuthModule,
     UsersModule,
+    // nestforge:feature:redis
     MailModule,
+    // nestforge:feature:redis:end
     HealthModule,
-    MetricsModule
+    MetricsModule,
   ],
 })
 export class AppModule implements NestModule {
