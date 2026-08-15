@@ -70,7 +70,7 @@ npm link
 nestforge                   # em qualquer pasta
 ```
 
-Guia completo de teste (passo a passo de cada uma das 11 perguntas): ver o documento de testes da CLI compartilhado à parte, ou o resumo em [`packages/cli/README.md`](packages/cli/README.md).
+Guia completo de teste (passo a passo de cada uma das 11 perguntas): ver o documento de testes da CLI compartilhado à parte, ou o resumo em [`packages/cli/README.md`](packages/cli/TESTING.md).
 
 ## Publicando
 
