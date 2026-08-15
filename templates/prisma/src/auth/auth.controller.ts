@@ -5,8 +5,10 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+// nestforge:feature:redis
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+// nestforge:feature:redis:end
 import { Public } from '../common/decorators/public.decorator';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GithubAuthGuard } from './guards/github-auth.guard';
@@ -60,6 +62,7 @@ export class AuthController {
     return this.authService.logout(dto.refreshToken);
   }
 
+  // nestforge:feature:redis
   @Public()
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
@@ -91,6 +94,7 @@ export class AuthController {
   verifyEmail(@Query('token') token: string) {
     return this.authService.verifyEmail(token);
   }
+  // nestforge:feature:redis:end
 
   @Public()
   @Get('google')
