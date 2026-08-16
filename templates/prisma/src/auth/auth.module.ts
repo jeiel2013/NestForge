@@ -11,8 +11,10 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GithubStrategy } from './strategies/github.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+// nestforge:feature:rbac
 import { RolesGuard } from '../common/guards/roles.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
+// nestforge:feature:rbac:end
 
 @Module({
   imports: [
@@ -29,8 +31,10 @@ import { PermissionsGuard } from '../common/guards/permissions.guard';
     GoogleStrategy,
     GithubStrategy,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    // nestforge:feature:rbac
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },
+    // nestforge:feature:rbac:end
   ],
   exports: [AuthService],
 })
