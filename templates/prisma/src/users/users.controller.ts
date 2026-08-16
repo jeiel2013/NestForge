@@ -16,8 +16,10 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FindUsersQueryDto } from './dto/find-users-query.dto';
+// nestforge:feature:rbac
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { Permission } from '../common/constants/permissions';
+// nestforge:feature:rbac:end
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import {
   AVATAR_MAX_SIZE_BYTES,
@@ -45,7 +47,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Post()
+  // nestforge:feature:rbac
   @Permissions(Permission.UserCreate)
+  // nestforge:feature:rbac:end
   @ApiOperation({ summary: 'Cria um usuário (requer permissão user:create)' })
   @ApiResponse({ status: 201, description: 'Usuário criado', schema: { example: USER_EXAMPLE } })
   @ApiResponse({ status: 403, description: 'Sem a permissão user:create', schema: { example: FORBIDDEN_EXAMPLE } })
@@ -54,7 +58,9 @@ export class UsersController {
   }
 
   @Get()
+  // nestforge:feature:rbac
   @Permissions(Permission.UserRead)
+  // nestforge:feature:rbac:end
   @ApiOperation({ summary: 'Lista usuários com paginação e filtros (requer permissão user:read)' })
   @ApiResponse({
     status: 200,
@@ -105,7 +111,9 @@ export class UsersController {
   }
 
   @Get(':id')
+  // nestforge:feature:rbac
   @Permissions(Permission.UserRead)
+  // nestforge:feature:rbac:end
   @ApiOperation({ summary: 'Busca um usuário por id (requer permissão user:read)' })
   @ApiResponse({ status: 200, description: 'Usuário encontrado', schema: { example: USER_EXAMPLE } })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado', schema: { example: { statusCode: 404, message: 'Usuário não encontrado' } } })
@@ -114,7 +122,9 @@ export class UsersController {
   }
 
   @Patch(':id')
+  // nestforge:feature:rbac
   @Permissions(Permission.UserUpdate)
+  // nestforge:feature:rbac:end
   @ApiOperation({ summary: 'Atualiza um usuário (requer permissão user:update)' })
   @ApiResponse({ status: 200, description: 'Usuário atualizado', schema: { example: USER_EXAMPLE } })
   @ApiResponse({ status: 403, description: 'Sem a permissão user:update', schema: { example: FORBIDDEN_EXAMPLE } })
@@ -123,7 +133,9 @@ export class UsersController {
   }
 
   @Delete(':id')
+  // nestforge:feature:rbac
   @Permissions(Permission.UserDelete)
+  // nestforge:feature:rbac:end
   @ApiOperation({ summary: 'Remove um usuário (requer permissão user:delete)' })
   @ApiResponse({ status: 200, description: 'Usuário removido', schema: { example: { message: 'Usuário removido com sucesso' } } })
   @ApiResponse({ status: 403, description: 'Sem a permissão user:delete', schema: { example: FORBIDDEN_EXAMPLE } })
