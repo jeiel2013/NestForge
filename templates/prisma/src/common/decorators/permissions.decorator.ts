@@ -1,3 +1,4 @@
+// nestforge:feature-file:rbac
 import { SetMetadata } from '@nestjs/common';
 import { Permission } from '../constants/permissions';
 

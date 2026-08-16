@@ -1,3 +1,4 @@
+// nestforge:feature-file:rbac
 import { SetMetadata } from '@nestjs/common';
 import { Role } from '@prisma/client';
 

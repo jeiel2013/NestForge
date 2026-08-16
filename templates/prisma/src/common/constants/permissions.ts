@@ -1,3 +1,4 @@
+// nestforge:feature-file:rbac
 export enum Permission {
     UserCreate = 'user:create',
     UserRead = 'user:read',

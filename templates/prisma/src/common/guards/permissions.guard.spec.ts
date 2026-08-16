@@ -1,3 +1,4 @@
+// nestforge:feature-file:rbac
 import { describe, expect, it, vi } from 'vitest';
 import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
