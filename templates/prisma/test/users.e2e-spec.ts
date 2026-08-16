@@ -75,6 +75,7 @@ describe('Users (e2e)', () => {
             .expect(200);
     });
 
+    // nestforge:feature:rbac
     it('USER consegue ler mas não consegue criar usuário', async () => {
         await createUserWithRole('user.e2e@example.com', 'senhaForte123', Role.USER);
         const token = await loginAndGetToken('user.e2e@example.com', 'senhaForte123');
@@ -88,6 +89,7 @@ describe('Users (e2e)', () => {
             .send({ name: 'Não deveria criar', email: 'bloqueado.e2e@example.com', password: 'senhaForte123' })
             .expect(403);
     });
+    // nestforge:feature:rbac:end
 
     it('GET /users/me retorna o usuário autenticado', async () => {
         await createUserWithRole('me.e2e@example.com', 'senhaForte123', Role.USER);
