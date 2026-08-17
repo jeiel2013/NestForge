@@ -16,6 +16,7 @@ Guia de teste passo a passo (todas as perguntas, na ordem, com checklist): ver [
 - Toggle real do recurso **Validação global (Zod)**: se você desmarcar, o `ZodValidationPipe` não é registrado no `main.ts` nem no setup de testes e2e (os DTOs continuam existindo como classes, só não são mais validados automaticamente)
 - Toggle real do recurso **Redis**: se você desmarcar, some o módulo `mail/` inteiro, o `BullModule`, o `RedisHealthIndicator` e as rotas de forgot/reset password + verificação de e-mail (elas dependem de mandar e-mail, que depende da fila) — `register`/`login` continuam funcionando normalmente
 - Toggle real do **controle de acesso (RBAC/Permissions)**: se você desmarcar, somem os guards, decorators e constants de RBAC, e as rotas de usuários deixam de exigir uma permission específica (continuam exigindo login, só não checam mais o que aquele usuário pode fazer)
+- Toggle real do recurso **Swagger / documentação de API**: se você desmarcar, some o bootstrap do Swagger no `main.ts` (`/docs` deixa de existir) e todos os decorators (`@ApiTags`, `@ApiOperation`, `@ApiResponse`, etc.) somem de todos os controllers
 - Criação automática do **`.env`** a partir do `.env.example`, se você pedir
 
 > A pergunta "Deseja incluir documentação Swagger/OpenAPI?" cobre tanto o Swagger quanto a "documentação de API" — é a mesma coisa no template atual, não tem pergunta duplicada.
@@ -34,11 +35,14 @@ Guia de teste passo a passo (todas as perguntas, na ordem, com checklist): ver [
 | Auth: Session/Cookies | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | Auth: OAuth apenas (sem JWT) | ❌ não implementado — hoje OAuth só existe junto do JWT |
 | Auth: Nenhuma | ❌ não implementado — ainda não existe variante do template sem auth |
-| Recurso: Swagger / documentação de API | ⚠️ sempre incluído (não dá pra desligar ainda) |
+
+O que falta agora é abrir mais ORMs/bancos/estratégias de auth — os toggles de recurso (a parte que essa leva de commits fechou) estão todos funcionando.
 
 Desligar de verdade `swagger` ainda exige remover decorators espalhados em praticamente todo controller — é o próximo (e último, dos toggles planejados) passo natural do gerador (`packages/cli/src/generator.ts`).
 
 **Limitação conhecida do toggle de Redis**: o `docker-compose.yml` e o `.env`/`.env.example` continuam trazendo o serviço/variáveis do Redis mesmo com o recurso desligado (clutter inofensivo, não quebra nada, mas não está 100% limpo ainda).
+
+**Todos os 6 recursos opcionais planejados (Docker, Validação global, Redis, RBAC, Swagger, `.env`) agora têm toggle real.**
 
 ## Desenvolvimento local
 
