@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { ProjectOptions } from './prompts.js';
-import { applyFeatureMarkers } from './features/markers.js';
+import { applyFeatureMarkers } from './features/marker.js';
 import { removeDisabledDependencies } from './features/dependencies.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
