@@ -5,14 +5,18 @@ import {
     HealthCheckService,
     MemoryHealthIndicator,
 } from '@nestjs/terminus';
+// nestforge:feature:swagger
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+// nestforge:feature:swagger:end
 import { Public } from '../common/decorators/public.decorator';
 import { PrismaHealthIndicator } from './indicators/prisma-health.indicator';
 // nestforge:feature:redis
 import { RedisHealthIndicator } from './indicators/redis-health.indicator';
 // nestforge:feature:redis:end
 
+// nestforge:feature:swagger
 @ApiTags('health')
+// nestforge:feature:swagger:end
 @Controller('health')
 export class HealthController {
     constructor(
@@ -28,7 +32,9 @@ export class HealthController {
     @Public()
     @Get()
     @HealthCheck()
+    // nestforge:feature:swagger
     @ApiOperation({ summary: 'Verifica a saúde da API (banco, memória, disco e demais dependências configuradas)' })
+    // nestforge:feature:swagger:end
     check() {
         return this.health.check([
             () => this.prismaIndicator.isHealthy('database'),
