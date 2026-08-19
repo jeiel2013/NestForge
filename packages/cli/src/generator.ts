@@ -2,8 +2,9 @@ import fs from 'fs-extra';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { ProjectOptions } from './prompts.js';
-import { applyFeatureMarkers } from './features/marker.js';
+import { applyFeatureMarkers } from './features/markers.js';
 import { removeDisabledDependencies } from './features/dependencies.js';
+import { applyDatabaseConfig } from './features/database.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
@@ -11,7 +12,7 @@ const TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
 // só isso está de fato pronto por enquanto — ver packages/cli/README.md
 const IMPLEMENTED_ORMS = ['prisma'];
 const IMPLEMENTED_LANGUAGES = ['typescript'];
-const IMPLEMENTED_DATABASES = ['postgres'];
+const IMPLEMENTED_DATABASES = ['postgres', 'mysql', 'sqlite'];
 const IMPLEMENTED_AUTH_STRATEGIES = ['jwt'];
 
 export async function generateProject(options: ProjectOptions): Promise<string> {
@@ -36,7 +37,7 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
 
     if (!IMPLEMENTED_DATABASES.includes(database)) {
         throw new Error(
-            `O banco "${database}" ainda não está pronto — só "postgres" está implementado por enquanto. Contribuições são bem-vindas!`,
+            `O banco "${database}" ainda não está pronto — hoje só ${IMPLEMENTED_DATABASES.join(', ')} estão implementados. Contribuições são bem-vindas!`,
         );
     }
 
@@ -55,9 +56,10 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
 
     await fs.copy(templateDir, targetDir);
 
-    const enabledFeatures = buildEnabledFeatures(features, accessControl);
+    const enabledFeatures = buildEnabledFeatures(features, accessControl, database);
 
     await applyDockerToggle(targetDir, enabledFeatures);
+    await applyDatabaseConfig(targetDir, database);
     await applyFeatureMarkers(targetDir, enabledFeatures);
     await removeDisabledDependencies(targetDir, enabledFeatures);
     await renameProject(targetDir, projectName);
@@ -69,11 +71,16 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
     return targetDir;
 }
 
-function buildEnabledFeatures(features: string[], accessControl: boolean): Set<string> {
+function buildEnabledFeatures(
+    features: string[],
+    accessControl: boolean,
+    database: string,
+): Set<string> {
     const enabled = new Set(features);
     if (accessControl) {
         enabled.add('rbac');
     }
+    enabled.add(`database:${database}`);
     return enabled;
 }
 
