@@ -4,11 +4,12 @@ import path from 'node:path';
 const IGNORED_DIRS = new Set(['node_modules', '.git', 'dist', 'coverage']);
 
 // primeira linha não-vazia do arquivo: se bater, o arquivo inteiro pertence a uma feature
-const FILE_MARKER = /^\/\/ nestforge:feature-file:(\S+)\s*$/;
+// aceita "//" (TS/JS) e "#" (YAML/.env) como prefixo de comentário
+const FILE_MARKER = /^(?:\/\/|#) nestforge:feature-file:(\S+)\s*$/;
 
 // marca o início/fim de um bloco dentro de um arquivo (várias linhas ou só uma)
-const BLOCK_START = /^(\s*)\/\/ nestforge:feature:(\S+)\s*$/;
-const BLOCK_END = /^(\s*)\/\/ nestforge:feature:(\S+):end\s*$/;
+const BLOCK_START = /^(\s*)(?:\/\/|#) nestforge:feature:(\S+)\s*$/;
+const BLOCK_END = /^(\s*)(?:\/\/|#) nestforge:feature:(\S+):end\s*$/;
 
 /**
  * Aplica os marcadores de features em todos os arquivos de texto do projeto gerado.
