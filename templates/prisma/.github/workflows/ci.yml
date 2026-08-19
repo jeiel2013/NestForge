@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
+      # nestforge:feature:database:postgres
       postgres:
         image: postgres:16-alpine
         env:
@@ -24,6 +25,24 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      # nestforge:feature:database:postgres:end
+
+      # nestforge:feature:database:mysql
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_USER: nestforge
+          MYSQL_PASSWORD: nestforge
+          MYSQL_ROOT_PASSWORD: nestforge
+          MYSQL_DATABASE: nestforge
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      # nestforge:feature:database:mysql:end
 
       redis:
         image: redis:7-alpine
@@ -36,7 +55,15 @@ jobs:
           --health-retries 5
 
     env:
+      # nestforge:feature:database:postgres
       DATABASE_URL: postgresql://nestforge:nestforge@localhost:5432/nestforge?schema=public
+      # nestforge:feature:database:postgres:end
+      # nestforge:feature:database:mysql
+      DATABASE_URL: mysql://nestforge:nestforge@localhost:3306/nestforge
+      # nestforge:feature:database:mysql:end
+      # nestforge:feature:database:sqlite
+      DATABASE_URL: file:./ci-dev.db
+      # nestforge:feature:database:sqlite:end
       JWT_ACCESS_SECRET: ci-access-secret-0123456789
       JWT_REFRESH_SECRET: ci-refresh-secret-0123456789
 
@@ -68,8 +95,15 @@ jobs:
       - name: Testes
         run: npm run test
 
+      # nestforge:feature:database:postgres
       - name: Criar banco de teste
         run: PGPASSWORD=nestforge psql -h localhost -U nestforge -d nestforge -c "CREATE DATABASE nestforge_test;"
+      # nestforge:feature:database:postgres:end
+
+      # nestforge:feature:database:mysql
+      - name: Criar banco de teste
+        run: mysql -h 127.0.0.1 -u root -pnestforge -e "CREATE DATABASE IF NOT EXISTS nestforge_test;"
+      # nestforge:feature:database:mysql:end
 
       - name: Testes e2e
         run: npm run test:e2e
