@@ -11,12 +11,13 @@ Guia de teste passo a passo (todas as perguntas, na ordem, com checklist): ver [
 ## O que já funciona (v0.1.0)
 
 - Prompts interativos (nome do projeto, linguagem, ORM, banco de dados, recursos adicionais, estratégia de autenticação, controle de acesso, criação do `.env`) via `@clack/prompts`
-- Template **Prisma + TypeScript + PostgreSQL + JWT** completo — é o boilerplate inteiro que já existe em `templates/prisma`: auth (JWT + OAuth Google/GitHub), RBAC + Permissions granulares, forgot/reset password, verificação de e-mail, upload de avatar, paginação/filtros, health checks, métricas Prometheus, testes unitários e e2e
+- Template **Prisma + TypeScript + JWT** completo, com **PostgreSQL, MySQL ou SQLite** à escolha — é o boilerplate inteiro que já existe em `templates/prisma`: auth (JWT + OAuth Google/GitHub), RBAC + Permissions granulares, forgot/reset password, verificação de e-mail, upload de avatar, paginação/filtros, health checks, métricas Prometheus, testes unitários e e2e
 - Toggle real do recurso **Docker**: se você desmarcar, o `Dockerfile` e o `docker-compose.yml` simplesmente não vão pro projeto gerado
 - Toggle real do recurso **Validação global (Zod)**: se você desmarcar, o `ZodValidationPipe` não é registrado no `main.ts` nem no setup de testes e2e (os DTOs continuam existindo como classes, só não são mais validados automaticamente)
 - Toggle real do recurso **Redis**: se você desmarcar, some o módulo `mail/` inteiro, o `BullModule`, o `RedisHealthIndicator` e as rotas de forgot/reset password + verificação de e-mail (elas dependem de mandar e-mail, que depende da fila) — `register`/`login` continuam funcionando normalmente
 - Toggle real do **controle de acesso (RBAC/Permissions)**: se você desmarcar, somem os guards, decorators e constants de RBAC, e as rotas de usuários deixam de exigir uma permission específica (continuam exigindo login, só não checam mais o que aquele usuário pode fazer)
 - Toggle real do recurso **Swagger / documentação de API**: se você desmarcar, some o bootstrap do Swagger no `main.ts` (`/docs` deixa de existir) e todos os decorators (`@ApiTags`, `@ApiOperation`, `@ApiResponse`, etc.) somem de todos os controllers
+- **MySQL e SQLite** funcionam de verdade além do PostgreSQL: o `provider` do `schema.prisma`, a `DATABASE_URL` (`.env.example`/`.env.test`), o serviço no `docker-compose.yml` e o job do CI se ajustam automaticamente ao banco escolhido
 - Criação automática do **`.env`** a partir do `.env.example`, se você pedir
 
 > A pergunta "Deseja incluir documentação Swagger/OpenAPI?" cobre tanto o Swagger quanto a "documentação de API" — é a mesma coisa no template atual, não tem pergunta duplicada.
@@ -29,8 +30,6 @@ Guia de teste passo a passo (todas as perguntas, na ordem, com checklist): ver [
 | ORM: TypeORM | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | ORM: Drizzle | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | ORM: Nenhum | ❌ não implementado |
-| Banco: MySQL | ❌ não implementado — a CLI recusa com uma mensagem clara |
-| Banco: SQLite | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | Banco: MongoDB | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | Auth: Session/Cookies | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | Auth: OAuth apenas (sem JWT) | ❌ não implementado — hoje OAuth só existe junto do JWT |
