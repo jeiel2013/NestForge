@@ -11,12 +11,17 @@ async function main() {
     try {
         const targetDir = await generateProject(options);
         const relativeDir = path.relative(process.cwd(), targetDir) || '.';
+        const dockerServices = ['redis', options.database !== 'sqlite' ? options.database : null]
+            .filter(Boolean)
+            .join(' ');
 
         const steps = [
             `cd ${relativeDir}`,
             ...(options.createEnv ? [] : ['cp .env.example .env']),
             'npm install',
-            'docker compose up -d postgres redis',
+            ...(options.features.includes('docker') && dockerServices
+                ? [`docker compose up -d ${dockerServices}`]
+                : []),
             'npx prisma migrate dev',
             'npm run start:dev',
         ];
