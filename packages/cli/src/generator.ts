@@ -5,6 +5,7 @@ import type { ProjectOptions } from './prompts.js';
 import { applyFeatureMarkers } from './features/markers.js';
 import { removeDisabledDependencies } from './features/dependencies.js';
 import { applyDatabaseConfig } from './features/database.js';
+import { applyAuthStrategyRemoval } from './features/auth-strategy.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
@@ -13,7 +14,7 @@ const TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
 const IMPLEMENTED_ORMS = ['prisma'];
 const IMPLEMENTED_LANGUAGES = ['typescript'];
 const IMPLEMENTED_DATABASES = ['postgres', 'mysql', 'sqlite'];
-const IMPLEMENTED_AUTH_STRATEGIES = ['jwt'];
+const IMPLEMENTED_AUTH_STRATEGIES = ['jwt', 'none'];
 
 export async function generateProject(options: ProjectOptions): Promise<string> {
     const { projectName, language, orm, database, features, authStrategy, accessControl, createEnv } =
@@ -43,7 +44,7 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
 
     if (!IMPLEMENTED_AUTH_STRATEGIES.includes(authStrategy)) {
         throw new Error(
-            `A estratégia de autenticação "${authStrategy}" ainda não está pronta — só "jwt" está implementada por enquanto (já inclui OAuth Google/GitHub). Contribuições são bem-vindas!`,
+            `A estratégia de autenticação "${authStrategy}" ainda não está pronta — hoje só ${IMPLEMENTED_AUTH_STRATEGIES.join(', ')} estão implementadas ("jwt" já inclui OAuth Google/GitHub). Contribuições são bem-vindas!`,
         );
     }
 
@@ -56,10 +57,11 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
 
     await fs.copy(templateDir, targetDir);
 
-    const enabledFeatures = buildEnabledFeatures(features, accessControl, database);
+    const enabledFeatures = buildEnabledFeatures(features, accessControl, database, authStrategy);
 
     await applyDockerToggle(targetDir, enabledFeatures);
     await applyDatabaseConfig(targetDir, database);
+    await applyAuthStrategyRemoval(targetDir, enabledFeatures);
     await applyFeatureMarkers(targetDir, enabledFeatures);
     await removeDisabledDependencies(targetDir, enabledFeatures);
     await renameProject(targetDir, projectName);
@@ -75,12 +77,14 @@ function buildEnabledFeatures(
     features: string[],
     accessControl: boolean,
     database: string,
+    authStrategy: string,
 ): Set<string> {
     const enabled = new Set(features);
     if (accessControl) {
         enabled.add('rbac');
     }
     enabled.add(`database:${database}`);
+    enabled.add(`auth:${authStrategy}`);
     return enabled;
 }
 
