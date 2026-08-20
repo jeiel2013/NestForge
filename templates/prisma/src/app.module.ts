@@ -5,8 +5,10 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { BullModule } from '@nestjs/bullmq';
 // nestforge:feature:redis:end
 import { LoggerModule } from 'nestjs-pino';
+// nestforge:feature:auth:jwt
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+// nestforge:feature:auth:jwt:end
 import { PrismaModule } from './database/prisma.module';
 // nestforge:feature:redis
 import { MailModule } from './mail/mail.module';
@@ -46,8 +48,10 @@ import { validateEnv } from './config/env.validation';
     }),
     // nestforge:feature:redis:end
     PrismaModule,
+    // nestforge:feature:auth:jwt
     AuthModule,
     UsersModule,
+    // nestforge:feature:auth:jwt:end
     // nestforge:feature:redis
     MailModule,
     // nestforge:feature:redis:end
