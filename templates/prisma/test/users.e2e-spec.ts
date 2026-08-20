@@ -1,3 +1,4 @@
+// nestforge:feature-file:auth:jwt
 import { INestApplication } from '@nestjs/common';
 import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
