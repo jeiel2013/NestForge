@@ -5,6 +5,7 @@
   "license": "MIT",
   "author": "Jeiel Alves <https://github.com/jeiel2013>",
   "type": "module",
+  "test": "tsx --test test/generator.test.ts",
   "bin": {
     "nestforge": "./dist/index.js"
   },
