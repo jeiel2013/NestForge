@@ -79,8 +79,8 @@ N E S T F O R G E
 
 | Opção | Hint | Resultado |
 |---|---|---|
-| **TypeScript** | "Recomendado" | ✅ Único que gera de verdade |
-| **JavaScript** | "em breve" | ❌ Erro amigável na hora de gerar, nenhuma pasta criada |
+| **TypeScript** | "Recomendado" | ✅ Gera projeto TypeScript |
+| **JavaScript** | - | ✅ Gera projeto JavaScript a partir do template TypeScript |
 
 ### Passo 3 — ORM / Query Builder
 
@@ -178,7 +178,7 @@ N E S T F O R G E
 
 (a linha `cp .env.example .env` só aparece aqui se você respondeu "não" no Passo 11)
 
-Se algum passo escolhido não for suportado (linguagem JavaScript, TypeORM, Drizzle, ORM nenhum, MongoDB e Session/Cookies.), em vez da tela final aparece uma mensagem de erro única — sem stacktrace — e a CLI sai com código `1`, sem criar nenhuma pasta.
+Se algum passo escolhido não for suportado (TypeORM, Drizzle, ORM nenhum, MongoDB e Session/Cookies.), em vez da tela final aparece uma mensagem de erro única — sem stacktrace — e a CLI sai com código `1`, sem criar nenhuma pasta.
 
 ---
 
@@ -189,7 +189,8 @@ Se algum passo escolhido não for suportado (linguagem JavaScript, TypeORM, Driz
 - [ ] TypeScript + Prisma + PostgreSQL + JWT → projeto completo gerado
 - [ ] TypeScript + Prisma + MySQL + JWT → `schema.prisma`, `.env.example`, `.env.test`, Docker Compose e CI configurados para MySQL
 - [ ] TypeScript + Prisma + SQLite + JWT → `schema.prisma`, `.env.example` e `.env.test` configurados para SQLite
-- [ ] JavaScript, TypeORM, Drizzle, ORM "Nenhum", MongoDB e Session/Cookies → cada um deve dar erro amigável, sem criar pasta
+- [ ] JavaScript + Prisma + PostgreSQL + JWT → projeto com fontes `.js`, sem `tsconfig.json`, com `start:dev` usando `node --watch`
+- [ ] TypeORM, Drizzle, ORM "Nenhum", MongoDB e Session/Cookies → cada um deve dar erro amigável, sem criar pasta
 - [ ] Apontar para uma pasta que já existe → erro "a pasta já existe", nada sobrescrito
 - [ ] **Docker "sim"** → `Dockerfile` e `docker-compose.yml` presentes
 - [ ] **Docker "não"** → os dois arquivos ausentes
@@ -211,7 +212,6 @@ Se algum passo escolhido não for suportado (linguagem JavaScript, TypeORM, Driz
 
 - Templates de TypeORM, Drizzle, "sem ORM", MongoDB
 - Estratégias de auth Session/Cookies.
-- Geração em JavaScript
 - Validação do nome do projeto (formato de pacote npm)
 - Publicação real no npm (próximo passo depois dos testes)
 

@@ -11,7 +11,7 @@ Guia de teste passo a passo (todas as perguntas, na ordem, com checklist): ver [
 ## O que já funciona (v0.1.0)
 
 - Prompts interativos (nome do projeto, linguagem, ORM, banco de dados, recursos adicionais, estratégia de autenticação, controle de acesso, criação do `.env`) via `@clack/prompts`
-- Template **Prisma + TypeScript + JWT** completo, com **PostgreSQL, MySQL ou SQLite** à escolha — é o boilerplate inteiro que já existe em `templates/prisma`: auth (JWT + OAuth Google/GitHub), RBAC + Permissions granulares, forgot/reset password, verificação de e-mail, upload de avatar, paginação/filtros, health checks, métricas Prometheus, testes unitários e e2e
+- Geração em **TypeScript ou JavaScript** a partir do mesmo template **Prisma + JWT**, com **PostgreSQL, MySQL ou SQLite** à escolha — o boilerplate inclui auth, RBAC + Permissions granulares, upload de avatar, paginação/filtros, health checks, métricas Prometheus, testes unitários e e2e
 - Estratégia de autenticação **"OAuth apenas"** funciona de verdade: `register`/`login`/`forgot-password`/`reset-password`/`verify-email` somem (não fazem sentido sem senha), mas OAuth Google/GitHub, `refresh`/`logout` e a validação do access token continuam normalmente
 - Toggle real do recurso **Docker**: se você desmarcar, o `Dockerfile` e o `docker-compose.yml` simplesmente não vão pro projeto gerado
 - Toggle real do recurso **Validação global (Zod)**: se você desmarcar, o `ZodValidationPipe` não é registrado no `main.ts` nem no setup de testes e2e (os DTOs continuam existindo como classes, só não são mais validados automaticamente)
@@ -28,7 +28,6 @@ Guia de teste passo a passo (todas as perguntas, na ordem, com checklist): ver [
 
 | Escolha | Status |
 |---|---|
-| Linguagem: JavaScript | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | ORM: TypeORM | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | ORM: Drizzle | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | ORM: Nenhum | ❌ não implementado |
@@ -36,8 +35,6 @@ Guia de teste passo a passo (todas as perguntas, na ordem, com checklist): ver [
 | Auth: Session/Cookies | ❌ não implementado — a CLI recusa com uma mensagem clara |
 
 O que falta agora é abrir mais ORMs/bancos/estratégias de auth — os toggles de recurso (a parte que essa leva de commits fechou) estão todos funcionando.
-
-Desligar de verdade `swagger` ainda exige remover decorators espalhados em praticamente todo controller — é o próximo (e último, dos toggles planejados) passo natural do gerador (`packages/cli/src/generator.ts`).
 
 **Limitação conhecida do toggle de Redis**: o `docker-compose.yml` e o `.env`/`.env.example` continuam trazendo o serviço/variáveis do Redis mesmo com o recurso desligado (clutter inofensivo, não quebra nada, mas não está 100% limpo ainda).
 **Limitação conhecida da estratégia "Nenhuma"**: o `schema.prisma` continua com os models `User`, `RefreshToken`, `OAuthAccount`, etc. mesmo sem nenhum código usando eles (clutter inofensivo — o projeto compila e roda normal, só sobra tabela sem uso se você rodar as migrations). O `prisma/seed.ts` também continua tentando criar usuários de teste.
@@ -52,6 +49,7 @@ Desligar de verdade `swagger` ainda exige remover decorators espalhados em prati
 npm install
 cd packages/cli
 npm run dev        # roda a CLI direto do TypeScript (tsx), sem buildar
+npm test           # testa automaticamente as combinações geradas pela CLI
 ```
 
 Pra testar como se fosse instalada de verdade:
