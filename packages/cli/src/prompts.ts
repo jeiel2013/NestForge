@@ -51,7 +51,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
         message: '🧠 TypeScript ou JavaScript?',
         options: [
             { value: 'typescript', label: 'TypeScript', hint: 'Recomendado' },
-            { value: 'javascript', label: 'JavaScript', hint: 'em breve' },
+            { value: 'javascript', label: 'JavaScript' },
         ],
     });
     handleCancel(language);

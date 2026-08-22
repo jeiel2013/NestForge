@@ -6,6 +6,7 @@ import { applyFeatureMarkers } from './features/markers.js';
 import { removeDisabledDependencies } from './features/dependencies.js';
 import { applyDatabaseConfig } from './features/database.js';
 import { applyAuthStrategyRemoval } from './features/auth-strategy.js';
+import { applyLanguageTransform } from './features/language.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PACKAGE_TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
@@ -13,7 +14,7 @@ const MONOREPO_TEMPLATES_ROOT = path.resolve(__dirname, '../../../templates');
 
 // só isso está de fato pronto por enquanto — ver packages/cli/README.md
 const IMPLEMENTED_ORMS = ['prisma'];
-const IMPLEMENTED_LANGUAGES = ['typescript'];
+const IMPLEMENTED_LANGUAGES = ['typescript', 'javascript'];
 const IMPLEMENTED_DATABASES = ['postgres', 'mysql', 'sqlite'];
 const IMPLEMENTED_AUTH_STRATEGIES = ['jwt', 'oauth', 'none'];
 
@@ -74,6 +75,7 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
     await applyAuthStrategyRemoval(targetDir, enabledFeatures);
     await applyFeatureMarkers(targetDir, enabledFeatures);
     await removeDisabledDependencies(targetDir, enabledFeatures);
+    await applyLanguageTransform(targetDir, language);
     await renameProject(targetDir, projectName);
 
     if (createEnv) {
