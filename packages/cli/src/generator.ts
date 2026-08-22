@@ -80,14 +80,22 @@ function buildEnabledFeatures(
     authStrategy: string,
 ): Set<string> {
     const enabled = new Set(features);
+
     if (accessControl) {
         enabled.add('rbac');
     }
+
     enabled.add(`database:${database}`);
     enabled.add(`auth:${authStrategy}`);
+
+    if (authStrategy !== 'none') {
+        enabled.add('auth:enabled');
+    }
+
     if (authStrategy === 'jwt') {
         enabled.add('auth:password');
     }
+
     return enabled;
 }
 
