@@ -48,6 +48,19 @@ async function collectFiles(dir: string): Promise<string[]> {
     return files;
 }
 
+/**
+ * O nome depois de "feature:" pode ser uma lista separada por vírgula
+ * (ex: "redis,auth:password") — nesse caso, TODAS precisam estar habilitadas
+ * pro conteúdo ser mantido. Uma feature só (o caso mais comum) continua
+ * funcionando igual, já que é só uma lista de um item.
+ */
+function isRequirementMet(rawName: string, enabledFeatures: Set<string>): boolean {
+    return rawName
+        .split(',')
+        .map((name) => name.trim())
+        .every((name) => enabledFeatures.has(name));
+}
+
 async function processFile(filePath: string, enabledFeatures: Set<string>): Promise<void> {
     const original = await fs.readFile(filePath, 'utf-8');
     const lines = original.split('\n');
@@ -58,7 +71,7 @@ async function processFile(filePath: string, enabledFeatures: Set<string>): Prom
     if (fileMatch) {
         const featureName = fileMatch[1];
 
-        if (!enabledFeatures.has(featureName)) {
+        if (!isRequirementMet(featureName, enabledFeatures)) {
             await fs.remove(filePath);
             return;
         }
@@ -94,7 +107,7 @@ function stripBlockMarkers(lines: string[], enabledFeatures: Set<string>): strin
         const startMatch = line.match(BLOCK_START);
         if (startMatch) {
             const featureName = startMatch[2];
-            if (!enabledFeatures.has(featureName)) {
+            if (!isRequirementMet(featureName, enabledFeatures)) {
                 skippingFeature = featureName;
             }
             continue; // remove a linha do marcador em qualquer um dos dois casos
