@@ -1,4 +1,4 @@
-// nestforge:feature-file:redis
+// nestforge:feature-file:redis,auth:password
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
