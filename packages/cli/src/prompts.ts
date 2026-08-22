@@ -73,8 +73,8 @@ export async function runPrompts(): Promise<ProjectOptions> {
         message: '🗃️  Qual banco de dados você quer usar?',
         options: [
             { value: 'postgres', label: 'PostgreSQL', hint: 'Recomendado' },
-            { value: 'mysql', label: 'MySQL', hint: 'em breve' },
-            { value: 'sqlite', label: 'SQLite', hint: 'em breve' },
+            { value: 'mysql', label: 'MySQL' },
+            { value: 'sqlite', label: 'SQLite' },
             { value: 'mongodb', label: 'MongoDB', hint: 'em breve' },
         ],
     });
@@ -117,7 +117,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
         options: [
             { value: 'jwt', label: 'JWT', hint: 'Recomendado — já inclui OAuth Google/GitHub' },
             { value: 'session', label: 'Session/Cookies', hint: 'em breve' },
-            { value: 'oauth', label: 'OAuth (Google/GitHub) apenas', hint: 'em breve' },
+            { value: 'oauth', label: 'OAuth (Google/GitHub) apenas', hint: 'sem login por senha' },
             { value: 'none', label: 'Nenhuma' },
         ],
     });
