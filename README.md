@@ -28,23 +28,23 @@ Ao rodar `npx nestforge`, você responde 11 perguntas e recebe um projeto NestJS
 | 1 | Nome do projeto | texto livre | ✅ |
 | 2 | Linguagem | TypeScript / JavaScript | ✅ TypeScript · ⏳ JavaScript |
 | 3 | ORM / Query Builder | Prisma / TypeORM / Drizzle / Nenhum | ✅ Prisma · ⏳ demais |
-| 4 | Banco de dados | PostgreSQL / MySQL / SQLite / MongoDB | ✅ PostgreSQL · ⏳ demais |
+| 4 | Banco de dados | PostgreSQL / MySQL / SQLite / MongoDB | ✅ PostgreSQL, MySQL e SQLite · ⏳ MongoDB |
 | 5 | Docker | sim/não | ✅ toggle real |
-| 6 | Documentação Swagger/OpenAPI | sim/não | ⚠️ sempre incluído |
-| 7 | Validação global (Zod) | sim/não | ⚠️ sempre incluído |
-| 8 | Redis (cache/filas + e-mail) | sim/não | ⚠️ sempre incluído |
-| 9 | Estratégia de autenticação | JWT / Session-Cookies / OAuth / Nenhuma | ✅ JWT (já inclui OAuth) · ⏳ demais |
-| 10 | Controle de acesso (RBAC/Permissions) | sim/não | ⚠️ resposta guardada, ainda não desliga nada |
+| 6 | Documentação Swagger/OpenAPI | sim/não | ✅ toggle real |
+| 7 | Validação global (Zod) | sim/não | ✅ toggle real |
+| 8 | Redis (cache/filas + e-mail) | sim/não | ✅ toggle real |
+| 9 | Estratégia de autenticação | JWT / Session-Cookies / OAuth / Nenhuma | ✅ JWT, OAuth e Nenhuma · ⏳ Session-Cookies |
+| 10 | Controle de acesso (RBAC/Permissions) | sim/não | ✅ toggle real |
 | 11 | Criar `.env` automaticamente | sim/não | ✅ toggle real |
 
-✅ = funciona de verdade hoje · ⚠️ = pergunta existe, mas o recurso sempre vem incluído (toggle ainda não desliga) · ⏳ = ainda não implementado, a CLI recusa com mensagem clara
+✅ = funciona de verdade hoje · ⏳ = ainda não implementado; a CLI recusa com mensagem clara
 
 ### O que o template Prisma já traz (quando tudo roda)
 
 - **Autenticação**: JWT (access + refresh token com rotação), OAuth Google e GitHub, forgot/reset password, verificação de e-mail
 - **RBAC + Permissions granulares**: roles (Admin/Manager/User) e permissions por ação (`user:create`, `user:delete`, etc.)
 - **Usuários**: CRUD completo, paginação e filtros, upload de avatar
-- **Banco**: Prisma + PostgreSQL, migrations, seed com um usuário por role
+- **Banco**: Prisma + PostgreSQL, MySQL ou SQLite., migrations, seed com um usuário por role
 - **Filas e e-mail**: BullMQ + Redis, templates de e-mail, Mailpit em dev
 - **Segurança**: Helmet, CORS, Rate Limiting, validação com Zod (`nestjs-zod`), serialização de output, CSRF opcional
 - **Observabilidade**: logs estruturados (Pino), health checks (`/health`), métricas Prometheus (`/metrics`)
@@ -70,7 +70,7 @@ npm link
 nestforge                   # em qualquer pasta
 ```
 
-Guia completo de teste (passo a passo de cada uma das 11 perguntas): ver o documento de testes da CLI compartilhado à parte, ou o resumo em [`packages/cli/README.md`](packages/cli/TESTING.md).
+Guia completo de teste: ver [`packages/cli/TESTING.md`](packages/cli/TESTING.md).
 
 ## Publicando
 
