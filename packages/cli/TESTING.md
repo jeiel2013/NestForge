@@ -45,7 +45,7 @@ Pra desfazer o link depois: `npm unlink -g nestforge`.
 
 ---
 
-## 3. O fluxo completo, passo a passo (10 perguntas)
+## 3. O fluxo completo, passo a passo (11 perguntas)
 
 ### Banner inicial
 
@@ -101,9 +101,9 @@ N E S T F O R G E
 
 | Opção | Hint | Resultado |
 |---|---|---|
-| **PostgreSQL** | "Recomendado" | ✅ Único que gera de verdade |
-| **MySQL** | "em breve" | ❌ Erro amigável |
-| **SQLite** | "em breve" | ❌ Erro amigável |
+| **PostgreSQL** | "Recomendado" | ✅ Funciona |
+| **MySQL** | "em breve" | ✅ Funciona |
+| **SQLite** | "em breve" | ✅ Funciona |
 | **MongoDB** | "em breve" | ❌ Erro amigável |
 
 ### Passo 5 — Docker
@@ -118,21 +118,21 @@ N E S T F O R G E
 **Pergunta:** `📄 Deseja incluir documentação Swagger/OpenAPI?`
 **Tipo:** sim/não · **Padrão:** sim
 
-⚠️ Sempre incluído no projeto gerado, independente da resposta (toggle ainda não implementado).
+✅ **Toggle real** — respondendo "não", o bootstrap e os decorators do Swagger são removidos, assim como a dependência `@nestjs/swagger`.
 
 ### Passo 7 — Validação global
 
 **Pergunta:** `✅ Deseja validação global (Zod) habilitada?`
 **Tipo:** sim/não · **Padrão:** sim
 
-⚠️ Sempre incluído, independente da resposta.
+✅ **Toggle real** — respondendo "não", o `ZodValidationPipe` deixa de ser registrado no `main.ts` e no setup e2e.
 
 ### Passo 8 — Redis
 
 **Pergunta:** `🧵 Deseja incluir Redis (cache/filas + e-mail via BullMQ)?`
 **Tipo:** sim/não · **Padrão:** sim
 
-⚠️ Sempre incluído, independente da resposta.
+✅ **Toggle real** — respondendo "não", módulos, dependências e fluxos que dependem de Redis/e-mail são removidos.
 
 ### Passo 9 — Estratégia de autenticação
 
@@ -141,10 +141,10 @@ N E S T F O R G E
 
 | Opção | Hint | Resultado |
 |---|---|---|
-| **JWT** | "Recomendado — já inclui OAuth Google/GitHub" | ✅ Único que gera de verdade |
+| **JWT** | "Recomendado — já inclui OAuth Google/GitHub" | ✅ Funciona |
 | **Session/Cookies** | "em breve" | ❌ Erro amigável |
-| **OAuth (Google/GitHub) apenas** | "em breve" | ❌ Erro amigável |
-| **Nenhuma** | — | ❌ Erro amigável |
+| **OAuth (Google/GitHub) apenas** | "em breve" | ✅ Funciona |
+| **Nenhuma** | — | ✅ Funciona |
 
 ### Passo 10 — Controle de acesso
 
@@ -152,7 +152,7 @@ N E S T F O R G E
 **Tipo:** sim/não · **Padrão:** sim
 **Só aparece se** o Passo 9 não for "Nenhuma".
 
-⚠️ A resposta é guardada mas ainda não desliga nada — RBAC/Permissions vem sempre junto do JWT.
+✅ **Toggle real** — respondendo "não", guards, decorators e constantes de RBAC são removidos; as rotas continuam exigindo autenticação.
 
 ### Passo 11 — Criação automática do `.env`
 
@@ -178,7 +178,7 @@ N E S T F O R G E
 
 (a linha `cp .env.example .env` só aparece aqui se você respondeu "não" no Passo 11)
 
-Se algum passo escolhido não for suportado (linguagem, ORM, banco ou auth "em breve"), em vez da tela final aparece uma mensagem de erro única — sem stacktrace — e a CLI sai com código `1`, sem criar nenhuma pasta.
+Se algum passo escolhido não for suportado (linguagem JavaScript, TypeORM, Drizzle, ORM nenhum, MongoDB e Session/Cookies.), em vez da tela final aparece uma mensagem de erro única — sem stacktrace — e a CLI sai com código `1`, sem criar nenhuma pasta.
 
 ---
 
@@ -187,25 +187,30 @@ Se algum passo escolhido não for suportado (linguagem, ORM, banco ou auth "em b
 - [ ] Rodar com nome padrão (Enter direto) → pasta `my-nest-api/` criada
 - [ ] Rodar com nome customizado → `package.json` gerado com `"name"` igual ao digitado, e `README.md` com o título trocado
 - [ ] TypeScript + Prisma + PostgreSQL + JWT → projeto completo gerado
-- [ ] JavaScript, TypeORM, Drizzle, "Nenhum" ORM, MySQL, SQLite, MongoDB, Session/Cookies, OAuth isolado, "Nenhuma" auth → cada um deve dar erro amigável, sem criar pasta
-- [ ] Apontar pra uma pasta que já existe → erro "a pasta já existe", nada sobrescrito
-- [ ] **Docker "sim"** → `Dockerfile`/`docker-compose.yml` presentes
+- [ ] TypeScript + Prisma + MySQL + JWT → `schema.prisma`, `.env.example`, `.env.test`, Docker Compose e CI configurados para MySQL
+- [ ] TypeScript + Prisma + SQLite + JWT → `schema.prisma`, `.env.example` e `.env.test` configurados para SQLite
+- [ ] JavaScript, TypeORM, Drizzle, ORM "Nenhum", MongoDB e Session/Cookies → cada um deve dar erro amigável, sem criar pasta
+- [ ] Apontar para uma pasta que já existe → erro "a pasta já existe", nada sobrescrito
+- [ ] **Docker "sim"** → `Dockerfile` e `docker-compose.yml` presentes
 - [ ] **Docker "não"** → os dois arquivos ausentes
-- [ ] **`.env` "sim"** → arquivo `.env` presente no projeto gerado, com o mesmo conteúdo do `.env.example`
-- [ ] **`.env` "não"** → só o `.env.example` presente; a nota final inclui `cp .env.example .env`
-- [ ] Responder "Nenhuma" na estratégia de auth → pergunta de controle de acesso (Passo 10) não aparece
-- [ ] Swagger/Validação/Redis respondidos "não" → confirmar que (por enquanto) aparecem mesmo assim no projeto gerado — esperado, não é bug
-- [ ] `Ctrl+C` em qualquer prompt → sai limpo, sem stacktrace, nenhuma pasta criada
-- [ ] Testar com `npm link` → o comando `nestforge` (não mais `create-nestforge`) é reconhecido
-- [ ] Dentro do projeto gerado: `npm install` → `docker compose up -d postgres redis` → `npx prisma migrate dev` → `npm run start:dev` → API sobe em `http://localhost:3000`, `/docs` mostra o Swagger, `/health` responde
+- [ ] **Swagger "não"** → bootstrap, decorators e dependência `@nestjs/swagger` ausentes
+- [ ] **Validação "não"** → `ZodValidationPipe` ausente do `main.ts` e do setup e2e
+- [ ] **Redis "não"** → módulo `mail/`, BullMQ, indicador Redis e dependências relacionadas ausentes
+- [ ] **RBAC "não"** → guards, decorators e constantes de RBAC ausentes; rotas de usuários continuam exigindo autenticação
+- [ ] **OAuth-only** → `AuthModule` e `UsersModule` presentes; endpoints e DTOs de senha ausentes; testes e2e baseados em senha ausentes
+- [ ] **Autenticação "Nenhuma"** → diretórios `src/auth/` e `src/users/` ausentes; pergunta de RBAC não aparece
+- [ ] **`.env` "sim"** → arquivo `.env` presente, com o mesmo conteúdo de `.env.example`
+- [ ] **`.env` "não"** → somente `.env.example` presente; a nota final inclui `cp .env.example .env`
+- [ ] `Ctrl+C` em qualquer prompt → sai limpo, sem stacktrace e sem criar pasta
+- [ ] Testar com `npm link` → o comando `nestforge` é reconhecido
+- [ ] No projeto padrão gerado: `npm install` → `docker compose up -d postgres redis` → `npx prisma migrate dev` → `npm run start:dev` → API sobe, `/docs` responde e `/health` responde
 
 ---
 
 ## 5. O que ainda não existe (não é bug, é escopo da v1)
 
-- Toggle real de Swagger/Validação/Redis/RBAC (hoje só documentam a intenção — desligar de verdade exige editar `app.module.ts`, `package.json` e remover pastas inteiras de módulo)
-- Templates de TypeORM, Drizzle, "sem ORM", MySQL, SQLite, MongoDB
-- Estratégias de auth Session/Cookies e OAuth isolado (hoje só existe JWT+OAuth combinados)
+- Templates de TypeORM, Drizzle, "sem ORM", MongoDB
+- Estratégias de auth Session/Cookies.
 - Geração em JavaScript
 - Validação do nome do projeto (formato de pacote npm)
 - Publicação real no npm (próximo passo depois dos testes)
