@@ -14,7 +14,7 @@ const TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
 const IMPLEMENTED_ORMS = ['prisma'];
 const IMPLEMENTED_LANGUAGES = ['typescript'];
 const IMPLEMENTED_DATABASES = ['postgres', 'mysql', 'sqlite'];
-const IMPLEMENTED_AUTH_STRATEGIES = ['jwt', 'none'];
+const IMPLEMENTED_AUTH_STRATEGIES = ['jwt', 'oauth', 'none'];
 
 export async function generateProject(options: ProjectOptions): Promise<string> {
     const { projectName, language, orm, database, features, authStrategy, accessControl, createEnv } =
@@ -85,6 +85,9 @@ function buildEnabledFeatures(
     }
     enabled.add(`database:${database}`);
     enabled.add(`auth:${authStrategy}`);
+    if (authStrategy === 'jwt') {
+        enabled.add('auth:password');
+    }
     return enabled;
 }
 
