@@ -8,13 +8,22 @@ import { applyDatabaseConfig } from './features/database.js';
 import { applyAuthStrategyRemoval } from './features/auth-strategy.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
+const PACKAGE_TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
+const MONOREPO_TEMPLATES_ROOT = path.resolve(__dirname, '../../../templates');
 
 // só isso está de fato pronto por enquanto — ver packages/cli/README.md
 const IMPLEMENTED_ORMS = ['prisma'];
 const IMPLEMENTED_LANGUAGES = ['typescript'];
 const IMPLEMENTED_DATABASES = ['postgres', 'mysql', 'sqlite'];
 const IMPLEMENTED_AUTH_STRATEGIES = ['jwt', 'oauth', 'none'];
+
+async function resolveTemplatesRoot(): Promise<string> {
+    if (await fs.pathExists(PACKAGE_TEMPLATES_ROOT)) {
+        return PACKAGE_TEMPLATES_ROOT;
+    }
+
+    return MONOREPO_TEMPLATES_ROOT;
+}
 
 export async function generateProject(options: ProjectOptions): Promise<string> {
     const { projectName, language, orm, database, features, authStrategy, accessControl, createEnv } =
@@ -48,7 +57,8 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
         );
     }
 
-    const templateDir = path.join(TEMPLATES_ROOT, orm);
+    const templatesRoot = await resolveTemplatesRoot();
+    const templateDir = path.join(templatesRoot, orm);
     const targetDir = path.resolve(process.cwd(), projectName);
 
     if (await fs.pathExists(targetDir)) {
