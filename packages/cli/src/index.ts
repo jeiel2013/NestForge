@@ -11,7 +11,10 @@ async function main() {
     try {
         const targetDir = await generateProject(options);
         const relativeDir = path.relative(process.cwd(), targetDir) || '.';
-        const dockerServices = ['redis', options.database !== 'sqlite' ? options.database : null]
+        const dockerServices = [
+            options.database !== 'sqlite' ? options.database : null,
+            options.features.includes('redis') ? 'redis' : null,
+        ]
             .filter(Boolean)
             .join(' ');
 
