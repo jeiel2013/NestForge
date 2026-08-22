@@ -161,9 +161,47 @@ test('gera OAuth-only sem fluxos e testes baseados em senha', { concurrency: fal
     );
 });
 
+test('gera projeto em JavaScript', { concurrency: false }, async () => {
+    await withGeneratedProject(
+        makeOptions({
+            projectName: 'javascript-project',
+            language: 'javascript',
+        }),
+        async (targetDir) => {
+            const packageJson = await fs.readJson(path.join(targetDir, 'package.json'));
+
+            assert.equal(await fs.pathExists(path.join(targetDir, 'src', 'main.js')), true);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'src', 'main.ts')), false);
+
+            assert.equal(await fs.pathExists(path.join(targetDir, 'prisma', 'seed.js')), true);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'prisma', 'seed.ts')), false);
+
+            assert.equal(await fs.pathExists(path.join(targetDir, 'vitest.config.js')), true);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'vitest.e2e.config.js')), true);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'vitest.config.ts')), false);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'vitest.e2e.config.ts')), false);
+
+            assert.equal(await fs.pathExists(path.join(targetDir, 'tsconfig.json')), false);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'tsconfig.build.json')), false);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'nest-cli.json')), false);
+
+            assert.equal(packageJson.scripts['start:dev'], 'node --watch src/main.js');
+            assert.equal(
+                packageJson.scripts['test:e2e'],
+                'dotenv -e .env.test -- vitest run --config ./vitest.e2e.config.js',
+            );
+
+            assert.equal(packageJson.dependencies.typescript, undefined);
+            assert.equal(packageJson.devDependencies.typescript, undefined);
+            assert.equal(packageJson.devDependencies['@nestjs/cli'], undefined);
+            assert.equal(packageJson.devDependencies['@typescript-eslint/parser'], undefined);
+            assert.equal(packageJson.devDependencies['ts-node'], undefined);
+        },
+    );
+});
+
 test('recusa opções ainda não implementadas sem criar projeto', { concurrency: false }, async () => {
     const unsupportedOptions: Array<[string, Partial<ProjectOptions>]> = [
-        ['JavaScript', { language: 'javascript' }],
         ['TypeORM', { orm: 'typeorm' }],
         ['Drizzle', { orm: 'drizzle' }],
         ['MongoDB', { database: 'mongodb' }],

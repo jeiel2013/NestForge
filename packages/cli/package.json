@@ -17,6 +17,7 @@
     "copy:templates": "node scripts/copy-templates.mjs",
     "dev": "tsx src/index.ts",
     "test": "tsx --test test/generator.test.ts",
+    "test:e2e": "dotenv -e .env.test -- vitest run --config ./vitest.e2e.config.js",
     "lint": "eslint \"src/**/*.ts\" --fix"
   },
   "dependencies": {
