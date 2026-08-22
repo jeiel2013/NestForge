@@ -1,4 +1,4 @@
-// nestforge:feature-file:auth:jwt
+// nestforge:feature-file:auth:password
 import { INestApplication } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import request from 'supertest';
