@@ -104,17 +104,20 @@ function stripBlockMarkers(lines: string[], enabledFeatures: Set<string>): strin
             continue; // pula todo o conteúdo do bloco (e a linha de :end que o fecha)
         }
 
+        const endMatch = line.match(BLOCK_END);
+        if (endMatch) {
+            continue;
+        }
+
         const startMatch = line.match(BLOCK_START);
         if (startMatch) {
             const featureName = startMatch[2];
+
             if (!isRequirementMet(featureName, enabledFeatures)) {
                 skippingFeature = featureName;
             }
-            continue; // remove a linha do marcador em qualquer um dos dois casos
-        }
 
-        if (BLOCK_END.test(line)) {
-            continue; // fecha um bloco de feature habilitada: remove só a linha do marcador
+            continue;
         }
 
         output.push(line);
