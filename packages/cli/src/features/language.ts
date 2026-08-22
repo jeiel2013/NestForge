@@ -115,6 +115,7 @@ async function updatePackageJson(targetDir: string): Promise<void> {
         lint: 'eslint "{src,test}/**/*.js" --fix',
         format: 'prettier --write "src/**/*.js" "test/**/*.js"',
         'prisma:seed': 'node prisma/seed.js',
+        'test:e2e': 'dotenv -e .env.test -- vitest run --config ./vitest.e2e.config.js',
     };
 
     packageJson.prisma = {
