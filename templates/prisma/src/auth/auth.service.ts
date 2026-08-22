@@ -7,11 +7,13 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
-// nestforge:feature:redis
+// nestforge:feature:redis,auth:password
 import { MailService } from '../mail/mail.service';
-// nestforge:feature:redis:end
+// nestforge:feature:redis,auth:password:end
+// nestforge:feature:auth:password
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+// nestforge:feature:auth:password:end
 import { OAuthProfile } from './strategies/google.strategy';
 
 @Injectable()
@@ -19,11 +21,12 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-    // nestforge:feature:redis
+    // nestforge:feature:redis,auth:password
     private readonly mailService: MailService,
-    // nestforge:feature:redis:end
+    // nestforge:feature:redis,auth:password:end
   ) { }
 
+  // nestforge:feature:auth:password
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -61,6 +64,7 @@ export class AuthService {
 
     return this.issueTokens(user.id, user.email, user.role);
   }
+  // nestforge:feature:auth:password:end
 
   async validateOAuthLogin(profile: OAuthProfile) {
     const linkedAccount = await this.prisma.oAuthAccount.findUnique({
@@ -136,7 +140,7 @@ export class AuthService {
     return { message: 'Logout realizado com sucesso' };
   }
 
-  // nestforge:feature:redis
+  // nestforge:feature:redis,auth:password
   async forgotPassword(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -238,7 +242,7 @@ export class AuthService {
 
     await this.mailService.queueVerificationEmail(email, name, rawToken);
   }
-  // nestforge:feature:redis:end
+  // nestforge:feature:redis,auth:password:end
 
   private async issueTokens(userId: string, email: string, role: string) {
     const payload = { sub: userId, email, role };

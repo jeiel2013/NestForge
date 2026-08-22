@@ -4,13 +4,15 @@ import { ApiExcludeEndpoint, ApiOperation, ApiResponse, ApiTags } from '@nestjs/
 // nestforge:feature:swagger:end
 import { Request } from 'express';
 import { AuthService } from './auth.service';
+// nestforge:feature:auth:password
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+// nestforge:feature:auth:password:end
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-// nestforge:feature:redis
+// nestforge:feature:redis,auth:password
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-// nestforge:feature:redis:end
+// nestforge:feature:redis,auth:password:end
 import { Public } from '../common/decorators/public.decorator';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GithubAuthGuard } from './guards/github-auth.guard';
@@ -30,6 +32,7 @@ const TOKENS_EXAMPLE = {
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
+  // nestforge:feature:auth:password
   @Public()
   @Post('register')
   // nestforge:feature:swagger
@@ -52,6 +55,7 @@ export class AuthController {
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
+  // nestforge:feature:auth:password:end
 
   @Public()
   @Post('refresh')
@@ -76,7 +80,7 @@ export class AuthController {
     return this.authService.logout(dto.refreshToken);
   }
 
-  // nestforge:feature:redis
+  // nestforge:feature:redis,auth:password
   @Public()
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
@@ -114,7 +118,7 @@ export class AuthController {
   verifyEmail(@Query('token') token: string) {
     return this.authService.verifyEmail(token);
   }
-  // nestforge:feature:redis:end
+  // nestforge:feature:redis,auth:password:end
 
   @Public()
   @Get('google')
