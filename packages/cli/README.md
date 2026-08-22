@@ -12,6 +12,7 @@ Guia de teste passo a passo (todas as perguntas, na ordem, com checklist): ver [
 
 - Prompts interativos (nome do projeto, linguagem, ORM, banco de dados, recursos adicionais, estratégia de autenticação, controle de acesso, criação do `.env`) via `@clack/prompts`
 - Template **Prisma + TypeScript + JWT** completo, com **PostgreSQL, MySQL ou SQLite** à escolha — é o boilerplate inteiro que já existe em `templates/prisma`: auth (JWT + OAuth Google/GitHub), RBAC + Permissions granulares, forgot/reset password, verificação de e-mail, upload de avatar, paginação/filtros, health checks, métricas Prometheus, testes unitários e e2e
+- Estratégia de autenticação **"OAuth apenas"** funciona de verdade: `register`/`login`/`forgot-password`/`reset-password`/`verify-email` somem (não fazem sentido sem senha), mas OAuth Google/GitHub, `refresh`/`logout` e a validação do access token continuam normalmente
 - Toggle real do recurso **Docker**: se você desmarcar, o `Dockerfile` e o `docker-compose.yml` simplesmente não vão pro projeto gerado
 - Toggle real do recurso **Validação global (Zod)**: se você desmarcar, o `ZodValidationPipe` não é registrado no `main.ts` nem no setup de testes e2e (os DTOs continuam existindo como classes, só não são mais validados automaticamente)
 - Toggle real do recurso **Redis**: se você desmarcar, some o módulo `mail/` inteiro, o `BullModule`, o `RedisHealthIndicator` e as rotas de forgot/reset password + verificação de e-mail (elas dependem de mandar e-mail, que depende da fila) — `register`/`login` continuam funcionando normalmente
@@ -33,7 +34,6 @@ Guia de teste passo a passo (todas as perguntas, na ordem, com checklist): ver [
 | ORM: Nenhum | ❌ não implementado |
 | Banco: MongoDB | ❌ não implementado — a CLI recusa com uma mensagem clara |
 | Auth: Session/Cookies | ❌ não implementado — a CLI recusa com uma mensagem clara |
-| Auth: OAuth apenas (sem JWT) | ❌ não implementado — hoje OAuth só existe junto do JWT |
 
 O que falta agora é abrir mais ORMs/bancos/estratégias de auth — os toggles de recurso (a parte que essa leva de commits fechou) estão todos funcionando.
 
@@ -41,6 +41,7 @@ Desligar de verdade `swagger` ainda exige remover decorators espalhados em prati
 
 **Limitação conhecida do toggle de Redis**: o `docker-compose.yml` e o `.env`/`.env.example` continuam trazendo o serviço/variáveis do Redis mesmo com o recurso desligado (clutter inofensivo, não quebra nada, mas não está 100% limpo ainda).
 **Limitação conhecida da estratégia "Nenhuma"**: o `schema.prisma` continua com os models `User`, `RefreshToken`, `OAuthAccount`, etc. mesmo sem nenhum código usando eles (clutter inofensivo — o projeto compila e roda normal, só sobra tabela sem uso se você rodar as migrations). O `prisma/seed.ts` também continua tentando criar usuários de teste.
+**Limitação conhecida da estratégia "OAuth apenas"**: o endpoint `POST /users` (admin criar usuário manualmente com e-mail+senha) continua existindo — a CLI não distingue "estratégia de login" de "como o admin cadastra alguém pelo painel". Se você não quer nem isso, precisa remover essa rota manualmente por enquanto.
 
 **Todos os 6 recursos opcionais planejados (Docker, Validação global, Redis, RBAC, Swagger, `.env`) agora têm toggle real.**
 
