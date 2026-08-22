@@ -26,7 +26,7 @@ Ao rodar `npx nestforge`, você responde 11 perguntas e recebe um projeto NestJS
 | # | Pergunta | Opções | Status |
 |---|---|---|---|
 | 1 | Nome do projeto | texto livre | ✅ |
-| 2 | Linguagem | TypeScript / JavaScript | ✅ TypeScript · ⏳ JavaScript |
+| 2 | Linguagem | TypeScript / JavaScript | ✅ TypeScript e JavaScript |
 | 3 | ORM / Query Builder | Prisma / TypeORM / Drizzle / Nenhum | ✅ Prisma · ⏳ demais |
 | 4 | Banco de dados | PostgreSQL / MySQL / SQLite / MongoDB | ✅ PostgreSQL, MySQL e SQLite · ⏳ MongoDB |
 | 5 | Docker | sim/não | ✅ toggle real |
@@ -38,6 +38,9 @@ Ao rodar `npx nestforge`, você responde 11 perguntas e recebe um projeto NestJS
 | 11 | Criar `.env` automaticamente | sim/não | ✅ toggle real |
 
 ✅ = funciona de verdade hoje · ⏳ = ainda não implementado; a CLI recusa com mensagem clara
+
+A opção JavaScript é gerada pela CLI a partir do template TypeScript, convertido durante a criação do projeto.
+Não é necessário mudar a árvore da estrutura que diz templates/prisma → ... TypeScript + PostgreSQL: ela descreve corretamente o template-fonte. A CLI é quem transforma esse template em JavaScript durante a geração.
 
 ### O que o template Prisma já traz (quando tudo roda)
 
