@@ -16,7 +16,7 @@ const MONOREPO_TEMPLATES_ROOT = path.resolve(__dirname, '../../../templates');
 const IMPLEMENTED_ORMS = ['prisma'];
 const IMPLEMENTED_LANGUAGES = ['typescript', 'javascript'];
 const IMPLEMENTED_DATABASES = ['postgres', 'mysql', 'sqlite'];
-const IMPLEMENTED_AUTH_STRATEGIES = ['jwt', 'oauth', 'none'];
+const IMPLEMENTED_AUTH_STRATEGIES = ['jwt', 'session', 'oauth', 'none'];
 
 async function resolveTemplatesRoot(): Promise<string> {
     if (await fs.pathExists(PACKAGE_TEMPLATES_ROOT)) {
@@ -105,6 +105,10 @@ function buildEnabledFeatures(
     }
 
     if (authStrategy === 'jwt') {
+        enabled.add('auth:password');
+    }
+
+    if (authStrategy === 'session') {
         enabled.add('auth:password');
     }
 
