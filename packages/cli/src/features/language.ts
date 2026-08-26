@@ -37,6 +37,8 @@ export async function applyLanguageTransform(
         await transpileFile(filePath);
     }
 
+    await removeTypeDeclarationFiles(targetDir);
+
     await fs.remove(path.join(targetDir, 'tsconfig.json'));
     await fs.remove(path.join(targetDir, 'tsconfig.build.json'));
     await fs.remove(path.join(targetDir, 'nest-cli.json'));
@@ -66,6 +68,27 @@ async function collectTypeScriptFiles(dir: string): Promise<string[]> {
     }
 
     return files;
+}
+
+async function removeTypeDeclarationFiles(dir: string): Promise<void> {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+        if (IGNORED_DIRS.has(entry.name)) {
+            continue;
+        }
+
+        const fullPath = path.join(dir, entry.name);
+
+        if (entry.isDirectory()) {
+            await removeTypeDeclarationFiles(fullPath);
+            continue;
+        }
+
+        if (entry.isFile() && entry.name.endsWith('.d.ts')) {
+            await fs.remove(fullPath);
+        }
+    }
 }
 
 async function transpileFile(filePath: string): Promise<void> {
