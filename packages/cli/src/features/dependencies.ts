@@ -19,6 +19,11 @@ const FEATURE_DEPENDENCIES: Record<string, string[]> = {
         'nodemailer',
         '@types/nodemailer',
     ],
+    'auth:session': [
+        '@quixo3/prisma-session-store',
+        'express-session',
+        '@types/express-session',
+    ],
     rbac: [], // hoje não tem dependência própria — só código (guards/decorators)
 };
 

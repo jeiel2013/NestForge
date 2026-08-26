@@ -14,39 +14,39 @@ enum Role {
 }
 
 model User {
-  id                       String   @id @default(uuid())
-  name                     String
-  email                    String   @unique
-  passwordHash             String?
-  role                     Role     @default(USER)
-  emailVerifiedAt          DateTime?
-  avatarUrl                String?
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
+  id              String    @id @default(uuid())
+  name            String
+  email           String    @unique
+  passwordHash    String?
+  role            Role      @default(USER)
+  emailVerifiedAt DateTime?
+  avatarUrl       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  refreshTokens            RefreshToken[]
-  oauthAccounts            OAuthAccount[]
-  passwordResetTokens      PasswordResetToken[]
-  emailVerificationTokens  EmailVerificationToken[]
+  refreshTokens           RefreshToken[]
+  oauthAccounts           OAuthAccount[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
 
   @@map("users")
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid())
-  tokenHash String   @unique
+  id        String    @id @default(uuid())
+  tokenHash String    @unique
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   revokedAt DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@map("refresh_tokens")
 }
 
 model OAuthAccount {
   id             String   @id @default(uuid())
-  provider       String   // "google" | "github"
+  provider       String // "google" | "github"
   providerUserId String
   userId         String
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -79,3 +79,27 @@ model EmailVerificationToken {
 
   @@map("email_verification_tokens")
 }
+
+// nestforge:feature:auth:session
+model Session {
+  id  String @id
+  sid String @unique
+
+  // nestforge:feature:database:mysql
+  data String @db.Text
+  // nestforge:feature:database:mysql:end
+
+  // nestforge:feature:database:postgres
+  data String
+  // nestforge:feature:database:postgres:end
+
+  // nestforge:feature:database:sqlite
+  data String
+  // nestforge:feature:database:sqlite:end
+
+  expiresAt DateTime
+
+  @@map("sessions")
+}
+
+// nestforge:feature:auth:session:end
