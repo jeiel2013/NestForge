@@ -40,14 +40,13 @@ Ao rodar `npx nestforge`, você responde 11 perguntas e recebe um projeto NestJS
 ✅ = funciona de verdade hoje · ⏳ = ainda não implementado; a CLI recusa com mensagem clara
 
 A opção JavaScript é gerada pela CLI a partir do template TypeScript, convertido durante a criação do projeto.
-Não é necessário mudar a árvore da estrutura que diz templates/prisma → ... TypeScript + PostgreSQL: ela descreve corretamente o template-fonte. A CLI é quem transforma esse template em JavaScript durante a geração.
 
 ### O que o template Prisma já traz (quando tudo roda)
 
 - **Autenticação**: JWT (access + refresh token com rotação), OAuth Google e GitHub, forgot/reset password, verificação de e-mail
 - **RBAC + Permissions granulares**: roles (Admin/Manager/User) e permissions por ação (`user:create`, `user:delete`, etc.)
 - **Usuários**: CRUD completo, paginação e filtros, upload de avatar
-- **Banco**: Prisma + PostgreSQL, MySQL ou SQLite., migrations, seed com um usuário por role
+- **Banco**: Prisma com PostgreSQL, MySQL ou SQLite, migrations e seed com um usuário por role
 - **Filas e e-mail**: BullMQ + Redis, templates de e-mail, Mailpit em dev
 - **Segurança**: Helmet, CORS, Rate Limiting, validação com Zod (`nestjs-zod`), serialização de output, CSRF opcional
 - **Observabilidade**: logs estruturados (Pino), health checks (`/health`), métricas Prometheus (`/metrics`)
@@ -63,6 +62,7 @@ Detalhes de cada um desses recursos estão documentados dentro do próprio templ
 npm install                # na raiz, instala tudo via workspaces
 cd packages/cli
 npm run dev                 # roda a CLI direto do TypeScript, sem buildar
+npm test                    # valida automaticamente as combinações geradas pela CLI
 ```
 
 Testar como se estivesse instalada de verdade:
