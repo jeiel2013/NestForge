@@ -14,6 +14,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 // nestforge:feature:swagger:end
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+// nestforge:feature:auth:session
+import session from 'express-session';
+import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+import { PrismaService } from './database/prisma.service';
+// nestforge:feature:auth:session:end
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -25,6 +30,33 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
   app.use(helmet());
   app.use(cookieParser());
+  // nestforge:feature:auth:session
+  const prisma = app.get(PrismaService);
+
+  if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+  }
+
+  app.use(
+    session({
+      name: 'nestforge.sid',
+      secret: process.env.SESSION_SECRET as string,
+      resave: false,
+      saveUninitialized: false,
+      store: new PrismaSessionStore(prisma, {
+        checkPeriod: 2 * 60 * 1000,
+        dbRecordIdIsSessionId: true,
+        dbRecordIdFunction: undefined,
+      }),
+      cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: Number(process.env.SESSION_MAX_AGE ?? 7 * 24 * 60 * 60 * 1000),
+      },
+    }),
+  );
+  // nestforge:feature:auth:session:end
   app.enableCors();
   // nestforge:feature:validation
   app.useGlobalPipes(new ZodValidationPipe());

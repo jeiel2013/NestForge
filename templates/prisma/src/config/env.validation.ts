@@ -20,6 +20,10 @@ const envSchema = z.object({
   THROTTLE_TTL: z.coerce.number().default(60),
   THROTTLE_LIMIT: z.coerce.number().default(100),
   ENABLE_CSRF: z.coerce.boolean().default(false),
+  // nestforge:feature:auth:session
+  SESSION_SECRET: z.string().min(32),
+  SESSION_MAX_AGE: z.coerce.number().positive().default(604800000),
+  // nestforge:feature:auth:session:end
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
