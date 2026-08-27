@@ -35,7 +35,7 @@
     "@nestjs/passport": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/swagger": "^11.0.0",
-    "@nestjs/throttler": "^7.0.0",
+    "@nestjs/throttler": "^6.5.0",
     "@nestjs/bullmq": "^11.0.0",
     "@nestjs/terminus": "^11.0.0",
     "@prisma/client": "^6.0.0",
