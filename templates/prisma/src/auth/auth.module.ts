@@ -22,6 +22,7 @@ import { PermissionsGuard } from '../common/guards/permissions.guard';
 // nestforge:feature:rbac:end
 // nestforge:feature:auth:session
 import { SessionAuthGuard } from './guards/session-auth.guard';
+import { SessionService } from './session.service';
 // nestforge:feature:auth:session:end
 
 @Module({
@@ -43,6 +44,7 @@ import { SessionAuthGuard } from './guards/session-auth.guard';
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     // nestforge:feature:auth:token:end
     // nestforge:feature:auth:session
+    SessionService,
     { provide: APP_GUARD, useClass: SessionAuthGuard },
     // nestforge:feature:auth:session:end
     GoogleStrategy,
