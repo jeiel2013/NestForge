@@ -7,9 +7,9 @@ import { AuthService } from './auth.service';
 // nestforge:feature:auth:password
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-// nestforge:feature:auth:password:end
+// nestforge:feature:auth:token
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-// nestforge:feature:redis,auth:password
+// nestforge:feature:auth:token:end
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 // nestforge:feature:redis,auth:password:end
@@ -17,22 +17,30 @@ import { Public } from '../common/decorators/public.decorator';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GithubAuthGuard } from './guards/github-auth.guard';
 import { OAuthProfile } from './strategies/google.strategy';
+// nestforge:feature:auth:token
+import { TokenService } from './token.service';
+// nestforge:feature:auth:token:end
 
-// nestforge:feature:swagger
+// nestforge:feature:swagger,auth:token
 const TOKENS_EXAMPLE = {
   accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
 };
-// nestforge:feature:swagger:end
+// nestforge:feature:swagger,auth:token:end
 
 // nestforge:feature:swagger
 @ApiTags('auth')
 // nestforge:feature:swagger:end
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(
+    private readonly authService: AuthService,
+    // nestforge:feature:auth:token
+    private readonly tokenService: TokenService,
+    // nestforge:feature:auth:token:end
+  ) { }
 
-  // nestforge:feature:auth:password
+  // nestforge:feature:auth:token,auth:password
   @Public()
   @Post('register')
   // nestforge:feature:swagger
@@ -40,10 +48,12 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'Conta criada com sucesso', schema: { example: TOKENS_EXAMPLE } })
   @ApiResponse({ status: 409, description: 'E-mail já cadastrado', schema: { example: { statusCode: 409, message: 'E-mail já cadastrado' } } })
   // nestforge:feature:swagger:end
-  register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  async register(@Body() dto: RegisterDto) {
+    const user = await this.authService.register(dto);
+    return this.tokenService.issueTokens(user.id, user.email, user.role);
   }
 
+  // nestforge:feature:auth:token,auth:password
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -52,11 +62,13 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Login realizado com sucesso', schema: { example: TOKENS_EXAMPLE } })
   @ApiResponse({ status: 401, description: 'Credenciais inválidas', schema: { example: { statusCode: 401, message: 'Credenciais inválidas' } } })
   // nestforge:feature:swagger:end
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(@Body() dto: LoginDto) {
+    const user = await this.authService.login(dto);
+    return this.tokenService.issueTokens(user.id, user.email, user.role);
   }
-  // nestforge:feature:auth:password:end
+  // nestforge:feature:auth:token,auth:password:end
 
+  // nestforge:feature:auth:token
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
@@ -66,7 +78,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Refresh token inválido, expirado ou já usado', schema: { example: { statusCode: 401, message: 'Refresh token inválido ou expirado' } } })
   // nestforge:feature:swagger:end
   refresh(@Body() dto: RefreshTokenDto) {
-    return this.authService.refresh(dto.refreshToken);
+    return this.tokenService.refresh(dto.refreshToken);
   }
 
   @Public()
@@ -77,8 +89,9 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Logout realizado', schema: { example: { message: 'Logout realizado com sucesso' } } })
   // nestforge:feature:swagger:end
   logout(@Body() dto: RefreshTokenDto) {
-    return this.authService.logout(dto.refreshToken);
+    return this.tokenService.logout(dto.refreshToken);
   }
+  // nestforge:feature:auth:token:end
 
   // nestforge:feature:redis,auth:password
   @Public()
@@ -130,15 +143,18 @@ export class AuthController {
     // o guard redireciona para o consentimento do Google; nada a fazer aqui
   }
 
+  // nestforge:feature:auth:token
   @Public()
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   // nestforge:feature:swagger
   @ApiExcludeEndpoint()
   // nestforge:feature:swagger:end
-  googleCallback(@Req() req: Request) {
-    return this.authService.validateOAuthLogin(req.user as OAuthProfile);
+  async googleCallback(@Req() req: Request) {
+    const user = await this.authService.validateOAuthLogin(req.user as OAuthProfile);
+    return this.tokenService.issueTokens(user.id, user.email, user.role);
   }
+  // nestforge:feature:auth:token:end
 
   @Public()
   @Get('github')
@@ -150,13 +166,16 @@ export class AuthController {
     // o guard redireciona para o consentimento do GitHub; nada a fazer aqui
   }
 
+  // nestforge:feature:auth:token
   @Public()
   @Get('github/callback')
   @UseGuards(GithubAuthGuard)
   // nestforge:feature:swagger
   @ApiExcludeEndpoint()
   // nestforge:feature:swagger:end
-  githubCallback(@Req() req: Request) {
-    return this.authService.validateOAuthLogin(req.user as OAuthProfile);
+  async githubCallback(@Req() req: Request) {
+    const user = await this.authService.validateOAuthLogin(req.user as OAuthProfile);
+    return this.tokenService.issueTokens(user.id, user.email, user.role);
   }
+  // nestforge:feature:auth:token:end
 }

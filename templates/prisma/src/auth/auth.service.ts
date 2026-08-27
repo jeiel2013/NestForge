@@ -3,7 +3,6 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
@@ -20,7 +19,6 @@ import { OAuthProfile } from './strategies/google.strategy';
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService,
     // nestforge:feature:redis,auth:password
     private readonly mailService: MailService,
     // nestforge:feature:redis,auth:password:end
@@ -46,7 +44,7 @@ export class AuthService {
     await this.sendEmailVerification(user.id, user.email, user.name);
     // nestforge:feature:redis:end
 
-    return this.issueTokens(user.id, user.email, user.role);
+    return this.toAuthenticatedUser(user);;
   }
 
   async login(dto: LoginDto) {
@@ -62,7 +60,7 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    return this.issueTokens(user.id, user.email, user.role);
+    return this.toAuthenticatedUser(user);
   }
   // nestforge:feature:auth:password:end
 
@@ -105,39 +103,7 @@ export class AuthService {
       },
     });
 
-    return this.issueTokens(user.id, user.email, user.role);
-  }
-
-  async refresh(refreshToken: string) {
-    const tokenHash = this.hashToken(refreshToken);
-
-    const stored = await this.prisma.refreshToken.findUnique({
-      where: { tokenHash },
-      include: { user: true },
-    });
-
-    if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
-      throw new UnauthorizedException('Refresh token inválido ou expirado');
-    }
-
-    // rotação: revoga o antigo e emite um novo par
-    await this.prisma.refreshToken.update({
-      where: { id: stored.id },
-      data: { revokedAt: new Date() },
-    });
-
-    return this.issueTokens(stored.user.id, stored.user.email, stored.user.role);
-  }
-
-  async logout(refreshToken: string) {
-    const tokenHash = this.hashToken(refreshToken);
-
-    await this.prisma.refreshToken.updateMany({
-      where: { tokenHash, revokedAt: null },
-      data: { revokedAt: new Date() },
-    });
-
-    return { message: 'Logout realizado com sucesso' };
+    return this.toAuthenticatedUser(linkedAccount.user);
   }
 
   // nestforge:feature:redis,auth:password
@@ -244,31 +210,16 @@ export class AuthService {
   }
   // nestforge:feature:redis,auth:password:end
 
-  private async issueTokens(userId: string, email: string, role: string) {
-    const payload = { sub: userId, email, role };
-
-    const accessToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
-    });
-
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
-    });
-
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-
-    await this.prisma.refreshToken.create({
-      data: {
-        tokenHash: this.hashToken(refreshToken),
-        userId,
-        expiresAt,
-      },
-    });
-
-    return { accessToken, refreshToken };
+  private toAuthenticatedUser(user: {
+    id: string;
+    email: string;
+    role: string;
+  }) {
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
   }
 
   private hashToken(token: string): string {

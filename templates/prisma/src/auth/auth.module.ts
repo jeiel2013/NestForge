@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 // nestforge:feature:auth:token
 import { JwtModule } from '@nestjs/jwt';
+import { TokenService } from './token.service';
 // nestforge:feature:auth:token:end
 import { PassportModule } from '@nestjs/passport';
 import { APP_GUARD } from '@nestjs/core';
@@ -37,6 +38,7 @@ import { SessionAuthGuard } from './guards/session-auth.guard';
   providers: [
     AuthService,
     // nestforge:feature:auth:token
+    TokenService,
     JwtStrategy,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     // nestforge:feature:auth:token:end

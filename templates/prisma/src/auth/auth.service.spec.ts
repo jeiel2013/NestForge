@@ -1,12 +1,18 @@
+// nestforge:feature-file:auth:password
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../database/prisma.service';
+// nestforge:feature:redis
+import { MailService } from '../mail/mail.service';
+// nestforge:feature:redis:end
 
 describe('AuthService', () => {
   let authService: AuthService;
   let prisma: any;
+  // nestforge:feature:redis
+  let mailService: MailService;
+  // nestforge:feature:redis:end
 
   beforeEach(() => {
     prisma = {
@@ -14,7 +20,19 @@ describe('AuthService', () => {
       refreshToken: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
     };
 
-    authService = new AuthService(prisma as PrismaService, new JwtService());
+    // nestforge:feature:redis
+    mailService = {
+      queueVerificationEmail: vi.fn(),
+      queuePasswordResetEmail: vi.fn(),
+    } as unknown as MailService;
+    // nestforge:feature:redis:end
+
+    authService = new AuthService(
+      prisma as PrismaService,
+      // nestforge:feature:redis
+      mailService,
+      // nestforge:feature:redis:end
+    );
   });
 
   it('deve lançar ConflictException se o e-mail já existir', async () => {
