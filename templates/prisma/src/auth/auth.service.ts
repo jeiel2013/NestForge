@@ -44,7 +44,7 @@ export class AuthService {
     await this.sendEmailVerification(user.id, user.email, user.name);
     // nestforge:feature:redis:end
 
-    return this.toAuthenticatedUser(user);;
+    return this.toAuthenticatedUser(user);
   }
 
   async login(dto: LoginDto) {
@@ -76,11 +76,7 @@ export class AuthService {
     });
 
     if (linkedAccount) {
-      return this.issueTokens(
-        linkedAccount.user.id,
-        linkedAccount.user.email,
-        linkedAccount.user.role,
-      );
+      return this.toAuthenticatedUser(linkedAccount.user);
     }
 
     let user = await this.prisma.user.findUnique({ where: { email: profile.email } });
@@ -103,7 +99,7 @@ export class AuthService {
       },
     });
 
-    return this.toAuthenticatedUser(linkedAccount.user);
+    return this.toAuthenticatedUser(user);
   }
 
   // nestforge:feature:redis,auth:password
