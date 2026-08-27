@@ -1,4 +1,4 @@
-// nestforge:feature-file:auth:password
+// nestforge:feature-file:auth:password,auth:token
 import { INestApplication } from '@nestjs/common';
 import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
