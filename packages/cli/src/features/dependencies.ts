@@ -24,6 +24,11 @@ const FEATURE_DEPENDENCIES: Record<string, string[]> = {
         'express-session',
         '@types/express-session',
     ],
+    'auth:token': [
+        '@nestjs/jwt',
+        'passport-jwt',
+        '@types/passport-jwt',
+    ],
     rbac: [], // hoje não tem dependência própria — só código (guards/decorators)
 };
 

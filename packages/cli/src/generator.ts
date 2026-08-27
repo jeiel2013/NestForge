@@ -106,6 +106,16 @@ function buildEnabledFeatures(
 
     if (authStrategy === 'jwt') {
         enabled.add('auth:password');
+        enabled.add('auth:token');
+    }
+
+    if (authStrategy === 'oauth') {
+        enabled.add('auth:token');
+    }
+
+    if (authStrategy === 'session') {
+        enabled.add('auth:password');
+        enabled.add('auth:session');
     }
 
     return enabled;
