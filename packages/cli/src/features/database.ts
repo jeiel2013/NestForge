@@ -49,7 +49,10 @@ async function updateSchemaProvider(
     if (!(await fs.pathExists(schemaPath))) return;
 
     const content = await fs.readFile(schemaPath, 'utf-8');
-    const updated = content.replace(/provider\s*=\s*"[^"]+"/, `provider = "${provider}"`);
+    const updated = content.replace(
+        /(datasource\s+db\s*\{[^}]*provider\s*=\s*)"[^"]+"/,
+        `$1"${provider}"`,
+    );
     await fs.writeFile(schemaPath, updated, 'utf-8');
 }
 
