@@ -161,6 +161,158 @@ test('gera OAuth-only sem fluxos e testes baseados em senha', { concurrency: fal
     );
 });
 
+test('gera autenticação por Session/Cookies sem recursos JWT', { concurrency: false }, async () => {
+    await withGeneratedProject(
+        makeOptions({
+            projectName: 'session-project',
+            authStrategy: 'session',
+            features: ['swagger', 'validation'],
+        }),
+        async (targetDir) => {
+            const schema = await readFile(
+                path.join(targetDir, 'prisma', 'schema.prisma'),
+                'utf8',
+            );
+            const main = await readFile(
+                path.join(targetDir, 'src', 'main.ts'),
+                'utf8',
+            );
+            const authModule = await readFile(
+                path.join(targetDir, 'src', 'auth', 'auth.module.ts'),
+                'utf8',
+            );
+            const authController = await readFile(
+                path.join(targetDir, 'src', 'auth', 'auth.controller.ts'),
+                'utf8',
+            );
+            const packageJson = await fs.readJson(
+                path.join(targetDir, 'package.json'),
+            );
+
+            assert.match(schema, /model Session/);
+            assert.match(schema, /@@map\("sessions"\)/);
+
+            assert.match(main, /express-session/);
+            assert.match(main, /PrismaSessionStore/);
+            assert.match(main, /name: 'nestforge\.sid'/);
+
+            assert.match(authModule, /SessionService/);
+            assert.match(authModule, /SessionAuthGuard/);
+            assert.doesNotMatch(authModule, /JwtModule/);
+            assert.doesNotMatch(authModule, /JwtStrategy/);
+            assert.doesNotMatch(authModule, /JwtAuthGuard/);
+            assert.doesNotMatch(authModule, /TokenService/);
+
+            assert.match(authController, /registerWithSession/);
+            assert.match(authController, /loginWithSession/);
+            assert.match(authController, /logoutSession/);
+            assert.doesNotMatch(authController, /@Post\('refresh'\)/);
+            assert.doesNotMatch(authController, /TOKENS_EXAMPLE/);
+
+            assert.equal(
+                await fs.pathExists(
+                    path.join(targetDir, 'src', 'auth', 'session.service.ts'),
+                ),
+                true,
+            );
+            assert.equal(
+                await fs.pathExists(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'auth',
+                        'guards',
+                        'session-auth.guard.ts',
+                    ),
+                ),
+                true,
+            );
+
+            assert.equal(
+                await fs.pathExists(
+                    path.join(targetDir, 'src', 'auth', 'token.service.ts'),
+                ),
+                false,
+            );
+            assert.equal(
+                await fs.pathExists(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'auth',
+                        'strategies',
+                        'jwt.strategy.ts',
+                    ),
+                ),
+                false,
+            );
+            assert.equal(
+                await fs.pathExists(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'auth',
+                        'guards',
+                        'jwt-auth.guard.ts',
+                    ),
+                ),
+                false,
+            );
+            assert.equal(
+                await fs.pathExists(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'auth',
+                        'dto',
+                        'refresh-token.dto.ts',
+                    ),
+                ),
+                false,
+            );
+
+            assert.equal(
+                await fs.pathExists(
+                    path.join(targetDir, 'test', 'session-auth.e2e-spec.ts'),
+                ),
+                true,
+            );
+            assert.equal(
+                await fs.pathExists(
+                    path.join(targetDir, 'test', 'auth.e2e-spec.ts'),
+                ),
+                false,
+            );
+            assert.equal(
+                await fs.pathExists(
+                    path.join(targetDir, 'test', 'users.e2e-spec.ts'),
+                ),
+                false,
+            );
+
+            assert.notEqual(
+                packageJson.dependencies['@quixo3/prisma-session-store'],
+                undefined,
+            );
+            assert.notEqual(
+                packageJson.dependencies['express-session'],
+                undefined,
+            );
+            assert.notEqual(
+                packageJson.devDependencies['@types/express-session'],
+                undefined,
+            );
+
+            assert.equal(packageJson.dependencies['@nestjs/jwt'], undefined);
+            assert.equal(packageJson.dependencies['passport-jwt'], undefined);
+            assert.equal(
+                packageJson.devDependencies['@types/passport-jwt'],
+                undefined,
+            );
+        },
+    );
+});
+
 test('gera projeto em JavaScript', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
