@@ -205,7 +205,6 @@ test('recusa opções ainda não implementadas sem criar projeto', { concurrency
         ['TypeORM', { orm: 'typeorm' }],
         ['Drizzle', { orm: 'drizzle' }],
         ['MongoDB', { database: 'mongodb' }],
-        ['Session/Cookies', { authStrategy: 'session' }],
     ];
 
     for (const [label, overrides] of unsupportedOptions) {

@@ -127,7 +127,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
         message: 'Qual estratégia de autenticação você quer usar?',
         options: [
             { value: 'jwt', label: 'JWT', hint: 'Recomendado — já inclui OAuth Google/GitHub' },
-            { value: 'session', label: 'Session/Cookies', hint: 'em breve' },
+            { value: 'session', label: 'Session/Cookies', hint: 'sessão persistente no banco de dados' },
             { value: 'oauth', label: 'OAuth (Google/GitHub) apenas', hint: 'sem login por senha' },
             { value: 'none', label: 'Nenhuma' },
         ],
