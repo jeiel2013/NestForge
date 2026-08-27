@@ -1,3 +1,4 @@
+// nestforge:feature-file:auth:token
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
