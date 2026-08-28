@@ -127,6 +127,8 @@ test('gera SQLite sem recursos opcionais e sem autenticação', { concurrency: f
 
             assertPrismaProviders(schema, 'sqlite');
             assert.match(envExample, /DATABASE_URL="file:\.\/dev\.db"/);
+            assert.doesNotMatch(envExample, /JWT_ACCESS_SECRET=/);
+            assert.doesNotMatch(envExample, /SESSION_SECRET=/);
 
             assert.equal(await fs.pathExists(path.join(targetDir, 'Dockerfile')), false);
             assert.equal(await fs.pathExists(path.join(targetDir, 'docker-compose.yml')), false);
@@ -250,9 +252,6 @@ test('gera autenticação por Session/Cookies sem recursos JWT', { concurrency: 
             assert.match(envExample, /SESSION_MAX_AGE=/);
             assert.doesNotMatch(envExample, /JWT_ACCESS_SECRET=/);
             assert.doesNotMatch(envExample, /JWT_REFRESH_SECRET=/);
-
-            assert.doesNotMatch(envExample, /JWT_ACCESS_SECRET=/);
-            assert.doesNotMatch(envExample, /SESSION_SECRET=/);
 
             assert.match(envTest, /SESSION_SECRET=/);
             assert.match(envTest, /SESSION_MAX_AGE=/);
