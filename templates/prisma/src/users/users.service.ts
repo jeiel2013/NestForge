@@ -34,8 +34,22 @@ export class UsersService {
       ...(search
         ? {
           OR: [
-            { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
-            { email: { contains: search, mode: Prisma.QueryMode.insensitive } },
+            {
+              name: {
+                contains: search,
+                // nestforge:feature:database:postgres
+                mode: Prisma.QueryMode.insensitive,
+                // nestforge:feature:database:postgres:end
+              },
+            },
+            {
+              email: {
+                contains: search,
+                // nestforge:feature:database:postgres
+                mode: Prisma.QueryMode.insensitive,
+                // nestforge:feature:database:postgres:end
+              },
+            },
           ],
         }
         : {}),

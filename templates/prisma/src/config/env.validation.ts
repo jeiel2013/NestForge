@@ -31,10 +31,6 @@ const envSchema = z.object({
   SESSION_SECRET: z.string().min(32),
   SESSION_MAX_AGE: z.coerce.number().positive().default(604800000),
   // nestforge:feature:auth:session:end
-  // nestforge:feature:auth:session
-  SESSION_SECRET: z.string().min(32),
-  SESSION_MAX_AGE: z.coerce.number().positive().default(604800000),
-  // nestforge:feature:auth:session:end
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
