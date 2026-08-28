@@ -206,6 +206,24 @@ test('gera autenticação por Session/Cookies sem recursos JWT', { concurrency: 
                 path.join(targetDir, 'package.json'),
             );
 
+            const envExample = await readFile(
+                path.join(targetDir, '.env.example'),
+                'utf8',
+            );
+            const envTest = await readFile(
+                path.join(targetDir, '.env.test'),
+                'utf8',
+            );
+            const envValidation = await readFile(
+                path.join(
+                    targetDir,
+                    'src',
+                    'config',
+                    'env.validation.ts',
+                ),
+                'utf8',
+            );
+
             assertPrismaProviders(schema, 'postgresql');
 
             assert.match(schema, /model Session/);
@@ -227,6 +245,24 @@ test('gera autenticação por Session/Cookies sem recursos JWT', { concurrency: 
             assert.match(authController, /logoutSession/);
             assert.doesNotMatch(authController, /@Post\('refresh'\)/);
             assert.doesNotMatch(authController, /TOKENS_EXAMPLE/);
+
+            assert.match(envExample, /SESSION_SECRET=/);
+            assert.match(envExample, /SESSION_MAX_AGE=/);
+            assert.doesNotMatch(envExample, /JWT_ACCESS_SECRET=/);
+            assert.doesNotMatch(envExample, /JWT_REFRESH_SECRET=/);
+
+            assert.doesNotMatch(envExample, /JWT_ACCESS_SECRET=/);
+            assert.doesNotMatch(envExample, /SESSION_SECRET=/);
+
+            assert.match(envTest, /SESSION_SECRET=/);
+            assert.match(envTest, /SESSION_MAX_AGE=/);
+            assert.doesNotMatch(envTest, /JWT_ACCESS_SECRET=/);
+            assert.doesNotMatch(envTest, /JWT_REFRESH_SECRET=/);
+
+            assert.match(envValidation, /SESSION_SECRET:/);
+            assert.match(envValidation, /SESSION_MAX_AGE:/);
+            assert.doesNotMatch(envValidation, /JWT_ACCESS_SECRET:/);
+            assert.doesNotMatch(envValidation, /JWT_REFRESH_SECRET:/);
 
             assert.equal(
                 await fs.pathExists(
