@@ -1,6 +1,12 @@
+import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+    plugins: [
+        swc.vite({
+            module: { type: 'es6' },
+        }),
+    ],
     test: {
         globals: true,
         root: './',
@@ -8,7 +14,6 @@ export default defineConfig({
         include: ['test/**/*.e2e-spec.ts'],
         testTimeout: 30000,
         hookTimeout: 30000,
-        // os specs compartilham o mesmo banco de teste, então rodam em sequência
         fileParallelism: false,
     },
 });
