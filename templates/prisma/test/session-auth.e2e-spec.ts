@@ -19,9 +19,14 @@ describe('Session auth (e2e)', () => {
     });
 
     afterAll(async () => {
-        await prisma.$disconnect();
-        await app.close();
-    });
+        if (prisma) {
+            await prisma.$disconnect();
+        }
+
+        if (app) {
+            await app.close();
+        }
+    })
 
     it('registra, autentica e encerra uma sessão protegida por CSRF', async () => {
         const agent = request.agent(app.getHttpServer());
