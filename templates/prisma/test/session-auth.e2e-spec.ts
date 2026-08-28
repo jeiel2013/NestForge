@@ -23,15 +23,34 @@ describe('Session auth (e2e)', () => {
         await app.close();
     });
 
-    it('registra, autentica e encerra uma sessão por cookie', async () => {
+    it('registra, autentica e encerra uma sessão protegida por CSRF', async () => {
         const agent = request.agent(app.getHttpServer());
 
         await agent
             .get('/users/me')
             .expect(401);
 
+        const csrfResponse = await agent
+            .get('/auth/csrf-token')
+            .expect(200);
+
+        const csrfToken = csrfResponse.body.csrfToken as string;
+
+        expect(csrfToken).toMatch(/^[a-f0-9]{64}$/);
+
+        // Requisições que alteram estado devem ser rejeitadas sem o token.
+        await agent
+            .post('/auth/register')
+            .send({
+                name: 'Jeiel',
+                email: 'jeiel.session@example.com',
+                password: 'senhaForte123',
+            })
+            .expect(403);
+
         const registerResponse = await agent
             .post('/auth/register')
+            .set('x-csrf-token', csrfToken)
             .send({
                 name: 'Jeiel',
                 email: 'jeiel.session@example.com',
@@ -49,6 +68,12 @@ describe('Session auth (e2e)', () => {
             ]),
         );
 
+        const authenticatedCsrfToken =
+            registerResponse.body.csrfToken as string;
+
+        expect(authenticatedCsrfToken).toMatch(/^[a-f0-9]{64}$/);
+        expect(authenticatedCsrfToken).not.toBe(csrfToken);
+
         const authenticatedResponse = await agent
             .get('/users/me')
             .expect(200);
@@ -59,6 +84,7 @@ describe('Session auth (e2e)', () => {
 
         await agent
             .post('/auth/logout')
+            .set('x-csrf-token', authenticatedCsrfToken)
             .expect(200);
 
         await agent
@@ -66,11 +92,21 @@ describe('Session auth (e2e)', () => {
             .expect(401);
     });
 
-    it('realiza login e mantém a sessão entre requisições', async () => {
-        const registrationAgent = request.agent(app.getHttpServer());
+    it('realiza login e renova o token CSRF da sessão', async () => {
+        const registrationAgent = request.agent(
+            app.getHttpServer(),
+        );
 
-        await registrationAgent
+        const registrationCsrfResponse = await registrationAgent
+            .get('/auth/csrf-token')
+            .expect(200);
+
+        const registrationCsrfToken =
+            registrationCsrfResponse.body.csrfToken as string;
+
+        const registrationResponse = await registrationAgent
             .post('/auth/register')
+            .set('x-csrf-token', registrationCsrfToken)
             .send({
                 name: 'Usuário de sessão',
                 email: 'login.session@example.com',
@@ -80,12 +116,24 @@ describe('Session auth (e2e)', () => {
 
         await registrationAgent
             .post('/auth/logout')
+            .set(
+                'x-csrf-token',
+                registrationResponse.body.csrfToken,
+            )
             .expect(200);
 
         const loginAgent = request.agent(app.getHttpServer());
 
+        const loginCsrfResponse = await loginAgent
+            .get('/auth/csrf-token')
+            .expect(200);
+
+        const loginCsrfToken =
+            loginCsrfResponse.body.csrfToken as string;
+
         const loginResponse = await loginAgent
             .post('/auth/login')
+            .set('x-csrf-token', loginCsrfToken)
             .send({
                 email: 'login.session@example.com',
                 password: 'senhaForte123',
@@ -94,6 +142,13 @@ describe('Session auth (e2e)', () => {
 
         expect(loginResponse.body.user.email).toBe(
             'login.session@example.com',
+        );
+
+        expect(loginResponse.body.csrfToken).toMatch(
+            /^[a-f0-9]{64}$/,
+        );
+        expect(loginResponse.body.csrfToken).not.toBe(
+            loginCsrfToken,
         );
 
         await loginAgent
