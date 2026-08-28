@@ -13,6 +13,7 @@ describe('SessionService', () => {
     function createRequest() {
         const session = {
             user: undefined,
+            csrfToken: undefined as string | undefined,
             regenerate: vi.fn(
                 (callback: (error?: Error) => void) => callback(),
             ),
@@ -43,7 +44,21 @@ describe('SessionService', () => {
         expect(session.regenerate).toHaveBeenCalledOnce();
         expect(session.user).toEqual(user);
         expect(session.save).toHaveBeenCalledOnce();
-        expect(result).toEqual({ user });
+        expect(session.csrfToken).toMatch(/^[a-f0-9]{64}$/);
+        expect(result).toEqual({
+            user,
+            csrfToken: session.csrfToken,
+        });
+    });
+
+    it('emite e salva um novo token CSRF', async () => {
+        const { request, session } = createRequest();
+
+        const result = await sessionService.issueCsrfToken(request);
+
+        expect(result.csrfToken).toMatch(/^[a-f0-9]{64}$/);
+        expect(session.csrfToken).toBe(result.csrfToken);
+        expect(session.save).toHaveBeenCalledOnce();
     });
 
     it('destrói a sessão atual', async () => {

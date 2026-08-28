@@ -4,6 +4,7 @@ import {
     InternalServerErrorException,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { randomBytes } from 'node:crypto';
 
 export interface SessionUser {
     id: string;
@@ -16,11 +17,28 @@ export class SessionService {
     async establish(request: Request, user: SessionUser) {
         await this.regenerate(request);
 
+        const csrfToken = this.generateCsrfToken();
+
         request.session.user = user;
+        request.session.csrfToken = csrfToken;
 
         await this.save(request);
 
-        return { user };
+        return { user, csrfToken };
+    }
+
+    async issueCsrfToken(request: Request) {
+        const csrfToken = this.generateCsrfToken();
+
+        request.session.csrfToken = csrfToken;
+
+        await this.save(request);
+
+        return { csrfToken };
+    }
+
+    private generateCsrfToken(): string {
+        return randomBytes(32).toString('hex');
     }
 
     async destroy(request: Request) {
