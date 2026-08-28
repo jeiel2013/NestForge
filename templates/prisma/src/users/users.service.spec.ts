@@ -25,11 +25,13 @@ describe('UsersService', () => {
         prisma = {
             user: {
                 findUnique: vi.fn(),
+                findMany: vi.fn(),
+                count: vi.fn(),
                 create: vi.fn(),
                 update: vi.fn(),
                 delete: vi.fn(),
             },
-            $transaction: vi.fn(),
+            $transaction: vi.fn((operations) => Promise.all(operations)),
         };
 
         usersService = new UsersService(prisma as PrismaService);
@@ -64,7 +66,8 @@ describe('UsersService', () => {
     });
 
     it('deve retornar dados paginados em findAll', async () => {
-        prisma.$transaction.mockResolvedValue([[mockUser], 1]);
+        prisma.user.findMany.mockResolvedValue([mockUser]);
+        prisma.user.count.mockResolvedValue(1);
 
         const result = await usersService.findAll({ page: 1, limit: 10 });
 
