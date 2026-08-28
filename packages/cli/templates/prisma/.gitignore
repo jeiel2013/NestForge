@@ -1,9 +1,0 @@
-node_modules/
-dist/
-coverage/
-.env
-.env.local
-*.log
-.DS_Store
-/generated
-uploads/
