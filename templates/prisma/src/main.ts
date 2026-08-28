@@ -57,7 +57,17 @@ async function bootstrap() {
     }),
   );
   // nestforge:feature:auth:session:end
-  app.enableCors();
+  const corsOrigins = (
+    process.env.CORS_ORIGINS ?? 'http://localhost:5173'
+  )
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  app.enableCors({
+    origin: corsOrigins,
+    credentials: true,
+  });
   // nestforge:feature:validation
   app.useGlobalPipes(new ZodValidationPipe());
   // nestforge:feature:validation:end
