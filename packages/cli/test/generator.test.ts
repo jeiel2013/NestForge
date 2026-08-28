@@ -21,6 +21,23 @@ function makeOptions(overrides: Partial<ProjectOptions> = {}): ProjectOptions {
     };
 }
 
+function assertPrismaProviders(
+    schema: string,
+    datasourceProvider: 'postgresql' | 'mysql' | 'sqlite',
+): void {
+    assert.match(
+        schema,
+        /generator client\s*\{[^}]*provider\s*=\s*"prisma-client-js"[^}]*\}/,
+    );
+
+    assert.match(
+        schema,
+        new RegExp(
+            `datasource db\\s*\\{[^}]*provider\\s*=\\s*"${datasourceProvider}"[^}]*\\}`,
+        ),
+    );
+}
+
 async function withGeneratedProject(
     options: ProjectOptions,
     assertion: (targetDir: string) => Promise<void>,
@@ -59,7 +76,7 @@ test('gera o projeto padrão com PostgreSQL e JWT', { concurrency: false }, asyn
     await withGeneratedProject(makeOptions(), async (targetDir) => {
         const schema = await readFile(path.join(targetDir, 'prisma', 'schema.prisma'), 'utf8');
 
-        assert.match(schema, /provider = "postgresql"/);
+        assertPrismaProviders(schema, 'postgresql');
         assert.equal(await fs.pathExists(path.join(targetDir, 'src', 'auth')), true);
         assert.equal(await fs.pathExists(path.join(targetDir, 'src', 'users')), true);
         assert.equal(await fs.pathExists(path.join(targetDir, 'Dockerfile')), true);
@@ -80,7 +97,7 @@ test('gera MySQL sem recursos Redis', { concurrency: false }, async () => {
             const compose = await readFile(path.join(targetDir, 'docker-compose.yml'), 'utf8');
             const packageJson = await fs.readJson(path.join(targetDir, 'package.json'));
 
-            assert.match(schema, /provider = "mysql"/);
+            assertPrismaProviders(schema, 'mysql');
             assert.match(envExample, /DATABASE_URL="mysql:\/\//);
             assert.match(compose, /^\s{2}mysql:/m);
             assert.doesNotMatch(compose, /^\s{2}postgres:/m);
@@ -108,7 +125,7 @@ test('gera SQLite sem recursos opcionais e sem autenticação', { concurrency: f
             const main = await readFile(path.join(targetDir, 'src', 'main.ts'), 'utf8');
             const packageJson = await fs.readJson(path.join(targetDir, 'package.json'));
 
-            assert.match(schema, /provider = "sqlite"/);
+            assertPrismaProviders(schema, 'sqlite');
             assert.match(envExample, /DATABASE_URL="file:\.\/dev\.db"/);
 
             assert.equal(await fs.pathExists(path.join(targetDir, 'Dockerfile')), false);
@@ -188,6 +205,8 @@ test('gera autenticação por Session/Cookies sem recursos JWT', { concurrency: 
             const packageJson = await fs.readJson(
                 path.join(targetDir, 'package.json'),
             );
+
+            assertPrismaProviders(schema, 'postgresql');
 
             assert.match(schema, /model Session/);
             assert.match(schema, /@@map\("sessions"\)/);
