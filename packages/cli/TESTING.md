@@ -142,8 +142,8 @@ N E S T F O R G E
 | Opção | Hint | Resultado |
 |---|---|---|
 | **JWT** | "Recomendado — já inclui OAuth Google/GitHub" | ✅ Funciona |
-| **Session/Cookies** | "em breve" | ❌ Erro amigável |
-| **OAuth (Google/GitHub) apenas** | "em breve" | ✅ Funciona |
+| **Session/Cookies** | "sessão persistente no banco de dados" | ✅ Funciona |
+| **OAuth (Google/GitHub) apenas** | "sem login por senha" | ✅ Funciona |
 | **Nenhuma** | — | ✅ Funciona |
 
 ### Passo 10 — Controle de acesso
@@ -178,7 +178,7 @@ N E S T F O R G E
 
 (a linha `cp .env.example .env` só aparece aqui se você respondeu "não" no Passo 11)
 
-Se algum passo escolhido não for suportado (TypeORM, Drizzle, ORM nenhum, MongoDB e Session/Cookies.), em vez da tela final aparece uma mensagem de erro única — sem stacktrace — e a CLI sai com código `1`, sem criar nenhuma pasta.
+Se algum passo escolhido não for suportado (TypeORM, Drizzle, ORM nenhum ou MongoDB), em vez da tela final aparece uma mensagem de erro única — sem stacktrace — e a CLI sai com código `1`, sem criar nenhuma pasta.
 
 ---
 
@@ -190,7 +190,7 @@ Se algum passo escolhido não for suportado (TypeORM, Drizzle, ORM nenhum, Mongo
 - [ ] TypeScript + Prisma + MySQL + JWT → `schema.prisma`, `.env.example`, `.env.test`, Docker Compose e CI configurados para MySQL
 - [ ] TypeScript + Prisma + SQLite + JWT → `schema.prisma`, `.env.example` e `.env.test` configurados para SQLite
 - [ ] JavaScript + Prisma + PostgreSQL + JWT → projeto com fontes `.js`, sem `tsconfig.json`, com `start:dev` usando `node --watch`
-- [ ] TypeORM, Drizzle, ORM "Nenhum", MongoDB e Session/Cookies → cada um deve dar erro amigável, sem criar pasta
+- [ ] TypeORM, Drizzle, ORM "Nenhum" e MongoDB → cada um deve dar erro amigável, sem criar pasta
 - [ ] Apontar para uma pasta que já existe → erro "a pasta já existe", nada sobrescrito
 - [ ] **Docker "sim"** → `Dockerfile` e `docker-compose.yml` presentes
 - [ ] **Docker "não"** → os dois arquivos ausentes
@@ -200,6 +200,10 @@ Se algum passo escolhido não for suportado (TypeORM, Drizzle, ORM nenhum, Mongo
 - [ ] **RBAC "não"** → guards, decorators e constantes de RBAC ausentes; rotas de usuários continuam exigindo autenticação
 - [ ] **OAuth-only** → `AuthModule` e `UsersModule` presentes; endpoints e DTOs de senha ausentes; testes e2e baseados em senha ausentes
 - [ ] **Autenticação "Nenhuma"** → diretórios `src/auth/` e `src/users/` ausentes; pergunta de RBAC não aparece
+- [ ] **Session/Cookies** → `SessionService`, `SessionAuthGuard`, middleware `express-session`, model Prisma `Session` e teste `session-auth.e2e-spec.ts` presentes
+- [ ] **Session/Cookies** → arquivos, dependências, endpoints e variáveis de ambiente exclusivos de JWT ausentes
+- [ ] **Session/Cookies** → `npm install`, `npm run prisma:generate`, `npm run build` e `npm test` passam
+- [ ] **Session/Cookies com Docker** → cadastro cria o cookie `nestforge.sid`, `/users/me` aceita a sessão e logout invalida o acesso
 - [ ] **`.env` "sim"** → arquivo `.env` presente, com o mesmo conteúdo de `.env.example`
 - [ ] **`.env` "não"** → somente `.env.example` presente; a nota final inclui `cp .env.example .env`
 - [ ] `Ctrl+C` em qualquer prompt → sai limpo, sem stacktrace e sem criar pasta
@@ -211,7 +215,6 @@ Se algum passo escolhido não for suportado (TypeORM, Drizzle, ORM nenhum, Mongo
 ## 5. O que ainda não existe (não é bug, é escopo da v1)
 
 - Templates de TypeORM, Drizzle, "sem ORM", MongoDB
-- Estratégias de auth Session/Cookies.
 - Validação do nome do projeto (formato de pacote npm)
 - Publicação real no npm (próximo passo depois dos testes)
 

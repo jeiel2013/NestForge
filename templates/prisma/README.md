@@ -11,11 +11,11 @@ NestForge é um boilerplate de NestJS pensado para acelerar o início de projeto
 
 ## ✨ Features
 
-- 🔐 **Autenticação completa** — login, cadastro, logout, refresh token, forgot/reset password, verificação de e-mail
-- 🌐 **OAuth** — Google e GitHub
+- 🔐 **Autenticação configurável** — JWT com access/refresh token, Session/Cookies persistida no Prisma, OAuth-only ou nenhuma autenticação
+- 🌐 **OAuth** — Google e GitHub, integrado à estratégia de token ou sessão escolhida
 - 👥 **RBAC** — Roles (Admin, Manager, User) e Permissions granulares
 - 🛡️ **Segurança** — Helmet, CORS, Rate Limiting, validação e serialização com Zod
-- 🗄️ **Banco de dados** — Prisma + PostgreSQL, migrations e seed
+- 🗄️ **Banco de dados** — Prisma com PostgreSQL, MySQL ou SQLite
 - 📨 **E-mails** — filas com BullMQ + Redis, testado localmente com Mailpit
 - 📄 **Documentação automática** — Swagger
 - 🪵 **Logs estruturados** — Pino
@@ -29,9 +29,9 @@ NestForge é um boilerplate de NestJS pensado para acelerar o início de projeto
 |---|---|
 | Framework | NestJS + TypeScript |
 | ORM | Prisma |
-| Banco | PostgreSQL |
+| Banco | PostgreSQL, MySQL ou SQLite |
 | Cache / Filas | Redis + BullMQ |
-| Autenticação | JWT + Better Auth |
+| Autenticação | JWT, Session/Cookies ou OAuth com Passport |
 | Validação | Zod + nestjs-zod (schemas viram DTO + Swagger automaticamente) |
 | Docs | Swagger |
 | E-mail (dev) | Mailpit |
@@ -43,7 +43,7 @@ NestForge é um boilerplate de NestJS pensado para acelerar o início de projeto
 ```
 src/
 │
-├── auth/          # login, cadastro, JWT, OAuth, guards, strategies
+├── auth/          # login, sessões/tokens, OAuth, guards e strategies
 ├── users/         # CRUD de usuários
 ├── common/        # decorators, filters, guards, interceptors, pipes, utils
 ├── config/        # configuração tipada e validada (env)
@@ -97,7 +97,11 @@ Permissions são granulares (`user:create`, `user:delete`, `report:read`, etc) e
 
 ## 🗺️ Roadmap
 
-- [x] Autenticação (login, cadastro, JWT)
+- [x] Autenticação por JWT
+- [x] Autenticação por Session/Cookies
+- [x] OAuth Google/GitHub
+- [x] Estratégia OAuth-only
+- [x] Geração sem autenticação
 - [x] Refresh Token
 - [x] Docker
 - [x] CI (build, lint, test)
@@ -128,7 +132,18 @@ GITHUB_CLIENT_SECRET=
 - **Google**: crie as credenciais no [Google Cloud Console](https://console.cloud.google.com/apis/credentials) e configure a URL de callback como `{APP_URL}/auth/google/callback`.
 - **GitHub**: crie um OAuth App em `Settings > Developer settings > OAuth Apps` e configure a mesma URL de callback, trocando para `{APP_URL}/auth/github/callback`.
 
-Depois é só acessar `GET /auth/google` ou `GET /auth/github` que o fluxo de redirecionamento cuida do resto — o callback já devolve `accessToken` e `refreshToken` como no login tradicional. Se for a primeira vez do usuário, uma conta é criada automaticamente e vinculada ao provedor.
+Depois é só acessar `GET /auth/google` ou `GET /auth/github`. No callback, a API emite access/refresh tokens ou estabelece uma sessão por cookie, conforme a estratégia escolhida. Se for o primeiro acesso, uma conta é criada e vinculada ao provedor.
+
+### Autenticação por Session/Cookies
+
+Quando o projeto é gerado com Session/Cookies, cadastro e login criam uma sessão persistida no banco por `@quixo3/prisma-session-store`. O identificador é enviado no cookie `nestforge.sid`, configurado com `httpOnly`, `sameSite=lax` e `secure` em produção.
+
+Configure no `.env`:
+
+```bash
+SESSION_SECRET=use-um-segredo-com-pelo-menos-32-caracteres
+SESSION_MAX_AGE=604800000
+```
 
 ### Recuperação de senha e verificação de e-mail
 
@@ -137,7 +152,7 @@ Todo cadastro (`POST /auth/register`) já dispara um e-mail de verificação aut
 | Rota | O que faz |
 |---|---|
 | `POST /auth/forgot-password` | Recebe um `email` e enfileira o envio do link de redefinição (resposta sempre genérica, não revela se o e-mail existe) |
-| `POST /auth/reset-password` | Recebe `token` + `password` e troca a senha; também revoga todas as sessões ativas do usuário |
+| `POST /auth/reset-password` | Recebe `token` + `password` e troca a senha; também revoga os refresh tokens ativos do usuário |
 | `GET /auth/verify-email?token=...` | Confirma o e-mail a partir do link recebido |
 
 Os tokens de reset e verificação expiram em 1 hora e 24 horas, respectivamente, e são de uso único.
@@ -228,6 +243,8 @@ npm run test:e2e
 O script `pretest:e2e` já aplica as migrations nesse banco automaticamente antes de cada rodada. Cada teste limpa as tabelas antes de rodar (`test/utils/clean-database.ts`), então não precisa zerar nada manualmente entre execuções. Hoje cobrem o fluxo de autenticação completo (registro, login, refresh, logout, e-mail duplicado, credenciais inválidas) e o CRUD de usuários com RBAC (ADMIN consegue tudo, USER lê mas não cria, `/users/me`, acesso sem token).
 
 Os testes unitários (`src/**/*.spec.ts`) rodam isolados, com Prisma e `ioredis` mockados (`vi.fn()` / `vi.mock()`) — não precisam de banco nem Redis de verdade. Hoje cobrem: `AuthService` (registro/login), `UsersService` (CRUD completo + paginação + confirma que o `passwordHash` não vaza na serialização via `instanceToPlain`), `RolesGuard` e `PermissionsGuard` (liberação/bloqueio, inclusive com múltiplas permissões exigidas ao mesmo tempo) e os indicadores de saúde (`PrismaHealthIndicator`, `RedisHealthIndicator`).
+
+Os testes unitários também cobrem `SessionService` e `SessionAuthGuard`. Quando Session/Cookies está habilitada, o teste e2e específico valida criação do cookie, persistência da autenticação entre requisições e logout.
 
 ## 📚 Documentação adicional
 
