@@ -48,6 +48,25 @@ export class AuthController {
     // nestforge:feature:auth:session:end
   ) { }
 
+  // nestforge:feature:auth:session
+  @Public()
+  @Get('csrf-token')
+  // nestforge:feature:swagger
+  @ApiOperation({ summary: 'Emite um token CSRF vinculado à sessão' })
+  @ApiResponse({
+    status: 200,
+    description: 'Token CSRF emitido',
+    schema: {
+      example: {
+        csrfToken: 'a1b2c3d4e5f6...',
+      },
+    },
+  })
+  // nestforge:feature:swagger:end
+  getCsrfToken(@Req() request: Request) {
+    return this.sessionService.issueCsrfToken(request);
+  }
+
   // nestforge:feature:auth:token,auth:password
   @Public()
   @Post('register')
