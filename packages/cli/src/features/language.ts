@@ -8,7 +8,6 @@ const TYPESCRIPT_DEV_DEPENDENCIES = [
     '@nestjs/cli',
     '@nestjs/schematics',
     '@types/bcryptjs',
-    '@types/cookie-parser',
     '@types/express-session',
     '@types/multer',
     '@types/node',

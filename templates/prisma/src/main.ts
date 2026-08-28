@@ -3,7 +3,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
-import cookieParser from 'cookie-parser';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 // nestforge:feature:validation
 import { ZodValidationPipe } from 'nestjs-zod';
@@ -29,7 +28,6 @@ async function bootstrap() {
 
   app.useLogger(app.get(Logger));
   app.use(helmet());
-  app.use(cookieParser());
   // nestforge:feature:auth:session
   const prisma = app.get(PrismaService);
 
