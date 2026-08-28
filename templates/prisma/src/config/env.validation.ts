@@ -23,7 +23,14 @@ const envSchema = z.object({
   GITHUB_CLIENT_SECRET: z.string().optional(),
   THROTTLE_TTL: z.coerce.number().default(60),
   THROTTLE_LIMIT: z.coerce.number().default(100),
-  ENABLE_CSRF: z.coerce.boolean().default(false),
+  // nestforge:feature:auth:session
+  ENABLE_CSRF: z
+    .enum(['true', 'false'])
+    .transform((value) => value === 'true')
+    .default('true'),
+  SESSION_SECRET: z.string().min(32),
+  SESSION_MAX_AGE: z.coerce.number().positive().default(604800000),
+  // nestforge:feature:auth:session:end
   // nestforge:feature:auth:session
   SESSION_SECRET: z.string().min(32),
   SESSION_MAX_AGE: z.coerce.number().positive().default(604800000),

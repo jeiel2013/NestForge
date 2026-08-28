@@ -15,7 +15,9 @@ import { MailModule } from './mail/mail.module';
 // nestforge:feature:redis:end
 import { HealthModule } from './health/health.module';
 import { MetricsModule } from './metrics/metrics.module';
+// nestforge:feature:auth:session
 import { CsrfMiddleware } from './common/middleware/csrf.middleware';
+// nestforge:feature:auth:session:end
 import { validateEnv } from './config/env.validation';
 
 @Module({
@@ -61,8 +63,10 @@ import { validateEnv } from './config/env.validation';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    // nestforge:feature:auth:session
     if (process.env.ENABLE_CSRF === 'true') {
       consumer.apply(CsrfMiddleware).forRoutes('*');
     }
+    // nestforge:feature:auth:session:end
   }
 }
