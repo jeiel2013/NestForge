@@ -367,6 +367,184 @@ test('gera autenticação por Session/Cookies sem recursos JWT', { concurrency: 
     );
 });
 
+test(
+    'gera TypeORM com SQLite e Session/Cookies',
+    { concurrency: false },
+    async () => {
+        await withGeneratedProject(
+            makeOptions({
+                projectName: 'typeorm-sqlite-session',
+                orm: 'typeorm',
+                database: 'sqlite',
+                language: 'typescript',
+                authStrategy: 'session',
+                features: ['validation'],
+                accessControl: false,
+            }),
+            async (targetDir) => {
+                const envExample = await readFile(
+                    path.join(targetDir, '.env.example'),
+                    'utf8',
+                );
+
+                const main = await readFile(
+                    path.join(targetDir, 'src', 'main.ts'),
+                    'utf8',
+                );
+
+                const usersService = await readFile(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'users',
+                        'users.service.ts',
+                    ),
+                    'utf8',
+                );
+
+                const packageJson = await fs.readJson(
+                    path.join(targetDir, 'package.json'),
+                );
+
+                assert.match(
+                    envExample,
+                    /^DB_TYPE=sqlite$/m,
+                );
+
+                assert.match(
+                    envExample,
+                    /DATABASE_URL="file:\.\/dev\.db"/,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(targetDir, 'prisma'),
+                    ),
+                    false,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'database',
+                            'data-source.ts',
+                        ),
+                    ),
+                    true,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'auth',
+                            'entities',
+                            'session.entity.ts',
+                        ),
+                    ),
+                    true,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'auth',
+                            'entities',
+                            'refresh-token.entity.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'auth',
+                            'entities',
+                            'password-reset-token.entity.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.match(main, /TypeormStore/);
+                assert.match(main, /DataSource/);
+                assert.doesNotMatch(
+                    main,
+                    /PrismaSessionStore|PrismaService/,
+                );
+
+                assert.match(
+                    usersService,
+                    /@InjectRepository\(UserEntity\)/,
+                );
+
+                assert.doesNotMatch(
+                    usersService,
+                    /PrismaService|this\.prisma/,
+                );
+
+                assert.notEqual(
+                    packageJson.dependencies.typeorm,
+                    undefined,
+                );
+
+                assert.notEqual(
+                    packageJson.dependencies[
+                    '@nestjs/typeorm'
+                    ],
+                    undefined,
+                );
+
+                assert.notEqual(
+                    packageJson.dependencies[
+                    'better-sqlite3'
+                    ],
+                    undefined,
+                );
+
+                assert.notEqual(
+                    packageJson.dependencies[
+                    'connect-typeorm'
+                    ],
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.dependencies.pg,
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.dependencies.mysql2,
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.dependencies[
+                    '@quixo3/prisma-session-store'
+                    ],
+                    undefined,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(targetDir, 'Dockerfile'),
+                    ),
+                    false,
+                );
+            },
+        );
+    },
+);
+
 test('gera projeto em JavaScript', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
@@ -408,7 +586,6 @@ test('gera projeto em JavaScript', { concurrency: false }, async () => {
 
 test('recusa opções ainda não implementadas sem criar projeto', { concurrency: false }, async () => {
     const unsupportedOptions: Array<[string, Partial<ProjectOptions>]> = [
-        ['TypeORM', { orm: 'typeorm' }],
         ['Drizzle', { orm: 'drizzle' }],
         ['MongoDB', { database: 'mongodb' }],
     ];
