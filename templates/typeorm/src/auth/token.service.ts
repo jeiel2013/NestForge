@@ -1,39 +1,52 @@
 // nestforge:feature-file:auth:token
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+    Injectable,
+    UnauthorizedException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { IsNull, Repository } from 'typeorm';
 import { createHash } from 'crypto';
-import { PrismaService } from '../database/prisma.service';
+import { RefreshTokenEntity } from './entities/refresh-token.entity';
 
 @Injectable()
 export class TokenService {
     constructor(
-        private readonly prisma: PrismaService,
+        @InjectRepository(RefreshTokenEntity)
+        private readonly refreshTokensRepository: Repository<RefreshTokenEntity>,
         private readonly jwtService: JwtService,
     ) { }
 
-    async issueTokens(userId: string, email: string, role: string) {
+    async issueTokens(
+        userId: string,
+        email: string,
+        role: string,
+    ) {
         const payload = { sub: userId, email, role };
 
         const accessToken = this.jwtService.sign(payload, {
             secret: process.env.JWT_ACCESS_SECRET,
-            expiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
+            expiresIn:
+                process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
         });
 
         const refreshToken = this.jwtService.sign(payload, {
             secret: process.env.JWT_REFRESH_SECRET,
-            expiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
+            expiresIn:
+                process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
         });
 
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7);
 
-        await this.prisma.refreshToken.create({
-            data: {
-                tokenHash: this.hashToken(refreshToken),
-                userId,
-                expiresAt,
-            },
+        const storedToken = this.refreshTokensRepository.create({
+            tokenHash: this.hashToken(refreshToken),
+            userId,
+            expiresAt,
+            revokedAt: null,
         });
+
+        await this.refreshTokensRepository.save(storedToken);
 
         return { accessToken, refreshToken };
     }
@@ -41,19 +54,26 @@ export class TokenService {
     async refresh(refreshToken: string) {
         const tokenHash = this.hashToken(refreshToken);
 
-        const stored = await this.prisma.refreshToken.findUnique({
+        const stored = await this.refreshTokensRepository.findOne({
             where: { tokenHash },
-            include: { user: true },
+            relations: {
+                user: true,
+            },
         });
 
-        if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
-            throw new UnauthorizedException('Refresh token inválido ou expirado');
+        if (
+            !stored ||
+            stored.revokedAt ||
+            stored.expiresAt < new Date()
+        ) {
+            throw new UnauthorizedException(
+                'Refresh token inválido ou expirado',
+            );
         }
 
-        await this.prisma.refreshToken.update({
-            where: { id: stored.id },
-            data: { revokedAt: new Date() },
-        });
+        stored.revokedAt = new Date();
+
+        await this.refreshTokensRepository.save(stored);
 
         return this.issueTokens(
             stored.user.id,
@@ -65,20 +85,22 @@ export class TokenService {
     async logout(refreshToken: string) {
         const tokenHash = this.hashToken(refreshToken);
 
-        await this.prisma.refreshToken.updateMany({
-            where: {
+        await this.refreshTokensRepository.update(
+            {
                 tokenHash,
-                revokedAt: null,
+                revokedAt: IsNull(),
             },
-            data: {
+            {
                 revokedAt: new Date(),
             },
-        });
+        );
 
         return { message: 'Logout realizado com sucesso' };
     }
 
     private hashToken(token: string): string {
-        return createHash('sha256').update(token).digest('hex');
+        return createHash('sha256')
+            .update(token)
+            .digest('hex');
     }
 }
