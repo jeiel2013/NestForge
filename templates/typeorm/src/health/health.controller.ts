@@ -9,7 +9,7 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 // nestforge:feature:swagger:end
 import { Public } from '../common/decorators/public.decorator';
-import { PrismaHealthIndicator } from './indicators/prisma-health.indicator';
+import { TypeOrmHealthIndicator } from './indicators/typeorm-health.indicator';
 // nestforge:feature:redis
 import { RedisHealthIndicator } from './indicators/redis-health.indicator';
 // nestforge:feature:redis:end
@@ -21,7 +21,7 @@ import { RedisHealthIndicator } from './indicators/redis-health.indicator';
 export class HealthController {
     constructor(
         private readonly health: HealthCheckService,
-        private readonly prismaIndicator: PrismaHealthIndicator,
+        private readonly databaseIndicator: TypeOrmHealthIndicator,
         // nestforge:feature:redis
         private readonly redisIndicator: RedisHealthIndicator,
         // nestforge:feature:redis:end
@@ -37,7 +37,7 @@ export class HealthController {
     // nestforge:feature:swagger:end
     check() {
         return this.health.check([
-            () => this.prismaIndicator.isHealthy('database'),
+            () => this.databaseIndicator.isHealthy('database'),
             // nestforge:feature:redis
             () => this.redisIndicator.isHealthy('redis'),
             // nestforge:feature:redis:end
