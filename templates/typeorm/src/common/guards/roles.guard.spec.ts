@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role } from '@prisma/client';
+import { Role } from '../constants/role.enum';
 import { RolesGuard } from './roles.guard';
 
 function createContext(user?: { role: Role }): ExecutionContext {

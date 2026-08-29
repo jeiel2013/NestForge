@@ -1,5 +1,5 @@
 // nestforge:feature-file:rbac
-import { Role } from '@prisma/client';
+import { Role } from './role.enum';
 import { Permission } from './permissions';
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {

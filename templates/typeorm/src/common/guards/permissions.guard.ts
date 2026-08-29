@@ -1,7 +1,7 @@
 // nestforge:feature-file:rbac
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role } from '@prisma/client';
+import { Role } from '../constants/role.enum';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
 import { Permission } from '../constants/permissions';
 import { ROLE_PERMISSIONS } from '../constants/role-permissions';

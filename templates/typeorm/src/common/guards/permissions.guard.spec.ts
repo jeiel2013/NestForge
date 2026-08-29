@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role } from '@prisma/client';
+import { Role } from '../constants/role.enum';
 import { Permission } from '../constants/permissions';
 import { PermissionsGuard } from './permissions.guard';
 

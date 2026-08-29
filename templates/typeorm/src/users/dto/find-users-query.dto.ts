@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
-import { Role } from '@prisma/client';
+import { Role } from '../../common/constants/role.enum';
 
 export const findUsersQuerySchema = z.object({
     page: z.coerce.number().int().min(1).default(1).describe('Página atual'),
