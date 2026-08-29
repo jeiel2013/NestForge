@@ -5,8 +5,17 @@ import {
     Entity,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
+    OneToMany,
 } from 'typeorm';
 import { Role } from '../../common/constants/role.enum';
+// nestforge:feature:auth:token
+import { RefreshTokenEntity } from '../../auth/entities/refresh-token.entity';
+// nestforge:feature:auth:token:end
+import { OAuthAccountEntity } from '../../auth/entities/oauth-account.entity';
+// nestforge:feature:redis,auth:password
+import { PasswordResetTokenEntity } from '../../auth/entities/password-reset-token.entity';
+import { EmailVerificationTokenEntity } from '../../auth/entities/email-verification-token.entity';
+// nestforge:feature:redis,auth:password:end
 
 @Entity({ name: 'users' })
 export class UserEntity {
@@ -67,6 +76,34 @@ export class UserEntity {
 
     @UpdateDateColumn({ name: 'updated_at' })
     updatedAt!: Date;
+
+    // nestforge:feature:auth:token
+    @OneToMany(
+        () => RefreshTokenEntity,
+        (refreshToken) => refreshToken.user,
+    )
+    refreshTokens!: RefreshTokenEntity[];
+    // nestforge:feature:auth:token:end
+
+    @OneToMany(
+        () => OAuthAccountEntity,
+        (oauthAccount) => oauthAccount.user,
+    )
+    oauthAccounts!: OAuthAccountEntity[];
+
+    // nestforge:feature:redis,auth:password
+    @OneToMany(
+        () => PasswordResetTokenEntity,
+        (token) => token.user,
+    )
+    passwordResetTokens!: PasswordResetTokenEntity[];
+
+    @OneToMany(
+        () => EmailVerificationTokenEntity,
+        (token) => token.user,
+    )
+    emailVerificationTokens!: EmailVerificationTokenEntity[];
+    // nestforge:feature:redis,auth:password:end
 
     constructor(partial?: Partial<UserEntity>) {
         if (partial) {
