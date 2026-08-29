@@ -1,32 +1,28 @@
 // nestforge:feature-file:auth:password,auth:session
 import { INestApplication } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { DataSource } from 'typeorm';
 import request from 'supertest';
 import { createTestApp } from './utils/e2e-setup';
 import { cleanDatabase } from './utils/clean-database';
 
 describe('Session auth (e2e)', () => {
     let app: INestApplication;
-    let prisma: PrismaClient;
+    let dataSource: DataSource;
 
     beforeAll(async () => {
         app = await createTestApp();
-        prisma = new PrismaClient();
-    });
+        dataSource = app.get(DataSource);
+    })
 
     beforeEach(async () => {
-        await cleanDatabase(prisma);
+        await cleanDatabase(dataSource);
     });
 
     afterAll(async () => {
-        if (prisma) {
-            await prisma.$disconnect();
-        }
-
         if (app) {
             await app.close();
         }
-    })
+    });
 
     it('registra, autentica e encerra uma sessão protegida por CSRF', async () => {
         const agent = request.agent(app.getHttpServer());
