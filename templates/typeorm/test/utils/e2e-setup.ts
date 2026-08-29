@@ -1,16 +1,23 @@
-import { ClassSerializerInterceptor, INestApplication } from '@nestjs/common';
+import {
+    ClassSerializerInterceptor,
+    INestApplication,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { NestExpressApplication } from '@nestjs/platform-express';
+
 // nestforge:feature:validation
 import { ZodValidationPipe } from 'nestjs-zod';
 // nestforge:feature:validation:end
+
 import { AppModule } from '../../src/app.module';
 import { HttpExceptionFilter } from '../../src/common/filters/http-exception.filter';
+
 // nestforge:feature:auth:session
 import session from 'express-session';
-import { PrismaSessionStore } from '@quixo3/prisma-session-store';
-import { PrismaService } from '../../src/database/prisma.service';
+import { TypeormStore } from 'connect-typeorm';
+import { DataSource } from 'typeorm';
+import { SessionEntity } from '../../src/auth/entities/session.entity';
 // nestforge:feature:auth:session:end
 
 export async function createTestApp(): Promise<INestApplication> {
@@ -18,10 +25,18 @@ export async function createTestApp(): Promise<INestApplication> {
         imports: [AppModule],
     }).compile();
 
-    const app = moduleRef.createNestApplication<NestExpressApplication>();
+    const app =
+        moduleRef.createNestApplication<NestExpressApplication>();
 
     // nestforge:feature:auth:session
-    const prisma = app.get(PrismaService);
+    const dataSource = app.get(DataSource);
+    const sessionsRepository =
+        dataSource.getRepository(SessionEntity);
+
+    const sessionMaxAge = Number(
+        process.env.SESSION_MAX_AGE ??
+        7 * 24 * 60 * 60 * 1000,
+    );
 
     app.use(
         session({
@@ -29,30 +44,34 @@ export async function createTestApp(): Promise<INestApplication> {
             secret: process.env.SESSION_SECRET as string,
             resave: false,
             saveUninitialized: false,
-            store: new PrismaSessionStore(prisma, {
-                checkPeriod: 2 * 60 * 1000,
-                dbRecordIdIsSessionId: true,
-                dbRecordIdFunction: undefined,
-            }),
+            store: new TypeormStore({
+                cleanupLimit: 2,
+                limitSubquery: false,
+                ttl: Math.floor(sessionMaxAge / 1000),
+            }).connect(sessionsRepository),
             cookie: {
                 httpOnly: true,
                 secure: false,
                 sameSite: 'lax',
-                maxAge: Number(
-                    process.env.SESSION_MAX_AGE ?? 7 * 24 * 60 * 60 * 1000,
-                ),
+                maxAge: sessionMaxAge,
             },
         }),
     );
     // nestforge:feature:auth:session:end
 
-    // mesmos pipes/filters/interceptors globais do main.ts, pra testar o comportamento real da API
     // nestforge:feature:validation
     app.useGlobalPipes(new ZodValidationPipe());
     // nestforge:feature:validation:end
+
     app.useGlobalFilters(new HttpExceptionFilter());
-    app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
+    app.useGlobalInterceptors(
+        new ClassSerializerInterceptor(
+            app.get(Reflector),
+        ),
+    );
 
     await app.init();
+
     return app;
 }
