@@ -584,6 +584,157 @@ test('gera projeto em JavaScript', { concurrency: false }, async () => {
     );
 });
 
+test(
+    'gera projeto TypeORM em JavaScript',
+    { concurrency: false },
+    async () => {
+        await withGeneratedProject(
+            makeOptions({
+                projectName: 'typeorm-javascript',
+                orm: 'typeorm',
+                database: 'sqlite',
+                language: 'javascript',
+                authStrategy: 'jwt',
+                features: ['validation'],
+                accessControl: false,
+            }),
+            async (targetDir) => {
+                const packageJson = await fs.readJson(
+                    path.join(targetDir, 'package.json'),
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(targetDir, 'src', 'main.js'),
+                    ),
+                    true,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(targetDir, 'src', 'main.ts'),
+                    ),
+                    false,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'database',
+                            'data-source.js',
+                        ),
+                    ),
+                    true,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'database',
+                            'data-source.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'database',
+                            'seed.js',
+                        ),
+                    ),
+                    true,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'database',
+                            'seed.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(targetDir, 'prisma'),
+                    ),
+                    false,
+                );
+
+                assert.equal(
+                    packageJson.scripts.typeorm,
+                    'dotenv -e .env -- typeorm -d src/database/data-source.js',
+                );
+
+                assert.equal(
+                    packageJson.scripts['pretest:e2e'],
+                    'dotenv -e .env.test -- typeorm -d src/database/data-source.js migration:run',
+                );
+
+                assert.equal(
+                    packageJson.scripts.seed,
+                    'dotenv -e .env -- node src/database/seed.js',
+                );
+
+                assert.equal(
+                    packageJson.scripts['test:e2e'],
+                    'dotenv -e .env.test -- vitest run --config ./vitest.e2e.config.js',
+                );
+
+                assert.equal(
+                    packageJson.prisma,
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.scripts['prisma:seed'],
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.devDependencies.typescript,
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.devDependencies['ts-node'],
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.devDependencies[
+                    '@types/better-sqlite3'
+                    ],
+                    undefined,
+                );
+
+                assert.notEqual(
+                    packageJson.dependencies.typeorm,
+                    undefined,
+                );
+
+                assert.notEqual(
+                    packageJson.dependencies[
+                    'better-sqlite3'
+                    ],
+                    undefined,
+                );
+            },
+        );
+    },
+);
+
 test('recusa opções ainda não implementadas sem criar projeto', { concurrency: false }, async () => {
     const unsupportedOptions: Array<[string, Partial<ProjectOptions>]> = [
         ['Drizzle', { orm: 'drizzle' }],
