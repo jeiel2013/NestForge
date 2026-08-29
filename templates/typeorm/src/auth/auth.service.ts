@@ -3,30 +3,59 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import {
+  DataSource,
+  IsNull,
+  Repository,
+} from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
-import { PrismaService } from '../database/prisma.service';
+import { UserEntity } from '../users/entities/user.entity';
+import { OAuthAccountEntity } from './entities/oauth-account.entity';
+
+// nestforge:feature:auth:token
+import { RefreshTokenEntity } from './entities/refresh-token.entity';
+// nestforge:feature:auth:token:end
+
 // nestforge:feature:redis,auth:password
 import { MailService } from '../mail/mail.service';
+import { PasswordResetTokenEntity } from './entities/password-reset-token.entity';
+import { EmailVerificationTokenEntity } from './entities/email-verification-token.entity';
 // nestforge:feature:redis,auth:password:end
+
 // nestforge:feature:auth:password
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 // nestforge:feature:auth:password:end
+
 import { OAuthProfile } from './strategies/google.strategy';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    @InjectRepository(UserEntity)
+    private readonly usersRepository: Repository<UserEntity>,
+
+    @InjectRepository(OAuthAccountEntity)
+    private readonly oauthAccountsRepository: Repository<OAuthAccountEntity>,
+
+    private readonly dataSource: DataSource,
+
     // nestforge:feature:redis,auth:password
+    @InjectRepository(PasswordResetTokenEntity)
+    private readonly passwordResetTokensRepository: Repository<PasswordResetTokenEntity>,
+
+    @InjectRepository(EmailVerificationTokenEntity)
+    private readonly emailVerificationTokensRepository: Repository<EmailVerificationTokenEntity>,
+
     private readonly mailService: MailService,
     // nestforge:feature:redis,auth:password:end
   ) { }
 
   // nestforge:feature:auth:password
   async register(dto: RegisterDto) {
-    const existing = await this.prisma.user.findUnique({
+    const existing = await this.usersRepository.findOne({
       where: { email: dto.email },
     });
 
@@ -36,28 +65,45 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
-    const user = await this.prisma.user.create({
-      data: { name: dto.name, email: dto.email, passwordHash },
+    const user = this.usersRepository.create({
+      name: dto.name,
+      email: dto.email,
+      passwordHash,
     });
 
+    const savedUser = await this.usersRepository.save(user);
+
     // nestforge:feature:redis
-    await this.sendEmailVerification(user.id, user.email, user.name);
+    await this.sendEmailVerification(
+      savedUser.id,
+      savedUser.email,
+      savedUser.name,
+    );
     // nestforge:feature:redis:end
 
-    return this.toAuthenticatedUser(user);
+    return this.toAuthenticatedUser(savedUser);
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.usersRepository.findOne({
       where: { email: dto.email },
     });
 
     if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException(
+        'Credenciais inválidas',
+      );
     }
 
-    if (!(await bcrypt.compare(dto.password, user.passwordHash))) {
-      throw new UnauthorizedException('Credenciais inválidas');
+    const passwordMatches = await bcrypt.compare(
+      dto.password,
+      user.passwordHash,
+    );
+
+    if (!passwordMatches) {
+      throw new UnauthorizedException(
+        'Credenciais inválidas',
+      );
     }
 
     return this.toAuthenticatedUser(user);
@@ -65,50 +111,60 @@ export class AuthService {
   // nestforge:feature:auth:password:end
 
   async validateOAuthLogin(profile: OAuthProfile) {
-    const linkedAccount = await this.prisma.oAuthAccount.findUnique({
-      where: {
-        provider_providerUserId: {
+    const linkedAccount =
+      await this.oauthAccountsRepository.findOne({
+        where: {
           provider: profile.provider,
           providerUserId: profile.providerUserId,
         },
-      },
-      include: { user: true },
-    });
-
-    if (linkedAccount) {
-      return this.toAuthenticatedUser(linkedAccount.user);
-    }
-
-    let user = await this.prisma.user.findUnique({ where: { email: profile.email } });
-
-    if (!user) {
-      user = await this.prisma.user.create({
-        data: {
-          name: profile.name,
-          email: profile.email,
-          emailVerifiedAt: new Date(),
+        relations: {
+          user: true,
         },
       });
+
+    if (linkedAccount) {
+      return this.toAuthenticatedUser(
+        linkedAccount.user,
+      );
     }
 
-    await this.prisma.oAuthAccount.create({
-      data: {
+    let user = await this.usersRepository.findOne({
+      where: { email: profile.email },
+    });
+
+    if (!user) {
+      const newUser = this.usersRepository.create({
+        name: profile.name,
+        email: profile.email,
+        emailVerifiedAt: new Date(),
+      });
+
+      user = await this.usersRepository.save(newUser);
+    }
+
+    const oauthAccount =
+      this.oauthAccountsRepository.create({
         provider: profile.provider,
         providerUserId: profile.providerUserId,
         userId: user.id,
-      },
-    });
+      });
+
+    await this.oauthAccountsRepository.save(
+      oauthAccount,
+    );
 
     return this.toAuthenticatedUser(user);
   }
 
   // nestforge:feature:redis,auth:password
   async forgotPassword(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.usersRepository.findOne({
+      where: { email },
+    });
 
-    // resposta genérica sempre, pra não revelar se o e-mail existe na base
     const genericResponse = {
-      message: 'Se o e-mail existir, enviaremos instruções de redefinição de senha',
+      message:
+        'Se o e-mail existir, enviaremos instruções de redefinição de senha',
     };
 
     if (!user) {
@@ -117,92 +173,156 @@ export class AuthService {
 
     const rawToken = randomBytes(32).toString('hex');
     const expiresAt = new Date();
+
     expiresAt.setHours(expiresAt.getHours() + 1);
 
-    await this.prisma.passwordResetToken.create({
-      data: {
+    const resetToken =
+      this.passwordResetTokensRepository.create({
         tokenHash: this.hashToken(rawToken),
         userId: user.id,
         expiresAt,
-      },
-    });
+        usedAt: null,
+      });
 
-    await this.mailService.queuePasswordResetEmail(user.email, user.name, rawToken);
+    await this.passwordResetTokensRepository.save(
+      resetToken,
+    );
+
+    await this.mailService.queuePasswordResetEmail(
+      user.email,
+      user.name,
+      rawToken,
+    );
 
     return genericResponse;
   }
 
-  async resetPassword(rawToken: string, newPassword: string) {
+  async resetPassword(
+    rawToken: string,
+    newPassword: string,
+  ) {
     const tokenHash = this.hashToken(rawToken);
 
-    const stored = await this.prisma.passwordResetToken.findUnique({
-      where: { tokenHash },
-    });
+    const stored =
+      await this.passwordResetTokensRepository.findOne({
+        where: { tokenHash },
+      });
 
-    if (!stored || stored.usedAt || stored.expiresAt < new Date()) {
-      throw new UnauthorizedException('Token de redefinição inválido ou expirado');
+    if (
+      !stored ||
+      stored.usedAt ||
+      stored.expiresAt < new Date()
+    ) {
+      throw new UnauthorizedException(
+        'Token de redefinição inválido ou expirado',
+      );
     }
 
-    const passwordHash = await bcrypt.hash(newPassword, 10);
+    const passwordHash = await bcrypt.hash(
+      newPassword,
+      10,
+    );
 
-    await this.prisma.$transaction([
-      this.prisma.user.update({
-        where: { id: stored.userId },
-        data: { passwordHash },
-      }),
-      this.prisma.passwordResetToken.update({
-        where: { id: stored.id },
-        data: { usedAt: new Date() },
-      }),
-      // por segurança, revoga todas as sessões ativas ao trocar a senha
-      this.prisma.refreshToken.updateMany({
-        where: { userId: stored.userId, revokedAt: null },
-        data: { revokedAt: new Date() },
-      }),
-    ]);
+    await this.dataSource.transaction(
+      async (manager) => {
+        await manager.update(
+          UserEntity,
+          { id: stored.userId },
+          { passwordHash },
+        );
 
-    return { message: 'Senha redefinida com sucesso' };
+        await manager.update(
+          PasswordResetTokenEntity,
+          { id: stored.id },
+          { usedAt: new Date() },
+        );
+
+        // nestforge:feature:auth:token
+        await manager.update(
+          RefreshTokenEntity,
+          {
+            userId: stored.userId,
+            revokedAt: IsNull(),
+          },
+          {
+            revokedAt: new Date(),
+          },
+        );
+        // nestforge:feature:auth:token:end
+      },
+    );
+
+    return {
+      message: 'Senha redefinida com sucesso',
+    };
   }
 
   async verifyEmail(rawToken: string) {
     const tokenHash = this.hashToken(rawToken);
 
-    const stored = await this.prisma.emailVerificationToken.findUnique({
-      where: { tokenHash },
-    });
+    const stored =
+      await this.emailVerificationTokensRepository.findOne({
+        where: { tokenHash },
+      });
 
-    if (!stored || stored.usedAt || stored.expiresAt < new Date()) {
-      throw new UnauthorizedException('Token de verificação inválido ou expirado');
+    if (
+      !stored ||
+      stored.usedAt ||
+      stored.expiresAt < new Date()
+    ) {
+      throw new UnauthorizedException(
+        'Token de verificação inválido ou expirado',
+      );
     }
 
-    await this.prisma.$transaction([
-      this.prisma.user.update({
-        where: { id: stored.userId },
-        data: { emailVerifiedAt: new Date() },
-      }),
-      this.prisma.emailVerificationToken.update({
-        where: { id: stored.id },
-        data: { usedAt: new Date() },
-      }),
-    ]);
+    await this.dataSource.transaction(
+      async (manager) => {
+        await manager.update(
+          UserEntity,
+          { id: stored.userId },
+          { emailVerifiedAt: new Date() },
+        );
 
-    return { message: 'E-mail verificado com sucesso' };
+        await manager.update(
+          EmailVerificationTokenEntity,
+          { id: stored.id },
+          { usedAt: new Date() },
+        );
+      },
+    );
+
+    return {
+      message: 'E-mail verificado com sucesso',
+    };
   }
 
-  private async sendEmailVerification(userId: string, email: string, name: string) {
+  private async sendEmailVerification(
+    userId: string,
+    email: string,
+    name: string,
+  ) {
     const rawToken = randomBytes(32).toString('hex');
     const expiresAt = new Date();
+
     expiresAt.setHours(expiresAt.getHours() + 24);
 
-    await this.prisma.emailVerificationToken.create({
-      data: {
+    const verificationToken =
+      this.emailVerificationTokensRepository.create({
         tokenHash: this.hashToken(rawToken),
         userId,
         expiresAt,
-      },
-    });
+        usedAt: null,
+      });
 
-    await this.mailService.queueVerificationEmail(email, name, rawToken);
+    await this.emailVerificationTokensRepository.save(
+      verificationToken,
+    );
+
+    await this.mailService.queueVerificationEmail(
+      email,
+      name,
+      rawToken,
+    );
   }
   // nestforge:feature:redis,auth:password:end
 
@@ -219,6 +339,8 @@ export class AuthService {
   }
 
   private hashToken(token: string): string {
-    return createHash('sha256').update(token).digest('hex');
+    return createHash('sha256')
+      .update(token)
+      .digest('hex');
   }
 }
