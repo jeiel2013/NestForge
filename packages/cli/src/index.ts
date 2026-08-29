@@ -18,6 +18,19 @@ async function main() {
             .filter(Boolean)
             .join(' ');
 
+        const databaseSteps =
+            options.orm === 'typeorm'
+                ? [
+                    'npm run migration:generate -- src/database/migrations/InitialSchema',
+                    'npm run migration:run',
+                    ...(['jwt', 'session'].includes(
+                        options.authStrategy,
+                    )
+                        ? ['npm run seed']
+                        : []),
+                ]
+                : ['npx prisma migrate dev'];
+
         const steps = [
             `cd ${relativeDir}`,
             ...(options.createEnv ? [] : ['cp .env.example .env']),
@@ -25,7 +38,7 @@ async function main() {
             ...(options.features.includes('docker') && dockerServices
                 ? [`docker compose up -d ${dockerServices}`]
                 : []),
-            'npx prisma migrate dev',
+            ...databaseSteps,
             'npm run start:dev',
         ];
 
