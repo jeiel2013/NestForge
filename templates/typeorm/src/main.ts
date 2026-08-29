@@ -4,19 +4,24 @@ import { join } from 'path';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 import { ClassSerializerInterceptor } from '@nestjs/common';
+
 // nestforge:feature:validation
 import { ZodValidationPipe } from 'nestjs-zod';
 // nestforge:feature:validation:end
+
 // nestforge:feature:swagger
 import { patchNestJsSwagger } from 'nestjs-zod';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 // nestforge:feature:swagger:end
+
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+
 // nestforge:feature:auth:session
 import session from 'express-session';
-import { PrismaSessionStore } from '@quixo3/prisma-session-store';
-import { PrismaService } from './database/prisma.service';
+import { TypeormStore } from 'connect-typeorm';
+import { DataSource } from 'typeorm';
+import { SessionEntity } from './auth/entities/session.entity';
 // nestforge:feature:auth:session:end
 
 async function bootstrap() {
@@ -28,8 +33,16 @@ async function bootstrap() {
 
   app.useLogger(app.get(Logger));
   app.use(helmet());
+
   // nestforge:feature:auth:session
-  const prisma = app.get(PrismaService);
+  const dataSource = app.get(DataSource);
+  const sessionsRepository =
+    dataSource.getRepository(SessionEntity);
+
+  const sessionMaxAge = Number(
+    process.env.SESSION_MAX_AGE ??
+    7 * 24 * 60 * 60 * 1000,
+  );
 
   if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', 1);
@@ -41,20 +54,22 @@ async function bootstrap() {
       secret: process.env.SESSION_SECRET as string,
       resave: false,
       saveUninitialized: false,
-      store: new PrismaSessionStore(prisma, {
-        checkPeriod: 2 * 60 * 1000,
-        dbRecordIdIsSessionId: true,
-        dbRecordIdFunction: undefined,
-      }),
+      store: new TypeormStore({
+        cleanupLimit: 2,
+        limitSubquery: false,
+        ttl: Math.floor(sessionMaxAge / 1000),
+      }).connect(sessionsRepository),
       cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure:
+          process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: Number(process.env.SESSION_MAX_AGE ?? 7 * 24 * 60 * 60 * 1000),
+        maxAge: sessionMaxAge,
       },
     }),
   );
   // nestforge:feature:auth:session:end
+
   const corsOrigins = (
     process.env.CORS_ORIGINS ?? 'http://localhost:5173'
   )
