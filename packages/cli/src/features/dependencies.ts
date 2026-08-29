@@ -6,12 +6,12 @@ import path from 'node:path';
  * correspondente estiver habilitada. Mantido separado dos marcadores de código
  * porque package.json é JSON puro — não aceita comentário.
  */
-const FEATURE_DEPENDENCIES: Record<string, string[]> = {
+const FEATURE_DEPENDENCIES: Record<
+    string,
+    string[]
+> = {
     swagger: ['@nestjs/swagger'],
-    // nestjs-zod NÃO entra aqui: os DTOs (RegisterDto, CreateUserDto, etc.) usam
-    // createZodDto() pra existir como classe, independente do ZodValidationPipe
-    // estar registrado globalmente ou não. Desligar "validação global" só tira
-    // o pipe do main.ts — a dependência continua necessária pro projeto compilar.
+
     redis: [
         '@nestjs/bullmq',
         'bullmq',
@@ -19,17 +19,35 @@ const FEATURE_DEPENDENCIES: Record<string, string[]> = {
         'nodemailer',
         '@types/nodemailer',
     ],
+
     'auth:session': [
         '@quixo3/prisma-session-store',
+        'connect-typeorm',
         'express-session',
         '@types/express-session',
     ],
+
     'auth:token': [
         '@nestjs/jwt',
         'passport-jwt',
         '@types/passport-jwt',
     ],
-    rbac: [], // hoje não tem dependência própria — só código (guards/decorators)
+
+    'database:postgres': [
+        'pg',
+        '@types/pg',
+    ],
+
+    'database:mysql': [
+        'mysql2',
+    ],
+
+    'database:sqlite': [
+        'better-sqlite3',
+        '@types/better-sqlite3',
+    ],
+
+    rbac: [],
 };
 
 export async function removeDisabledDependencies(
