@@ -72,7 +72,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
         message: 'Escolha o ORM/Query Builder:',
         options: [
             { value: 'prisma', label: 'Prisma', hint: 'Recomendado' },
-            { value: 'typeorm', label: 'TypeORM', hint: 'em breve' },
+            { value: 'typeorm', label: 'TypeORM' },
             { value: 'drizzle', label: 'Drizzle ORM', hint: 'em breve' },
             { value: 'none', label: 'Nenhum' },
         ],

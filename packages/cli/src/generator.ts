@@ -13,7 +13,10 @@ const PACKAGE_TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
 const MONOREPO_TEMPLATES_ROOT = path.resolve(__dirname, '../../../templates');
 
 // só isso está de fato pronto por enquanto — ver packages/cli/README.md
-const IMPLEMENTED_ORMS = ['prisma'];
+const IMPLEMENTED_ORMS = [
+    'prisma',
+    'typeorm',
+];
 const IMPLEMENTED_LANGUAGES = ['typescript', 'javascript'];
 const IMPLEMENTED_DATABASES = ['postgres', 'mysql', 'sqlite'];
 const IMPLEMENTED_AUTH_STRATEGIES = ['jwt', 'session', 'oauth', 'none'];
@@ -37,12 +40,12 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
     }
 
     if (orm === 'none') {
-        throw new Error('Ainda não existe um template sem ORM. Escolha "prisma" por enquanto.');
+        throw new Error('Ainda não existe um template sem ORM. Escolha "prisma" ou "typeorm".');
     }
 
     if (!IMPLEMENTED_ORMS.includes(orm)) {
         throw new Error(
-            `O template para "${orm}" ainda não está pronto — só "prisma" está implementado por enquanto. Contribuições são bem-vindas!`,
+            `O template para "${orm}" ainda não está pronto — hoje estão disponíveis: ${IMPLEMENTED_ORMS.join(', ',)}. Contribuições são bem-vindas!`,
         );
     }
 
