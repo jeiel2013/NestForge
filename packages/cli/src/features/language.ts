@@ -185,7 +185,7 @@ async function updatePackageJson(
         ] =
             'npm run typeorm -- migration:revert';
 
-        packageJson.scripts['pretest: e2e'] =
+        packageJson.scripts['pretest:e2e'] =
             'dotenv -e .env.test -- typeorm -d src/database/data-source.js migration:run';
 
         packageJson.scripts.seed =
