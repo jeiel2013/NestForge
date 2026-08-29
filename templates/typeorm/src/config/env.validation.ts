@@ -5,6 +5,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
   APP_URL: z.string().url().default('http://localhost:3000'),
   CORS_ORIGINS: z.string().min(1).default('http://localhost:5173'),
+  DB_TYPE: z.enum(['postgres', 'mysql', 'sqlite']).default('postgres'),
   DATABASE_URL: z.string().url(),
   // nestforge:feature:auth:token
   JWT_ACCESS_SECRET: z.string().min(16),

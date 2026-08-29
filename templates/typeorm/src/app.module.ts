@@ -9,7 +9,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 // nestforge:feature:auth:enabled:end
-import { PrismaModule } from './database/prisma.module';
+import { DatabaseModule } from 'database/database.module';
 // nestforge:feature:redis
 import { MailModule } from './mail/mail.module';
 // nestforge:feature:redis:end
@@ -49,7 +49,7 @@ import { validateEnv } from './config/env.validation';
       },
     }),
     // nestforge:feature:redis:end
-    PrismaModule,
+    DatabaseModule,
     // nestforge:feature:auth:enabled
     AuthModule,
     UsersModule,

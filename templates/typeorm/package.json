@@ -17,13 +17,13 @@
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:e2e": "dotenv -e .env.test -- vitest run --config ./vitest.e2e.config.ts",
-    "pretest:e2e": "dotenv -e .env.test -- typeorm-ts-node-commonjs -d src/database/data-source.ts migration:run",
-    "typeorm": "typeorm-ts-node-commonjs -d src/database/data-source.ts",
-    "migration:generate": "typeorm-ts-node-commonjs -d src/database/data-source.ts migration:generate",
+    "typeorm": "dotenv -e .env -- typeorm-ts-node-commonjs -d src/database/data-source.ts",
+    "migration:generate": "npm run typeorm -- migration:generate",
     "migration:create": "typeorm migration:create",
-    "migration:run": "typeorm-ts-node-commonjs -d src/database/data-source.ts migration:run",
-    "migration:revert": "typeorm-ts-node-commonjs -d src/database/data-source.ts migration:revert",
-    "seed": "ts-node src/database/seed.ts"
+    "migration:run": "npm run typeorm -- migration:run",
+    "migration:revert": "npm run typeorm -- migration:revert",
+    "pretest:e2e": "dotenv -e .env.test -- typeorm-ts-node-commonjs -d src/database/data-source.ts migration:run",
+    "seed": "dotenv -e .env -- ts-node src/database/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
