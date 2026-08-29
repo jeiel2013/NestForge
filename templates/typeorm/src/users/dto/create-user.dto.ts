@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
-import { Role } from '@prisma/client';
+import { Role } from '../../common/constants/role.enum';
 
 export const createUserSchema = z.object({
   name: z.string().min(2).describe('Nome completo'),
