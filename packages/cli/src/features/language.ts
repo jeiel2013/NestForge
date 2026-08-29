@@ -20,11 +20,14 @@ const TYPESCRIPT_DEV_DEPENDENCIES = [
     '@typescript-eslint/parser',
     'ts-node',
     'typescript',
+    '@types/better-sqlite3',
+    '@types/pg',
 ];
 
 export async function applyLanguageTransform(
     targetDir: string,
     language: string,
+    orm: string,
 ): Promise<void> {
     if (language !== 'javascript') {
         return;
@@ -42,7 +45,7 @@ export async function applyLanguageTransform(
     await fs.remove(path.join(targetDir, 'tsconfig.build.json'));
     await fs.remove(path.join(targetDir, 'nest-cli.json'));
 
-    await updatePackageJson(targetDir);
+    await updatePackageJson(targetDir, orm);
 }
 
 async function collectTypeScriptFiles(dir: string): Promise<string[]> {
@@ -124,32 +127,82 @@ async function transpileFile(filePath: string): Promise<void> {
     await fs.remove(filePath);
 }
 
-async function updatePackageJson(targetDir: string): Promise<void> {
-    const packageJsonPath = path.join(targetDir, 'package.json');
-    const packageJson = await fs.readJson(packageJsonPath);
+async function updatePackageJson(
+    targetDir: string,
+    orm: string,
+): Promise<void> {
+    const packageJsonPath = path.join(
+        targetDir,
+        'package.json',
+    );
+
+    const packageJson =
+        await fs.readJson(packageJsonPath);
 
     packageJson.scripts = {
         ...packageJson.scripts,
         build: 'node --check src/main.js',
         start: 'node src/main.js',
         'start:dev': 'node --watch src/main.js',
-        'start:debug': 'node --inspect --watch src/main.js',
+        'start:debug':
+            'node --inspect --watch src/main.js',
         'start:prod': 'node src/main.js',
         lint: 'eslint "{src,test}/**/*.js" --fix',
-        format: 'prettier --write "src/**/*.js" "test/**/*.js"',
-        'prisma:seed': 'node prisma/seed.js',
-        'test:e2e': 'dotenv -e .env.test -- vitest run --config ./vitest.e2e.config.js',
+        format:
+            'prettier --write "src/**/*.js" "test/**/*.js"',
+        'test:e2e':
+            'dotenv -e .env.test -- vitest run --config ./vitest.e2e.config.js',
     };
 
-    packageJson.prisma = {
-        ...packageJson.prisma,
-        seed: 'node prisma/seed.js',
-    };
+    if (orm === 'prisma') {
+        packageJson.scripts['prisma:seed'] =
+            'node prisma/seed.js';
+
+        packageJson.prisma = {
+            ...packageJson.prisma,
+            seed: 'node prisma/seed.js',
+        };
+    }
+
+    if (orm === 'typeorm') {
+        packageJson.scripts.typeorm =
+            'dotenv -e .env -- typeorm -d src/database/data-source.js';
+
+        packageJson.scripts[
+            'migration:generate'
+        ] =
+            'npm run typeorm -- migration:generate';
+
+        packageJson.scripts[
+            'migration:create'
+        ] = 'typeorm migration:create';
+
+        packageJson.scripts['migration:run'] =
+            'npm run typeorm -- migration:run';
+
+        packageJson.scripts[
+            'migration:revert'
+        ] =
+            'npm run typeorm -- migration:revert';
+
+        packageJson.scripts['pretest: e2e'] =
+            'dotenv -e .env.test -- typeorm -d src/database/data-source.js migration:run';
+
+        packageJson.scripts.seed =
+            'dotenv -e .env -- node src/database/seed.js';
+
+        delete packageJson.prisma;
+        delete packageJson.scripts['prisma:seed'];
+    }
 
     for (const dependency of TYPESCRIPT_DEV_DEPENDENCIES) {
         delete packageJson.dependencies?.[dependency];
         delete packageJson.devDependencies?.[dependency];
     }
 
-    await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
+    await fs.writeJson(
+        packageJsonPath,
+        packageJson,
+        { spaces: 2 },
+    );
 }

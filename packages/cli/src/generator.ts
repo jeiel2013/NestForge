@@ -75,7 +75,7 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
     await applyAuthStrategyRemoval(targetDir, enabledFeatures);
     await applyFeatureMarkers(targetDir, enabledFeatures);
     await removeDisabledDependencies(targetDir, enabledFeatures);
-    await applyLanguageTransform(targetDir, language);
+    await applyLanguageTransform(targetDir, language, orm);
     await renameProject(targetDir, projectName);
 
     if (createEnv) {
