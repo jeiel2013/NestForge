@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
+import type { JwtSignOptions } from '@nestjs/jwt';
 import { IsNull, Repository } from 'typeorm';
 import { createHash } from 'crypto';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
@@ -23,6 +24,14 @@ export class TokenService {
         role: string,
     ) {
         const payload = { sub: userId, email, role };
+
+        const accessTokenExpiresIn = (
+            process.env.JWT_ACCESS_EXPIRES_IN ?? '15m'
+        ) as JwtSignOptions['expiresIn'];
+
+        const refreshTokenExpiresIn = (
+            process.env.JWT_REFRESH_EXPIRES_IN ?? '7d'
+        ) as JwtSignOptions['expiresIn'];
 
         const accessToken = this.jwtService.sign(payload, {
             secret: process.env.JWT_ACCESS_SECRET,
