@@ -59,7 +59,7 @@
     "typeorm": "^0.3.31",
     "pg": "^8.23.0",
     "mysql2": "^3.24.2",
-    "better-sqlite3": "^11.10.0",
+    "better-sqlite3": "^12.11.1",
     "connect-typeorm": "^2.0.0"
   },
   "devDependencies": {
