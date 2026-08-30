@@ -61,33 +61,56 @@ function isRequirementMet(rawName: string, enabledFeatures: Set<string>): boolea
         .every((name) => enabledFeatures.has(name));
 }
 
-async function processFile(filePath: string, enabledFeatures: Set<string>): Promise<void> {
-    const original = await fs.readFile(filePath, 'utf-8');
-    const lines = original.split('\n');
+async function processFile(
+    filePath: string,
+    enabledFeatures: Set<string>,
+): Promise<void> {
+    const original = await fs.readFile(
+        filePath,
+        'utf-8',
+    );
 
-    const firstMeaningfulLine = lines.find((line) => line.trim().length > 0) ?? '';
-    const fileMatch = firstMeaningfulLine.match(FILE_MARKER);
+    let lines = original.split('\n');
+
+    const firstMeaningfulLine =
+        lines.find(
+            (line) => line.trim().length > 0,
+        ) ?? '';
+
+    const fileMatch =
+        firstMeaningfulLine.match(FILE_MARKER);
 
     if (fileMatch) {
         const featureName = fileMatch[1];
 
-        if (!isRequirementMet(featureName, enabledFeatures)) {
+        if (
+            !isRequirementMet(
+                featureName,
+                enabledFeatures,
+            )
+        ) {
             await fs.remove(filePath);
             return;
         }
 
-        const withoutMarker = lines.filter((line) => !FILE_MARKER.test(line)).join('\n');
-        if (withoutMarker !== original) {
-            await fs.writeFile(filePath, withoutMarker, 'utf-8');
-        }
-        return;
+        lines = lines.filter(
+            (line) => !FILE_MARKER.test(line),
+        );
     }
 
-    const processedLines = stripBlockMarkers(lines, enabledFeatures);
+    const processedLines = stripBlockMarkers(
+        lines,
+        enabledFeatures,
+    );
+
     const processed = processedLines.join('\n');
 
     if (processed !== original) {
-        await fs.writeFile(filePath, processed, 'utf-8');
+        await fs.writeFile(
+            filePath,
+            processed,
+            'utf-8',
+        );
     }
 }
 
