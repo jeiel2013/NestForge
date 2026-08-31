@@ -3,25 +3,35 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import {
-  DataSource,
-  IsNull,
-  Repository,
-} from 'typeorm';
+  and,
+  eq,
+  isNull,
+} from 'drizzle-orm';
 import * as bcrypt from 'bcryptjs';
-import { createHash, randomBytes } from 'crypto';
-import { UserEntity } from '../users/entities/user.entity';
-import { OAuthAccountEntity } from './entities/oauth-account.entity';
+import {
+  createHash,
+  randomBytes,
+  randomUUID,
+} from 'node:crypto';
+import { Role } from '../common/constants/role.enum';
+import { InjectDatabase } from '../database/database.decorators';
+import type { DrizzleDatabase } from '../database/database.types';
+import {
+  oauthAccounts,
+  users,
+} from '../database/schema';
 
 // nestforge:feature:auth:token
-import { RefreshTokenEntity } from './entities/refresh-token.entity';
+import { refreshTokens } from '../database/schema';
 // nestforge:feature:auth:token:end
 
 // nestforge:feature:redis,auth:password
 import { MailService } from '../mail/mail.service';
-import { PasswordResetTokenEntity } from './entities/password-reset-token.entity';
-import { EmailVerificationTokenEntity } from './entities/email-verification-token.entity';
+import {
+  emailVerificationTokens,
+  passwordResetTokens,
+} from '../database/schema';
 // nestforge:feature:redis,auth:password:end
 
 // nestforge:feature:auth:password
@@ -34,60 +44,62 @@ import { OAuthProfile } from './strategies/google.strategy';
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly usersRepository: Repository<UserEntity>,
-
-    @InjectRepository(OAuthAccountEntity)
-    private readonly oauthAccountsRepository: Repository<OAuthAccountEntity>,
-
-    private readonly dataSource: DataSource,
+    @InjectDatabase()
+    private readonly database: DrizzleDatabase,
 
     // nestforge:feature:redis,auth:password
-    @InjectRepository(PasswordResetTokenEntity)
-    private readonly passwordResetTokensRepository: Repository<PasswordResetTokenEntity>,
-
-    @InjectRepository(EmailVerificationTokenEntity)
-    private readonly emailVerificationTokensRepository: Repository<EmailVerificationTokenEntity>,
-
     private readonly mailService: MailService,
     // nestforge:feature:redis,auth:password:end
   ) { }
 
   // nestforge:feature:auth:password
   async register(dto: RegisterDto) {
-    const existing = await this.usersRepository.findOne({
-      where: { email: dto.email },
-    });
+    const existing = await this.findUserByEmail(
+      dto.email,
+    );
 
     if (existing) {
-      throw new ConflictException('E-mail já cadastrado');
+      throw new ConflictException(
+        'E-mail já cadastrado',
+      );
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, 10);
+    const id = randomUUID();
+    const passwordHash = await bcrypt.hash(
+      dto.password,
+      10,
+    );
 
-    const user = this.usersRepository.create({
+    await this.database.insert(users).values({
+      id,
       name: dto.name,
       email: dto.email,
       passwordHash,
+      role: Role.USER,
     });
 
-    const savedUser = await this.usersRepository.save(user);
+    const user = {
+      id,
+      name: dto.name,
+      email: dto.email,
+      role: Role.USER,
+    };
 
     // nestforge:feature:redis
     await this.sendEmailVerification(
-      savedUser.id,
-      savedUser.email,
-      savedUser.name,
+      user.id,
+      user.email,
+      user.name,
     );
     // nestforge:feature:redis:end
 
-    return this.toAuthenticatedUser(savedUser);
+    return this.toAuthenticatedUser(user);
   }
 
   async login(dto: LoginDto) {
-    const user = await this.usersRepository.findOne({
-      where: { email: dto.email },
-    });
+    const user = await this.findUserByEmail(
+      dto.email,
+    );
 
     if (!user || !user.passwordHash) {
       throw new UnauthorizedException(
@@ -110,57 +122,87 @@ export class AuthService {
   }
   // nestforge:feature:auth:password:end
 
-  async validateOAuthLogin(profile: OAuthProfile) {
-    const linkedAccount =
-      await this.oauthAccountsRepository.findOne({
-        where: {
-          provider: profile.provider,
-          providerUserId: profile.providerUserId,
-        },
-        relations: {
-          user: true,
-        },
-      });
+  async validateOAuthLogin(
+    profile: OAuthProfile,
+  ) {
+    const [linkedAccount] = await this.database
+      .select({
+        id: users.id,
+        email: users.email,
+        role: users.role,
+      })
+      .from(oauthAccounts)
+      .innerJoin(
+        users,
+        eq(oauthAccounts.userId, users.id),
+      )
+      .where(
+        and(
+          eq(
+            oauthAccounts.provider,
+            profile.provider,
+          ),
+          eq(
+            oauthAccounts.providerUserId,
+            profile.providerUserId,
+          ),
+        ),
+      )
+      .limit(1);
 
     if (linkedAccount) {
       return this.toAuthenticatedUser(
-        linkedAccount.user,
+        linkedAccount,
       );
     }
 
-    let user = await this.usersRepository.findOne({
-      where: { email: profile.email },
-    });
+    let user = await this.findUserByEmail(
+      profile.email,
+    );
 
     if (!user) {
-      const newUser = this.usersRepository.create({
+      const userId = randomUUID();
+
+      await this.database.insert(users).values({
+        id: userId,
         name: profile.name,
         email: profile.email,
+        passwordHash: null,
+        role: Role.USER,
         emailVerifiedAt: new Date(),
       });
 
-      user = await this.usersRepository.save(newUser);
+      user = {
+        id: userId,
+        name: profile.name,
+        email: profile.email,
+        passwordHash: null,
+        role: Role.USER,
+        avatarUrl: null,
+        emailVerifiedAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
     }
 
-    const oauthAccount =
-      this.oauthAccountsRepository.create({
+    await this.database
+      .insert(oauthAccounts)
+      .values({
+        id: randomUUID(),
         provider: profile.provider,
-        providerUserId: profile.providerUserId,
+        providerUserId:
+          profile.providerUserId,
         userId: user.id,
       });
-
-    await this.oauthAccountsRepository.save(
-      oauthAccount,
-    );
 
     return this.toAuthenticatedUser(user);
   }
 
   // nestforge:feature:redis,auth:password
   async forgotPassword(email: string) {
-    const user = await this.usersRepository.findOne({
-      where: { email },
-    });
+    const user = await this.findUserByEmail(
+      email,
+    );
 
     const genericResponse = {
       message:
@@ -171,22 +213,24 @@ export class AuthService {
       return genericResponse;
     }
 
-    const rawToken = randomBytes(32).toString('hex');
+    const rawToken = randomBytes(32).toString(
+      'hex',
+    );
+
     const expiresAt = new Date();
+    expiresAt.setHours(
+      expiresAt.getHours() + 1,
+    );
 
-    expiresAt.setHours(expiresAt.getHours() + 1);
-
-    const resetToken =
-      this.passwordResetTokensRepository.create({
+    await this.database
+      .insert(passwordResetTokens)
+      .values({
+        id: randomUUID(),
         tokenHash: this.hashToken(rawToken),
         userId: user.id,
         expiresAt,
         usedAt: null,
       });
-
-    await this.passwordResetTokensRepository.save(
-      resetToken,
-    );
 
     await this.mailService.queuePasswordResetEmail(
       user.email,
@@ -203,10 +247,16 @@ export class AuthService {
   ) {
     const tokenHash = this.hashToken(rawToken);
 
-    const stored =
-      await this.passwordResetTokensRepository.findOne({
-        where: { tokenHash },
-      });
+    const [stored] = await this.database
+      .select()
+      .from(passwordResetTokens)
+      .where(
+        eq(
+          passwordResetTokens.tokenHash,
+          tokenHash,
+        ),
+      )
+      .limit(1);
 
     if (
       !stored ||
@@ -223,31 +273,50 @@ export class AuthService {
       10,
     );
 
-    await this.dataSource.transaction(
-      async (manager) => {
-        await manager.update(
-          UserEntity,
-          { id: stored.userId },
-          { passwordHash },
-        );
+    await this.database.transaction(
+      async (transaction) => {
+        await transaction
+          .update(users)
+          .set({
+            passwordHash,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, stored.userId));
 
-        await manager.update(
-          PasswordResetTokenEntity,
-          { id: stored.id },
-          { usedAt: new Date() },
-        );
+        await transaction
+          .update(passwordResetTokens)
+          .set({
+            usedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(
+                passwordResetTokens.id,
+                stored.id,
+              ),
+              isNull(
+                passwordResetTokens.usedAt,
+              ),
+            ),
+          );
 
         // nestforge:feature:auth:token
-        await manager.update(
-          RefreshTokenEntity,
-          {
-            userId: stored.userId,
-            revokedAt: IsNull(),
-          },
-          {
+        await transaction
+          .update(refreshTokens)
+          .set({
             revokedAt: new Date(),
-          },
-        );
+          })
+          .where(
+            and(
+              eq(
+                refreshTokens.userId,
+                stored.userId,
+              ),
+              isNull(
+                refreshTokens.revokedAt,
+              ),
+            ),
+          );
         // nestforge:feature:auth:token:end
       },
     );
@@ -260,10 +329,16 @@ export class AuthService {
   async verifyEmail(rawToken: string) {
     const tokenHash = this.hashToken(rawToken);
 
-    const stored =
-      await this.emailVerificationTokensRepository.findOne({
-        where: { tokenHash },
-      });
+    const [stored] = await this.database
+      .select()
+      .from(emailVerificationTokens)
+      .where(
+        eq(
+          emailVerificationTokens.tokenHash,
+          tokenHash,
+        ),
+      )
+      .limit(1);
 
     if (
       !stored ||
@@ -275,19 +350,32 @@ export class AuthService {
       );
     }
 
-    await this.dataSource.transaction(
-      async (manager) => {
-        await manager.update(
-          UserEntity,
-          { id: stored.userId },
-          { emailVerifiedAt: new Date() },
-        );
+    await this.database.transaction(
+      async (transaction) => {
+        await transaction
+          .update(users)
+          .set({
+            emailVerifiedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, stored.userId));
 
-        await manager.update(
-          EmailVerificationTokenEntity,
-          { id: stored.id },
-          { usedAt: new Date() },
-        );
+        await transaction
+          .update(emailVerificationTokens)
+          .set({
+            usedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(
+                emailVerificationTokens.id,
+                stored.id,
+              ),
+              isNull(
+                emailVerificationTokens.usedAt,
+              ),
+            ),
+          );
       },
     );
 
@@ -301,22 +389,24 @@ export class AuthService {
     email: string,
     name: string,
   ) {
-    const rawToken = randomBytes(32).toString('hex');
+    const rawToken = randomBytes(32).toString(
+      'hex',
+    );
+
     const expiresAt = new Date();
+    expiresAt.setHours(
+      expiresAt.getHours() + 24,
+    );
 
-    expiresAt.setHours(expiresAt.getHours() + 24);
-
-    const verificationToken =
-      this.emailVerificationTokensRepository.create({
+    await this.database
+      .insert(emailVerificationTokens)
+      .values({
+        id: randomUUID(),
         tokenHash: this.hashToken(rawToken),
         userId,
         expiresAt,
         usedAt: null,
       });
-
-    await this.emailVerificationTokensRepository.save(
-      verificationToken,
-    );
 
     await this.mailService.queueVerificationEmail(
       email,
@@ -325,6 +415,18 @@ export class AuthService {
     );
   }
   // nestforge:feature:redis,auth:password:end
+
+  private async findUserByEmail(
+    email: string,
+  ) {
+    const [user] = await this.database
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    return user;
+  }
 
   private toAuthenticatedUser(user: {
     id: string;
