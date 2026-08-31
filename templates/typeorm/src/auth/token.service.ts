@@ -36,13 +36,13 @@ export class TokenService {
         const accessToken = this.jwtService.sign(payload, {
             secret: process.env.JWT_ACCESS_SECRET,
             expiresIn:
-                process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
+                accessTokenExpiresIn,
         });
 
         const refreshToken = this.jwtService.sign(payload, {
             secret: process.env.JWT_REFRESH_SECRET,
             expiresIn:
-                process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
+                refreshTokenExpiresIn,
         });
 
         const expiresAt = new Date();
