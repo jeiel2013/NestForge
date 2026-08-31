@@ -1,0 +1,86 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { PassportModule } from '@nestjs/passport';
+import { APP_GUARD } from '@nestjs/core';
+
+// nestforge:feature:auth:token
+import { JwtModule } from '@nestjs/jwt';
+import { TokenService } from './token.service';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RefreshTokenEntity } from './entities/refresh-token.entity';
+// nestforge:feature:auth:token:end
+
+// nestforge:feature:redis
+import { MailModule } from '../mail/mail.module';
+// nestforge:feature:redis:end
+
+// nestforge:feature:redis,auth:password
+import { PasswordResetTokenEntity } from './entities/password-reset-token.entity';
+import { EmailVerificationTokenEntity } from './entities/email-verification-token.entity';
+// nestforge:feature:redis,auth:password:end
+
+import { UserEntity } from '../users/entities/user.entity';
+import { OAuthAccountEntity } from './entities/oauth-account.entity';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { GithubStrategy } from './strategies/github.strategy';
+
+// nestforge:feature:rbac
+import { RolesGuard } from '../common/guards/roles.guard';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
+// nestforge:feature:rbac:end
+
+// nestforge:feature:auth:session
+import { SessionEntity } from './entities/session.entity';
+import { SessionAuthGuard } from './guards/session-auth.guard';
+import { SessionService } from './session.service';
+// nestforge:feature:auth:session:end
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([
+      UserEntity,
+      OAuthAccountEntity,
+      // nestforge:feature:auth:token
+      RefreshTokenEntity,
+      // nestforge:feature:auth:token:end
+      // nestforge:feature:redis,auth:password
+      PasswordResetTokenEntity,
+      EmailVerificationTokenEntity,
+      // nestforge:feature:redis,auth:password:end
+      // nestforge:feature:auth:session
+      SessionEntity,
+      // nestforge:feature:auth:session:end
+    ]),
+    PassportModule,
+    // nestforge:feature:auth:token
+    JwtModule.register({}),
+    // nestforge:feature:auth:token:end
+    // nestforge:feature:redis
+    MailModule,
+    // nestforge:feature:redis:end
+  ],
+  controllers: [AuthController],
+  providers: [
+    AuthService,
+    // nestforge:feature:auth:token
+    TokenService,
+    JwtStrategy,
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    // nestforge:feature:auth:token:end
+    // nestforge:feature:auth:session
+    SessionService,
+    { provide: APP_GUARD, useClass: SessionAuthGuard },
+    // nestforge:feature:auth:session:end
+    GoogleStrategy,
+    GithubStrategy,
+    // nestforge:feature:rbac
+    { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: PermissionsGuard },
+    // nestforge:feature:rbac:end
+  ],
+  exports: [AuthService],
+})
+export class AuthModule { }
