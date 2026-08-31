@@ -10,59 +10,46 @@ import {
   ConflictException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import type { DrizzleDatabase } from '../database/database.types';
 import { AuthService } from './auth.service';
-import { UserEntity } from '../users/entities/user.entity';
-import { OAuthAccountEntity } from './entities/oauth-account.entity';
 
 // nestforge:feature:redis
 import { MailService } from '../mail/mail.service';
-import { PasswordResetTokenEntity } from './entities/password-reset-token.entity';
-import { EmailVerificationTokenEntity } from './entities/email-verification-token.entity';
 // nestforge:feature:redis:end
+
+function createSelectBuilder<T>(result: T[]) {
+  const builder: any = {};
+
+  builder.from = vi.fn(() => builder);
+  builder.innerJoin = vi.fn(() => builder);
+  builder.where = vi.fn(() => builder);
+  builder.limit = vi.fn(() => builder);
+
+  builder.then = (
+    resolve: (value: T[]) => unknown,
+    reject?: (reason: unknown) => unknown,
+  ) => Promise.resolve(result).then(resolve, reject);
+
+  return builder;
+}
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let usersRepository: any;
-  let oauthAccountsRepository: any;
-  let dataSource: DataSource;
+  let database: any;
 
   // nestforge:feature:redis
-  let passwordResetTokensRepository: any;
-  let emailVerificationTokensRepository: any;
   let mailService: MailService;
   // nestforge:feature:redis:end
 
   beforeEach(() => {
-    usersRepository = {
-      findOne: vi.fn(),
-      create: vi.fn(),
-      save: vi.fn(),
-    };
-
-    oauthAccountsRepository = {
-      findOne: vi.fn(),
-      create: vi.fn(),
-      save: vi.fn(),
-    };
-
-    dataSource = {
+    database = {
+      select: vi.fn(),
+      insert: vi.fn(),
+      update: vi.fn(),
       transaction: vi.fn(),
-    } as unknown as DataSource;
+    };
 
     // nestforge:feature:redis
-    passwordResetTokensRepository = {
-      findOne: vi.fn(),
-      create: vi.fn(),
-      save: vi.fn(),
-    };
-
-    emailVerificationTokensRepository = {
-      findOne: vi.fn(),
-      create: vi.fn(),
-      save: vi.fn(),
-    };
-
     mailService = {
       queueVerificationEmail: vi.fn(),
       queuePasswordResetEmail: vi.fn(),
@@ -70,22 +57,29 @@ describe('AuthService', () => {
     // nestforge:feature:redis:end
 
     authService = new AuthService(
-      usersRepository as unknown as Repository<UserEntity>,
-      oauthAccountsRepository as unknown as Repository<OAuthAccountEntity>,
-      dataSource,
+      database as unknown as DrizzleDatabase,
       // nestforge:feature:redis
-      passwordResetTokensRepository as unknown as Repository<PasswordResetTokenEntity>,
-      emailVerificationTokensRepository as unknown as Repository<EmailVerificationTokenEntity>,
       mailService,
       // nestforge:feature:redis:end
     );
   });
 
   it('deve lançar ConflictException se o e-mail já existir', async () => {
-    usersRepository.findOne.mockResolvedValue({
-      id: 'user-1',
-      email: 'jeiel@example.com',
-    });
+    database.select.mockReturnValueOnce(
+      createSelectBuilder([
+        {
+          id: 'user-1',
+          name: 'Jeiel',
+          email: 'jeiel@example.com',
+          passwordHash: 'hash-secreto',
+          role: 'USER',
+          avatarUrl: null,
+          emailVerifiedAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]),
+    );
 
     await expect(
       authService.register({
@@ -93,11 +87,17 @@ describe('AuthService', () => {
         email: 'jeiel@example.com',
         password: 'senhaForte123',
       }),
-    ).rejects.toBeInstanceOf(ConflictException);
+    ).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+
+    expect(database.insert).not.toHaveBeenCalled();
   });
 
   it('deve lançar UnauthorizedException com credenciais inválidas', async () => {
-    usersRepository.findOne.mockResolvedValue(null);
+    database.select.mockReturnValueOnce(
+      createSelectBuilder([]),
+    );
 
     await expect(
       authService.login({
