@@ -1,92 +1,277 @@
 # NestForge
 
-Monorepo do NestForge: uma **CLI interativa** (`nestforge`) que gera projetos NestJS prontos pra produção a partir de um boilerplate completo — auth, RBAC, banco, filas, observabilidade, testes e documentação já configurados.
+Monorepo do NestForge: uma CLI interativa que gera projetos NestJS prontos para produção com autenticação,
+autorização, banco de dados, filas, observabilidade, testes e documentação.
 
-```bash
 npx nestforge
-```
 
 ## Estrutura do repositório
 
 ```
 /
 ├── packages/
-│   └── cli/              → o pacote publicado no npm (nestforge)
+│ └── cli/ → pacote `nestforge` publicado no npm
 └── templates/
-    └── prisma/            → o boilerplate NestJS completo (Prisma + TypeScript + PostgreSQL)
+├── prisma/ → template NestJS com Prisma
+└── typeorm/ → template NestJS com TypeORM
 ```
 
-- **`packages/cli`** — o código-fonte da CLI: prompts interativos, gerador de projeto, entrypoint. É isso que vira o pacote `nestforge` no npm.
-- **`templates/prisma`** — o boilerplate em si, um projeto NestJS completo e funcional por conta própria (tem README, ARCHITECTURE.md, ROADMAP.md e docs próprios). A CLI copia esse template pra gerar o projeto do usuário.
+- packages/cli — código-fonte da CLI, incluindo prompts, gerador, transformações e testes automatizados.
+- templates/prisma — projeto NestJS completo usando Prisma.
+- templates/typeorm — projeto NestJS completo usando TypeORM e repositories.
+
+Durante o build, os templates são copiados para dentro do pacote da CLI para que ele funcione depois de publicado no
+npm.
 
 ## O que a CLI faz
 
-Ao rodar `npx nestforge`, você responde 11 perguntas e recebe um projeto NestJS pronto:
+Ao executar npx nestforge, você responde às perguntas do fluxo interativo e recebe um projeto NestJS configurado
+conforme suas escolhas.
 
-| # | Pergunta | Opções | Status |
-|---|---|---|---|
-| 1 | Nome do projeto | texto livre | ✅ |
-| 2 | Linguagem | TypeScript / JavaScript | ✅ TypeScript e JavaScript |
-| 3 | ORM / Query Builder | Prisma / TypeORM / Drizzle / Nenhum | ✅ Prisma · ⏳ demais |
-| 4 | Banco de dados | PostgreSQL / MySQL / SQLite / MongoDB | ✅ PostgreSQL, MySQL e SQLite · ⏳ MongoDB |
-| 5 | Docker | sim/não | ✅ toggle real |
-| 6 | Documentação Swagger/OpenAPI | sim/não | ✅ toggle real |
-| 7 | Validação global (Zod) | sim/não | ✅ toggle real |
-| 8 | Redis (cache/filas + e-mail) | sim/não | ✅ toggle real |
-| 9 | Estratégia de autenticação | JWT / Session-Cookies / OAuth / Nenhuma | ✅ JWT, OAuth e Nenhuma · ⏳ Session-Cookies |
-| 10 | Controle de acesso (RBAC/Permissions) | sim/não | ✅ toggle real |
-| 11 | Criar `.env` automaticamente | sim/não | ✅ toggle real |
+# Pergunta Opções Status
 
-✅ = funciona de verdade hoje · ⏳ = ainda não implementado; a CLI recusa com mensagem clara
+━━━━━ ━━━━━━━━━━━━━━━━━━━━━━━━━━ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1 Nome do projeto texto livre ✅
+───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
+2 Linguagem TypeScript / JavaScript ✅ Ambas
+───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
+3 ORM / Query Builder Prisma / TypeORM / Drizzle / Nenhum ✅ Prisma e TypeORM · ⏳ Drizzle e Nenhum
+───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
+4 Banco de dados PostgreSQL / MySQL / SQLite / ✅ PostgreSQL, MySQL e SQLite · ⏳ MongoDB
+MongoDB
+───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
+5 Docker sim / não ✅ Toggle real
+───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
+6 Swagger/OpenAPI sim / não ✅ Toggle real
+───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
+7 Validação global com Zod sim / não ✅ Toggle real
+───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
+8 Redis, filas e e-mail sim / não ✅ Toggle real
+───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
+9 Autenticação JWT / Session-Cookies / OAuth / ✅ Todas
+Nenhuma
+───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
+10 RBAC e Permissions sim / não ✅ Toggle real
+───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
+11 Criar .env sim / não ✅ Toggle real
 
-A opção JavaScript é gerada pela CLI a partir do template TypeScript, convertido durante a criação do projeto.
+Legenda:
 
-### O que o template Prisma já traz (quando tudo roda)
+- ✅ funciona;
+- ⏳ ainda não implementado e recusado com mensagem clara.
 
-- **Autenticação**: JWT (access + refresh token com rotação), OAuth Google e GitHub, forgot/reset password, verificação de e-mail
-- **RBAC + Permissions granulares**: roles (Admin/Manager/User) e permissions por ação (`user:create`, `user:delete`, etc.)
-- **Usuários**: CRUD completo, paginação e filtros, upload de avatar
-- **Banco**: Prisma com PostgreSQL, MySQL ou SQLite, migrations e seed com um usuário por role
-- **Filas e e-mail**: BullMQ + Redis, templates de e-mail, Mailpit em dev
-- **Segurança**: Helmet, CORS, Rate Limiting, validação com Zod (`nestjs-zod`), serialização de output, CSRF opcional
-- **Observabilidade**: logs estruturados (Pino), health checks (`/health`), métricas Prometheus (`/metrics`)
-- **Docs**: Swagger com exemplos de request/response, guia de arquitetura, guia de como adicionar um módulo novo
-- **Testes**: unitários (Vitest) e e2e (Supertest, banco isolado)
-- **Docker & CI**: `docker-compose` com API/Postgres/Redis/Mailpit, GitHub Actions (build/lint/test/e2e)
+A opção JavaScript é gerada automaticamente a partir dos templates TypeScript durante a criação do projeto.
 
-Detalhes de cada um desses recursos estão documentados dentro do próprio template: [`templates/prisma/README.md`](templates/prisma/README.md) e [`templates/prisma/ARCHITECTURE.md`](templates/prisma/ARCHITECTURE.md).
+## ORMs disponíveis
 
-## Desenvolvendo a CLI localmente
+### Prisma
 
-```bash
-npm install                # na raiz, instala tudo via workspaces
+O template Prisma inclui:
+
+- Prisma Client;
+- schema declarativo;
+- migrations;
+- seed;
+- PostgreSQL, MySQL e SQLite;
+- store Prisma para Session/Cookies;
+- health check baseado em Prisma.
+
+### TypeORM
+
+O template TypeORM inclui:
+
+- entidades com decorators;
+- repositories injetados com TypeOrmModule.forFeature;
+- DataSource configurado por banco;
+- migrations;
+- seed;
+- PostgreSQL com pg;
+- MySQL com mysql2;
+- SQLite com better-sqlite3;
+- store persistente com connect-typeorm;
+- health check baseado em DataSource.
+
+A CLI mantém somente o driver necessário para o banco selecionado.
+
+## Recursos dos templates
+
+### Autenticação
+
+As estratégias disponíveis são:
+
+- JWT com access e refresh tokens;
+- Session/Cookies persistida no banco;
+- OAuth Google e GitHub;
+- OAuth-only;
+- nenhuma autenticação.
+
+A estratégia JWT inclui:
+
+- rotação de refresh token;
+- revogação;
+- logout;
+- recuperação de senha;
+- verificação de e-mail, quando Redis/e-mail estão habilitados.
+
+A estratégia Session/Cookies inclui:
+
+- cookie httpOnly;
+- regeneração de sessão;
+- persistência no banco;
+- SessionAuthGuard;
+- proteção CSRF com token associado à sessão;
+- logout com destruição da sessão.
+
+Na opção “Nenhuma”, os diretórios src/auth e src/users são removidos.
+
+### RBAC e Permissions
+
+Os templates incluem:
+
+- roles ADMIN, MANAGER e USER;
+- permissions granulares;
+- RolesGuard;
+- PermissionsGuard;
+- decorators para proteger endpoints.
+
+### Usuários
+
+- CRUD;
+- paginação;
+- filtros;
+- busca;
+- upload de avatar;
+- serialização segura;
+- remoção do passwordHash das respostas.
+
+### Redis, filas e e-mail
+
+Quando habilitado:
+
+- Redis;
+- BullMQ;
+- filas de e-mail;
+- Nodemailer;
+- Mailpit em desenvolvimento;
+- recuperação de senha;
+- verificação de e-mail;
+- health check do Redis.
+
+Quando desabilitado, arquivos e dependências relacionados são removidos.
+
+### Segurança
+
+- Helmet;
+- CORS configurável;
+- rate limiting;
+- Zod;
+- serialização com ClassSerializerInterceptor;
+- hash de senhas com bcrypt;
+- hash de refresh tokens;
+- proteção CSRF para Session/Cookies;
+- cookies seguros em produção.
+
+### Observabilidade
+
+- logs estruturados com Pino;
+- health check em /health;
+- métricas Prometheus em /metrics;
+- indicadores de banco, Redis, memória e disco.
+
+### Testes
+
+- testes unitários com Vitest;
+- testes E2E com Supertest;
+- banco de teste isolado;
+- helpers para inicializar a aplicação;
+- limpeza de tabelas entre testes;
+- testes específicos de JWT e Session/Cookies.
+
+### Docker e CI
+
+- Dockerfile multi-stage;
+- Docker Compose;
+- PostgreSQL ou MySQL conforme a escolha;
+- Redis e Mailpit quando aplicáveis;
+- GitHub Actions;
+- build, lint, testes unitários e E2E.
+
+## Validação atual
+
+As seguintes combinações TypeORM foram validadas com smoke tests completos:
+
+- TypeScript + TypeORM + SQLite + JWT;
+- TypeScript + TypeORM + SQLite + Session/Cookies.
+
+Os smoke tests executaram:
+
+npm install
+npm run build
+npm test
+npm run migration:generate
+npm run migration:run
+npm run seed
+npm run test:e2e
+
+PostgreSQL e MySQL possuem cobertura automatizada de geração, configuração de colunas e poda de drivers. Smoke tests
+reais desses bancos ainda exigem os serviços locais ou Docker.
+
+## Documentação dos templates
+
+### Prisma
+
+- templates/prisma/README.md (templates/prisma/README.md)
+- templates/prisma/ARCHITECTURE.md (templates/prisma/ARCHITECTURE.md)
+- templates/prisma/docs (templates/prisma/docs)
+
+### TypeORM
+
+- templates/typeorm/README.md (templates/typeorm/README.md)
+- templates/typeorm/ARCHITECTURE.md (templates/typeorm/ARCHITECTURE.md)
+- templates/typeorm/docs (templates/typeorm/docs)
+
+## Desenvolvimento local
+
+Na raiz do monorepo:
+
+npm install
 cd packages/cli
-npm run dev                 # roda a CLI direto do TypeScript, sem buildar
-npm test                    # valida automaticamente as combinações geradas pela CLI
-```
+npm run dev
 
-Testar como se estivesse instalada de verdade:
+Para executar os testes automatizados:
 
-```bash
+npm test
+
+Para testar como uma CLI instalada:
+
 npm run build
 npm link
-nestforge                   # em qualquer pasta
-```
+nestforge
 
-Guia completo de teste: ver [`packages/cli/TESTING.md`](packages/cli/TESTING.md).
+O guia completo está em packages/cli/TESTING.md (packages/cli/TESTING.md).
 
-## Publicando
+## Publicação
 
-```bash
 cd packages/cli
-npm run build       # compila TS + copia templates/ pra dentro do pacote publicado
+npm run build
+npm pack --dry-run
 npm publish
-```
 
-## Roadmap da CLI
+O build compila a CLI e copia os templates Prisma e TypeORM para o pacote publicado.
 
-O que já funciona de verdade vs. o que ainda é placeholder está sempre atualizado em [`packages/cli/README.md`](packages/cli/README.md) — é a fonte de verdade de status, pra não a documentação ficar prometendo algo que o código ainda não faz.
+## Roadmap
+
+Próximos itens planejados:
+
+- Drizzle ORM;
+- opção sem ORM;
+- MongoDB;
+- validação completa do nome do pacote;
+- ampliação da matriz de smoke tests.
+
+O status detalhado fica em packages/cli/README.md (packages/cli/README.md).
 
 ## Licença
 
-MIT — ver [`templates/prisma/LICENSE`](templates/prisma/LICENSE).
+MIT — consulte templates/prisma/LICENSE (templates/prisma/LICENSE) ou templates/typeorm/LICENSE (templates/typeorm/
+LICENSE).
