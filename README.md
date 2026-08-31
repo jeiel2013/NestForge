@@ -28,37 +28,26 @@ npm.
 Ao executar npx nestforge, você responde às perguntas do fluxo interativo e recebe um projeto NestJS configurado
 conforme suas escolhas.
 
-# Pergunta Opções Status
+## O que a CLI configura
 
-━━━━━ ━━━━━━━━━━━━━━━━━━━━━━━━━━ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1 Nome do projeto texto livre ✅
-───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
-2 Linguagem TypeScript / JavaScript ✅ Ambas
-───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
-3 ORM / Query Builder Prisma / TypeORM / Drizzle / Nenhum ✅ Prisma e TypeORM · ⏳ Drizzle e Nenhum
-───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
-4 Banco de dados PostgreSQL / MySQL / SQLite / ✅ PostgreSQL, MySQL e SQLite · ⏳ MongoDB
-MongoDB
-───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
-5 Docker sim / não ✅ Toggle real
-───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
-6 Swagger/OpenAPI sim / não ✅ Toggle real
-───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
-7 Validação global com Zod sim / não ✅ Toggle real
-───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
-8 Redis, filas e e-mail sim / não ✅ Toggle real
-───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
-9 Autenticação JWT / Session-Cookies / OAuth / ✅ Todas
-Nenhuma
-───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
-10 RBAC e Permissions sim / não ✅ Toggle real
-───── ────────────────────────── ───────────────────────────────────── ────────────────────────────────────────────
-11 Criar .env sim / não ✅ Toggle real
+1. **Nome do projeto** — texto livre — ✅ Disponível
+2. **Linguagem** — TypeScript ou JavaScript — ✅ Ambas disponíveis
+3. **ORM** — Prisma ou TypeORM — ✅ Disponíveis
+4. **ORM** — Drizzle ou Nenhum — ⏳ Ainda não implementados
+5. **Banco de dados** — PostgreSQL, MySQL ou SQLite — ✅ Disponíveis
+6. **Banco de dados** — MongoDB — ⏳ Ainda não implementado
+7. **Docker** — sim ou não — ✅ Toggle real
+8. **Swagger/OpenAPI** — sim ou não — ✅ Toggle real
+9. **Validação global com Zod** — sim ou não — ✅ Toggle real
+10. **Redis, filas e e-mail** — sim ou não — ✅ Toggle real
+11. **Autenticação** — JWT, Session/Cookies, OAuth-only ou Nenhuma — ✅ Todas disponíveis
+12. **RBAC e Permissions** — sim ou não — ✅ Toggle real
+13. **Criação do `.env`** — sim ou não — ✅ Toggle real
 
 Legenda:
 
-- ✅ funciona;
-- ⏳ ainda não implementado e recusado com mensagem clara.
+- ✅ Funciona atualmente.
+- ⏳ Ainda não está implementado; a CLI recusa a opção com uma mensagem clara.
 
 A opção JavaScript é gerada automaticamente a partir dos templates TypeScript durante a criação do projeto.
 
