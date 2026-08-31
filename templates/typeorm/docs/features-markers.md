@@ -1,6 +1,6 @@
 # Marcadores de features (feature markers)
 
-O `templates/prisma` é usado tanto como projeto standalone quanto como fonte pra CLI (`packages/cli`) gerar projetos. Quando um recurso é **opcional** na CLI (ex: Swagger, Redis, RBAC), o código dele precisa ficar marcado no template, pra CLI saber o que remover quando o usuário responde "não" naquela pergunta.
+O `templates/typeorm` é usado tanto como projeto standalone quanto como fonte para a CLI (`packages/cli`) gerar projetos.
 
 Se você está adicionando código ligado a um recurso que já existe como pergunta na CLI (ou propondo um recurso novo opcional), marque o trecho seguindo esta convenção.
 

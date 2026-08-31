@@ -4,7 +4,7 @@ Este documento explica como o NestForge com TypeORM está organizado e por que c
 
 ## Visão geral
 
-````text
+```text
 Request → main.ts (pipes, filters e interceptors globais)
   → Guards de autenticação e autorização
   → Controller (valida DTO e delega)
@@ -13,9 +13,11 @@ Request → main.ts (pipes, filters e interceptors globais)
   → PostgreSQL, MySQL ou SQLite
   → ClassSerializerInterceptor
   → Response
+```
 
 Cada módulo de domínio segue a mesma estrutura:
 
+```text
 <modulo>/
 ├── dto/                    # schemas Zod e DTOs
 ├── entities/               # entidades persistidas pelo TypeORM
@@ -23,6 +25,7 @@ Cada módulo de domínio segue a mesma estrutura:
 ├── <modulo>.service.ts     # regras de negócio
 ├── <modulo>.service.spec.ts
 └── <modulo>.module.ts      # dependências, repositories e exports
+```
 
 Controllers não acessam repositories diretamente. Toda operação passa pelo service, mantendo as regras de negócio centralizadas e testáveis.
 
@@ -149,12 +152,3 @@ Entidades condicionais usam os marcadores do gerador para que apenas os arquivos
 ## Onde adicionar um módulo
 
 Para adicionar um novo domínio, consulte docs/adding-a-module.md (docs/adding-a-module.md).
-
-
-Depois confira:
-
-```powershell
-  Select-String `
-    -Path '.\templates\typeorm\ARCHITECTURE.md' `
-    -Pattern 'Prisma|prisma'
-````

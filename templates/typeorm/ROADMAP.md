@@ -32,10 +32,12 @@ Este roadmap existe para deixar claro o que já está pronto e onde dá pra cont
 - [x] CSRF (quando necessário)
 
 ## Banco de dados
-- [x] Prisma
+- [x] TypeORM
 - [x] PostgreSQL
+- [x] MySQL
+- [x] SQLite
 - [x] Migrations
-- [x] Seed completo (roles, permissions, usuário admin)
+- [x] Seed com usuários para as roles padrão
 
 ## Infra
 - [x] Docker / docker-compose (API, Postgres, Redis, Mailpit)
