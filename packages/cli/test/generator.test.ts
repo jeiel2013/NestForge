@@ -573,6 +573,124 @@ test(
     },
 );
 
+test(
+    'configura PostgreSQL e MySQL no template TypeORM',
+    { concurrency: false },
+    async () => {
+        const cases = [
+            {
+                database: 'postgres' as const,
+                projectName: 'typeorm-postgres',
+                dbType: 'postgres',
+                driver: 'pg',
+                columnType: 'timestamp with time zone',
+            },
+            {
+                database: 'mysql' as const,
+                projectName: 'typeorm-mysql',
+                dbType: 'mysql',
+                driver: 'mysql2',
+                columnType: 'datetime',
+            },
+        ];
+
+        for (const testCase of cases) {
+            await withGeneratedProject(
+                makeOptions({
+                    projectName: testCase.projectName,
+                    orm: 'typeorm',
+                    database: testCase.database,
+                    authStrategy: 'jwt',
+                    features: [],
+                    accessControl: false,
+                }),
+                async (targetDir) => {
+                    const envExample = await readFile(
+                        path.join(
+                            targetDir,
+                            '.env.example',
+                        ),
+                        'utf8',
+                    );
+
+                    const refreshTokenEntity =
+                        await readFile(
+                            path.join(
+                                targetDir,
+                                'src',
+                                'auth',
+                                'entities',
+                                'refresh-token.entity.ts',
+                            ),
+                            'utf8',
+                        );
+
+                    const packageJson =
+                        await fs.readJson(
+                            path.join(
+                                targetDir,
+                                'package.json',
+                            ),
+                        );
+
+                    assert.match(
+                        envExample,
+                        new RegExp(
+                            `^DB_TYPE=${testCase.dbType}$`,
+                            'm',
+                        ),
+                    );
+
+                    assert.match(
+                        refreshTokenEntity,
+                        new RegExp(testCase.columnType),
+                    );
+
+                    assert.doesNotMatch(
+                        refreshTokenEntity,
+                        /nestforge:feature/,
+                    );
+
+                    assert.notEqual(
+                        packageJson.dependencies[
+                        testCase.driver
+                        ],
+                        undefined,
+                    );
+
+                    if (testCase.database === 'postgres') {
+                        assert.equal(
+                            packageJson.dependencies.mysql2,
+                            undefined,
+                        );
+
+                        assert.equal(
+                            packageJson.dependencies[
+                            'better-sqlite3'
+                            ],
+                            undefined,
+                        );
+                    }
+
+                    if (testCase.database === 'mysql') {
+                        assert.equal(
+                            packageJson.dependencies.pg,
+                            undefined,
+                        );
+
+                        assert.equal(
+                            packageJson.dependencies[
+                            'better-sqlite3'
+                            ],
+                            undefined,
+                        );
+                    }
+                },
+            );
+        }
+    },
+);
+
 test('gera projeto em JavaScript', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
