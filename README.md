@@ -270,4 +270,4 @@ O status detalhado fica em [README do CLI](packages/cli/README.md).
 
 ## Licença
 
-MIT — consulte [LICENSE Prisma](templates/prisma/LICENSE) ou [LICENSE TypeORM](templates/typeorm/LICENSE).
+MIT — consulte [LICENSE Prisma](templates/prisma/LICENSE) ou [LICENSE TypeORM](templates/typeorm/LICENSE)
