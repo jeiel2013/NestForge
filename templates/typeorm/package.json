@@ -1,7 +1,7 @@
 {
   "name": "nestforge",
   "version": "0.1.0",
-  "description": "Production-ready NestJS starter with Prisma, Authentication, Docker, Testing, CI/CD and Clean Architecture.",
+  "description": "Production-ready NestJS starter with TypeORM, Authentication, Docker, Testing, CI/CD and Clean Architecture.",
   "license": "MIT",
   "author": "Jeiel Alves <https://github.com/jeiel2013>",
   "private": true,
