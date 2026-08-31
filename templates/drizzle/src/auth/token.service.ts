@@ -3,18 +3,29 @@ import {
     Injectable,
     UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import type { JwtSignOptions } from '@nestjs/jwt';
-import { IsNull, Repository } from 'typeorm';
-import { createHash } from 'crypto';
-import { RefreshTokenEntity } from './entities/refresh-token.entity';
+import {
+    and,
+    eq,
+    isNull,
+} from 'drizzle-orm';
+import {
+    createHash,
+    randomUUID,
+} from 'node:crypto';
+import { InjectDatabase } from '../database/database.decorators';
+import type { DrizzleDatabase } from '../database/database.types';
+import {
+    refreshTokens,
+    users,
+} from '../database/schema';
 
 @Injectable()
 export class TokenService {
     constructor(
-        @InjectRepository(RefreshTokenEntity)
-        private readonly refreshTokensRepository: Repository<RefreshTokenEntity>,
+        @InjectDatabase()
+        private readonly database: DrizzleDatabase,
         private readonly jwtService: JwtService,
     ) { }
 
@@ -23,52 +34,80 @@ export class TokenService {
         email: string,
         role: string,
     ) {
-        const payload = { sub: userId, email, role };
+        const payload = {
+            sub: userId,
+            email,
+            role,
+        };
 
         const accessTokenExpiresIn = (
-            process.env.JWT_ACCESS_EXPIRES_IN ?? '15m'
+            process.env.JWT_ACCESS_EXPIRES_IN ??
+            '15m'
         ) as JwtSignOptions['expiresIn'];
 
         const refreshTokenExpiresIn = (
-            process.env.JWT_REFRESH_EXPIRES_IN ?? '7d'
+            process.env.JWT_REFRESH_EXPIRES_IN ??
+            '7d'
         ) as JwtSignOptions['expiresIn'];
 
-        const accessToken = this.jwtService.sign(payload, {
-            secret: process.env.JWT_ACCESS_SECRET,
-            expiresIn:
-                accessTokenExpiresIn,
-        });
+        const accessToken = this.jwtService.sign(
+            payload,
+            {
+                secret: process.env.JWT_ACCESS_SECRET,
+                expiresIn: accessTokenExpiresIn,
+            },
+        );
 
-        const refreshToken = this.jwtService.sign(payload, {
-            secret: process.env.JWT_REFRESH_SECRET,
-            expiresIn:
-                refreshTokenExpiresIn,
-        });
+        const refreshToken = this.jwtService.sign(
+            payload,
+            {
+                secret: process.env.JWT_REFRESH_SECRET,
+                expiresIn: refreshTokenExpiresIn,
+            },
+        );
 
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7);
 
-        const storedToken = this.refreshTokensRepository.create({
-            tokenHash: this.hashToken(refreshToken),
-            userId,
-            expiresAt,
-            revokedAt: null,
-        });
+        await this.database
+            .insert(refreshTokens)
+            .values({
+                id: randomUUID(),
+                tokenHash:
+                    this.hashToken(refreshToken),
+                userId,
+                expiresAt,
+                revokedAt: null,
+            });
 
-        await this.refreshTokensRepository.save(storedToken);
-
-        return { accessToken, refreshToken };
+        return {
+            accessToken,
+            refreshToken,
+        };
     }
 
     async refresh(refreshToken: string) {
-        const tokenHash = this.hashToken(refreshToken);
+        const tokenHash =
+            this.hashToken(refreshToken);
 
-        const stored = await this.refreshTokensRepository.findOne({
-            where: { tokenHash },
-            relations: {
-                user: true,
-            },
-        });
+        const [stored] = await this.database
+            .select({
+                id: refreshTokens.id,
+                userId: refreshTokens.userId,
+                expiresAt: refreshTokens.expiresAt,
+                revokedAt: refreshTokens.revokedAt,
+                userEmail: users.email,
+                userRole: users.role,
+            })
+            .from(refreshTokens)
+            .innerJoin(
+                users,
+                eq(refreshTokens.userId, users.id),
+            )
+            .where(
+                eq(refreshTokens.tokenHash, tokenHash),
+            )
+            .limit(1);
 
         if (
             !stored ||
@@ -80,31 +119,47 @@ export class TokenService {
             );
         }
 
-        stored.revokedAt = new Date();
-
-        await this.refreshTokensRepository.save(stored);
+        await this.database
+            .update(refreshTokens)
+            .set({
+                revokedAt: new Date(),
+            })
+            .where(
+                and(
+                    eq(refreshTokens.id, stored.id),
+                    isNull(refreshTokens.revokedAt),
+                ),
+            );
 
         return this.issueTokens(
-            stored.user.id,
-            stored.user.email,
-            stored.user.role,
+            stored.userId,
+            stored.userEmail,
+            stored.userRole,
         );
     }
 
     async logout(refreshToken: string) {
-        const tokenHash = this.hashToken(refreshToken);
+        const tokenHash =
+            this.hashToken(refreshToken);
 
-        await this.refreshTokensRepository.update(
-            {
-                tokenHash,
-                revokedAt: IsNull(),
-            },
-            {
+        await this.database
+            .update(refreshTokens)
+            .set({
                 revokedAt: new Date(),
-            },
-        );
+            })
+            .where(
+                and(
+                    eq(
+                        refreshTokens.tokenHash,
+                        tokenHash,
+                    ),
+                    isNull(refreshTokens.revokedAt),
+                ),
+            );
 
-        return { message: 'Logout realizado com sucesso' };
+        return {
+            message: 'Logout realizado com sucesso',
+        };
     }
 
     private hashToken(token: string): string {
