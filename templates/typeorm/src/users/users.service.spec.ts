@@ -137,7 +137,14 @@ describe('UsersService', () => {
         });
 
         expect(result.name).toBe('Novo Nome');
-        expect(usersRepository.save).toHaveBeenCalledWith(mockUser);
+        expect(
+            usersRepository.save,
+        ).toHaveBeenCalledWith(
+            expect.objectContaining({
+                id: 'user-1',
+                name: 'Novo Nome',
+            }),
+        );
     });
 
     it('deve remover um usuário existente', async () => {
@@ -164,6 +171,13 @@ describe('UsersService', () => {
         );
 
         expect(result.avatarUrl).toBe('/uploads/avatars/x.png');
-        expect(usersRepository.save).toHaveBeenCalledWith(mockUser);
+        expect(
+            usersRepository.save,
+        ).toHaveBeenCalledWith(
+            expect.objectContaining({
+                id: 'user-1',
+                avatarUrl: '/uploads/avatars/x.png',
+            }),
+        );
     });
 });
