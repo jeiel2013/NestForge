@@ -1,172 +1,232 @@
-# Como adicionar um novo módulo
+# Adicionando um módulo
 
-Este guia mostra o passo a passo pra adicionar um recurso novo seguindo as convenções do NestForge, usando um módulo `posts` (posts de blog) como exemplo. Adapte os nomes pro seu caso.
+Este guia mostra como adicionar um módulo `posts` ao projeto usando NestJS, TypeORM e Zod.
 
-## 1. Adicione o model no Prisma
+## 1. Crie a entidade
 
-Em `prisma/schema.prisma`:
+Crie `src/posts/entities/post.entity.ts`:
 
-```prisma
-model Post {
-  id        String   @id @default(uuid())
-  title     String
-  content   String
-  authorId  String
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+```ts
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { UserEntity } from '../../users/entities/user.entity';
 
-  @@map("posts")
+@Entity({ name: 'posts' })
+export class PostEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @Column({
+    type: 'varchar',
+    length: 200,
+  })
+  title!: string;
+
+  @Column({
+    type: 'text',
+  })
+  content!: string;
+
+  @Column({
+    name: 'author_id',
+    type: 'varchar',
+    length: 36,
+  })
+  authorId!: string;
+
+  @ManyToOne(() => UserEntity, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({
+    name: 'author_id',
+  })
+  author!: UserEntity;
+
+  @CreateDateColumn({
+    name: 'created_at',
+  })
+  createdAt!: Date;
+
+  @UpdateDateColumn({
+    name: 'updated_at',
+  })
+  updatedAt!: Date;
+
+  constructor(partial?: Partial<PostEntity>) {
+    if (partial) {
+      Object.assign(this, partial);
+    }
+  }
 }
 ```
 
-Não esqueça de adicionar a relação inversa no `model User`:
+## 2. Crie os DTOs
 
-```prisma
-posts Post[]
-```
-
-Gere a migration:
-
-```bash
-npx prisma migrate dev --name add_posts
-```
-
-## 2. Crie a estrutura de pastas
-
-```
-src/posts/
-├── dto/
-│   ├── create-post.dto.ts
-│   └── update-post.dto.ts
-├── entities/
-│   └── post.entity.ts
-├── posts.controller.ts
-├── posts.service.ts
-└── posts.module.ts
-```
-
-## 3. DTOs com Zod
-
-`src/posts/dto/create-post.dto.ts`:
+Crie `src/posts/dto/create-post.dto.ts`:
 
 ```ts
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
 export const createPostSchema = z.object({
-  title: z.string().min(3).describe('Título do post'),
-  content: z.string().min(10).describe('Conteúdo do post'),
+  title: z
+    .string()
+    .min(3)
+    .max(200),
+  content: z.string().min(1),
 });
 
-export class CreatePostDto extends createZodDto(createPostSchema) {}
+export class CreatePostDto extends createZodDto(
+  createPostSchema,
+) {}
 ```
 
-`src/posts/dto/update-post.dto.ts`:
+Crie `src/posts/dto/update-post.dto.ts`:
 
 ```ts
 import { createZodDto } from 'nestjs-zod';
 import { createPostSchema } from './create-post.dto';
 
-export const updatePostSchema = createPostSchema.partial();
+export const updatePostSchema =
+  createPostSchema.partial();
 
-export class UpdatePostDto extends createZodDto(updatePostSchema) {}
+export class UpdatePostDto extends createZodDto(
+  updatePostSchema,
+) {}
 ```
 
-## 4. Entity (o que a API expõe)
+## 3. Crie o service
 
-`src/posts/entities/post.entity.ts` — mesmo se não houver nada sensível pra esconder agora, criar a entity já deixa o padrão pronto pra quando houver:
-
-```ts
-export class PostEntity {
-  id: string;
-  title: string;
-  content: string;
-  authorId: string;
-  createdAt: Date;
-  updatedAt: Date;
-
-  constructor(partial: Partial<PostEntity>) {
-    Object.assign(this, partial);
-  }
-}
-```
-
-## 5. Service (regra de negócio)
-
-`src/posts/posts.service.ts`:
+Crie `src/posts/posts.service.ts`:
 
 ```ts
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
+import {
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { PostEntity } from './entities/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { PostEntity } from './entities/post.entity';
 
 @Injectable()
 export class PostsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(PostEntity)
+    private readonly postsRepository: Repository<PostEntity>,
+  ) {}
 
-  async create(authorId: string, dto: CreatePostDto) {
-    const post = await this.prisma.post.create({ data: { ...dto, authorId } });
-    return new PostEntity(post);
+  async create(
+    authorId: string,
+    dto: CreatePostDto,
+  ) {
+    const post = this.postsRepository.create({
+      ...dto,
+      authorId,
+    });
+
+    return this.postsRepository.save(post);
+  }
+
+  async findAll() {
+    return this.postsRepository.find({
+      relations: {
+        author: true,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
   }
 
   async findOne(id: string) {
-    const post = await this.prisma.post.findUnique({ where: { id } });
-    if (!post) throw new NotFoundException('Post não encontrado');
-    return new PostEntity(post);
+    const post = await this.postsRepository.findOne({
+      where: { id },
+      relations: {
+        author: true,
+      },
+    });
+
+    if (!post) {
+      throw new NotFoundException(
+        'Post não encontrado',
+      );
+    }
+
+    return post;
   }
 
-  async update(id: string, dto: UpdatePostDto) {
-    await this.findOne(id);
-    const post = await this.prisma.post.update({ where: { id }, data: dto });
-    return new PostEntity(post);
+  async update(
+    id: string,
+    dto: UpdatePostDto,
+  ) {
+    const post = await this.findOne(id);
+
+    Object.assign(post, dto);
+
+    return this.postsRepository.save(post);
   }
 
   async remove(id: string) {
-    await this.findOne(id);
-    await this.prisma.post.delete({ where: { id } });
-    return { message: 'Post removido com sucesso' };
+    const post = await this.findOne(id);
+
+    await this.postsRepository.remove(post);
+
+    return {
+      message: 'Post removido com sucesso',
+    };
   }
 }
 ```
 
-## 6. Controller (guards + permissions)
+## 4. Crie o controller
 
-Se o recurso precisa de controle de acesso, adicione a permission em `src/common/constants/permissions.ts` e no mapeamento `src/common/constants/role-permissions.ts` antes de usar:
-
-```ts
-// permissions.ts
-export enum Permission {
-  // ...existentes
-  PostCreate = 'post:create',
-  PostDelete = 'post:delete',
-}
-```
-
-`src/posts/posts.controller.ts`:
+Crie `src/posts/posts.controller.ts`:
 
 ```ts
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+} from '@nestjs/common';
+import { Request } from 'express';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { Permissions } from '../common/decorators/permissions.decorator';
-import { Permission } from '../common/constants/permissions';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
 
-@ApiTags('posts')
-@ApiBearerAuth()
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+  ) {}
 
   @Post()
-  @Permissions(Permission.PostCreate)
-  create(@CurrentUser() user: { id: string }, @Body() dto: CreatePostDto) {
-    return this.postsService.create(user.id, dto);
+  create(
+    @Req() request: Request,
+    @Body() dto: CreatePostDto,
+  ) {
+    return this.postsService.create(
+      request.user.id,
+      dto,
+    );
+  }
+
+  @Get()
+  findAll() {
+    return this.postsService.findAll();
   }
 
   @Get(':id')
@@ -175,28 +235,39 @@ export class PostsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdatePostDto) {
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdatePostDto,
+  ) {
     return this.postsService.update(id, dto);
   }
 
   @Delete(':id')
-  @Permissions(Permission.PostDelete)
   remove(@Param('id') id: string) {
     return this.postsService.remove(id);
   }
 }
 ```
 
-## 7. Module
+Se o projeto não usa autenticação, remova `@Req()` e receba `authorId` de outra forma adequada ao domínio.
 
-`src/posts/posts.module.ts`:
+## 5. Registre o repository no módulo
+
+Crie `src/posts/posts.module.ts`:
 
 ```ts
 import { Module } from '@nestjs/common';
-import { PostsService } from './posts.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { PostEntity } from './entities/post.entity';
 import { PostsController } from './posts.controller';
+import { PostsService } from './posts.service';
 
 @Module({
+  imports: [
+    TypeOrmModule.forFeature([
+      PostEntity,
+    ]),
+  ],
   controllers: [PostsController],
   providers: [PostsService],
   exports: [PostsService],
@@ -204,27 +275,102 @@ import { PostsController } from './posts.controller';
 export class PostsModule {}
 ```
 
-Registre no `src/app.module.ts` (dentro do array `imports`):
+Depois importe `PostsModule` em `src/app.module.ts`.
 
-```ts
-import { PostsModule } from './posts/posts.module';
-// ...
-PostsModule,
+## 6. Gere e aplique a migration
+
+```bash
+npm run migration:generate -- src/database/migrations/AddPosts
+npm run migration:run
 ```
 
-## 8. Testes
+Confira o arquivo gerado antes de executar a migration em produção.
 
-- **Unitário** (`src/posts/posts.service.spec.ts`): mocke o `PrismaService` como em `src/users/users.service.spec.ts` — sem banco real.
-- **E2e** (`test/posts.e2e-spec.ts`): use os helpers de `test/utils/e2e-setup.ts` e `test/utils/clean-database.ts` (adicione `prisma.post.deleteMany()` na limpeza) e siga o padrão de `test/users.e2e-spec.ts`.
+Para desfazer a última migration:
 
-## Checklist rápido
+```bash
+npm run migration:revert
+```
 
-- [ ] Model no `schema.prisma` + migration
-- [ ] DTOs com Zod (`createZodDto`)
-- [ ] Entity (mesmo sem campo sensível ainda)
-- [ ] Service sem lógica no controller
-- [ ] Permissions novas cadastradas em `permissions.ts` e `role-permissions.ts`, se necessário
-- [ ] Module registrado no `AppModule`
-- [ ] Teste unitário do service
-- [ ] Teste e2e do fluxo principal
-- [ ] Atualizar `ROADMAP.md` se o módulo fechar um item do roadmap
+## 7. Adicione testes unitários
+
+O teste unitário deve mockar o repository:
+
+```ts
+import { Repository } from 'typeorm';
+import { vi } from 'vitest';
+import { PostsService } from './posts.service';
+import { PostEntity } from './entities/post.entity';
+
+const postsRepository = {
+  findOne: vi.fn(),
+  find: vi.fn(),
+  create: vi.fn(),
+  save: vi.fn(),
+  remove: vi.fn(),
+};
+
+const postsService = new PostsService(
+  postsRepository as unknown as Repository<PostEntity>,
+);
+```
+
+Dessa forma, o teste não precisa iniciar o Nest nem conectar ao banco.
+
+## 8. Atualize a limpeza E2E
+
+Em `test/utils/clean-database.ts`, exclua posts antes de usuários:
+
+```ts
+await manager
+  .createQueryBuilder()
+  .delete()
+  .from(PostEntity)
+  .execute();
+```
+
+A ordem é importante por causa da chave estrangeira `posts.author_id`.
+
+## 9. Use transações quando necessário
+
+Quando várias operações precisarem ser atômicas, injete `DataSource`:
+
+```ts
+constructor(
+  private readonly dataSource: DataSource,
+) {}
+```
+
+E execute:
+
+```ts
+await this.dataSource.transaction(
+  async (manager) => {
+    await manager.save(...);
+    await manager.update(...);
+  },
+);
+```
+
+Se uma operação falhar, a transação inteira será revertida.
+
+## Checklist
+
+- [ ] Entidade criada
+- [ ] DTOs Zod criados
+- [ ] Service usa `Repository<Entity>`
+- [ ] Repository registrado com `TypeOrmModule.forFeature`
+- [ ] Controller criado
+- [ ] Módulo importado no `AppModule`
+- [ ] Migration gerada e revisada
+- [ ] Migration aplicada
+- [ ] Testes unitários adicionados
+- [ ] Limpeza dos testes E2E atualizada
+- [ ] Swagger e permissões adicionados, quando aplicáveis
+
+Depois confira:
+
+Select-String `    -Path '.\templates\typeorm\docs\adding-a-module.md'`
+-Pattern 'Prisma|prisma'
+
+Não deve retornar nada.
