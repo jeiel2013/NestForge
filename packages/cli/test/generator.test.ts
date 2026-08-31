@@ -392,6 +392,17 @@ test(
                     'utf8',
                 );
 
+                const sessionEntity = await readFile(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'auth',
+                        'entities',
+                        'session.entity.ts',
+                    ),
+                    'utf8',
+                );
+
                 const usersService = await readFile(
                     path.join(
                         targetDir,
@@ -421,6 +432,23 @@ test(
                         path.join(targetDir, 'prisma'),
                     ),
                     false,
+                );
+
+                assert.doesNotMatch(
+                    sessionEntity,
+                    /nestforge:feature/,
+                );
+
+                assert.doesNotMatch(
+                    sessionEntity,
+                    /timestamp with time zone/,
+                );
+
+                assert.equal(
+                    sessionEntity.match(
+                        /type:\s*['"]datetime['"]/g,
+                    )?.length,
+                    1,
                 );
 
                 assert.equal(
