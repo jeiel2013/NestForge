@@ -26,6 +26,7 @@ import { PermissionsGuard } from '../common/guards/permissions.guard';
 // nestforge:feature:auth:session
 import { SessionAuthGuard } from './guards/session-auth.guard';
 import { SessionService } from './session.service';
+import { DrizzleSessionStore } from './drizzle-session.store';
 // nestforge:feature:auth:session:end
 
 @Module({
@@ -50,6 +51,7 @@ import { SessionService } from './session.service';
     },
     // nestforge:feature:auth:token:end
     // nestforge:feature:auth:session
+    DrizzleSessionStore,
     SessionService,
     {
       provide: APP_GUARD,
@@ -69,6 +71,11 @@ import { SessionService } from './session.service';
     },
     // nestforge:feature:rbac:end
   ],
-  exports: [AuthService],
+  exports: [
+    AuthService,
+    // nestforge:feature:auth:session
+    DrizzleSessionStore,
+    // nestforge:feature:auth:session:end
+  ],
 })
 export class AuthModule { }
