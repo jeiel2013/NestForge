@@ -1,365 +1,357 @@
-# Testando a CLI nestforge (v0.1.0)
+# Testando a CLI `nestforge`
 
-Guia para validar a CLI, as combinações geradas e os projetos Prisma e TypeORM.
+Guia para validar a CLI, as combinações geradas e os projetos Prisma, TypeORM e Drizzle.
 
-## 0. Pré-requisitos
+## 1. Pré-requisitos
 
-- Node.js 20 ou superior
-- npm 10 ou superior
-- Docker, somente para testes reais com PostgreSQL, MySQL ou Redis
+* Node.js 20 ou superior;
+* npm 10 ou superior;
+* Docker apenas para testes reais com PostgreSQL, MySQL ou Redis.
 
 SQLite pode ser testado sem Docker.
 
-## 1. Preparar o monorepo
+Dependências como `better-sqlite3` podem exigir uma versão compatível com a versão do Node utilizada.
 
-Na raiz do repositório:
+## 2. Preparar o monorepo
 
+No PowerShell:
+
+```powershell
 Set-Location C:\Users\Jeiel\Music\nestforge
 npm install
+```
 
-## 2. Testes automatizados da CLI
+Depois, entre na pasta da CLI:
 
-Execute:
-
+```powershell
 Set-Location .\packages\cli
+```
+
+## 3. Executar os testes automatizados
+
+Dentro de `packages/cli`:
+
+```bash
 npm test
-
-O comando executa:
-
-tsx --test test/generator.test.ts
-
-A suíte valida automaticamente:
-
-- Prisma com PostgreSQL e JWT;
-- Prisma com MySQL;
-- Prisma com SQLite e autenticação “Nenhuma”;
-- OAuth-only;
-- Session/Cookies;
-- TypeORM com SQLite e Session/Cookies;
-- geração JavaScript com Prisma;
-- geração JavaScript com TypeORM;
-- configuração TypeORM para PostgreSQL e MySQL;
-- rejeição de Drizzle, MongoDB e ORM “Nenhum”;
-- remoção de arquivos e dependências desabilitadas;
-- processamento de marcadores internos em arquivos condicionais.
-
-## 3. Rodar a CLI em desenvolvimento
-
-Dentro de packages/cli:
-
-npm run dev
+```
 
 Esse comando executa:
 
+```bash
+tsx --test test/generator.test.ts
+```
+
+A suíte valida automaticamente:
+
+* Prisma com PostgreSQL e JWT;
+* Prisma com MySQL;
+* Prisma com SQLite;
+* OAuth-only;
+* autenticação sem senha;
+* autenticação por Session/Cookies;
+* projetos sem autenticação;
+* TypeORM com SQLite e Session/Cookies;
+* TypeORM com PostgreSQL e MySQL;
+* Drizzle com SQLite e JWT;
+* Drizzle com SQLite e Session/Cookies;
+* Drizzle com PostgreSQL e MySQL;
+* JavaScript com Prisma;
+* JavaScript com TypeORM;
+* JavaScript com Drizzle;
+* remoção de recursos desabilitados;
+* remoção de dependências desnecessárias;
+* seleção do driver correto;
+* configuração dos scripts de migrations;
+* processamento dos marcadores;
+* recusa de MongoDB e ORM “Nenhum”.
+
+Resultado esperado:
+
+```text
+pass 14
+fail 0
+```
+
+A quantidade de testes pode aumentar conforme novos casos forem adicionados. O critério principal é não existir teste com falha.
+
+## 4. Executar a CLI em desenvolvimento
+
+Dentro de `packages/cli`:
+
+```bash
+npm run dev
+```
+
+O comando executa a CLI diretamente pelo TypeScript:
+
+```bash
 tsx src/index.ts
+```
 
-A CLI cria o projeto em process.cwd(). Para gerar projetos fora do repositório, você também pode executar o código
-local a partir de outra pasta:
+A pasta do projeto é criada no diretório atual.
 
+Para gerar um projeto fora do repositório usando o código local:
+
+```powershell
 Set-Location C:\Users\Jeiel\Music
 
 & '.\nestforge\node_modules\.bin\tsx.cmd' `
-'.\nestforge\packages\cli\src\index.ts'
+  '.\nestforge\packages\cli\src\index.ts'
+```
 
-## 4. Testar como uma CLI instalada
+## 5. Testar como uma CLI instalada
 
 Na pasta da CLI:
 
+```powershell
 Set-Location C:\Users\Jeiel\Music\nestforge\packages\cli
 npm run build
 npm link
+```
 
 Depois, em outra pasta:
 
+```powershell
 Set-Location C:\Users\Jeiel\Music
 nestforge
+```
 
-Para desfazer o link:
+Para desfazer o link global:
 
+```bash
 npm unlink -g nestforge
+```
 
-## 5. Fluxo interativo
+## 6. Fluxo interativo
 
-A CLI apresenta 11 etapas, sendo que a pergunta de RBAC aparece somente quando existe autenticação.
+A CLI apresenta até 11 perguntas. A pergunta de RBAC aparece somente quando alguma autenticação é selecionada.
 
-### Passo 1 — Nome do projeto
+| Nº | Pergunta                 | Opções                                      | Status                 |
+| -: | ------------------------ | ------------------------------------------- | ---------------------- |
+|  1 | Nome do projeto          | Texto livre                                 | ✅                      |
+|  2 | Linguagem                | TypeScript ou JavaScript                    | ✅ Ambas                |
+|  3 | ORM / Query Builder      | Prisma, TypeORM, Drizzle ou Nenhum          | ✅ Três ORMs · ⏳ Nenhum |
+|  4 | Banco de dados           | PostgreSQL, MySQL, SQLite ou MongoDB        | ✅ SQL · ⏳ MongoDB      |
+|  5 | Docker                   | Sim ou não                                  | ✅                      |
+|  6 | Swagger/OpenAPI          | Sim ou não                                  | ✅                      |
+|  7 | Validação global com Zod | Sim ou não                                  | ✅                      |
+|  8 | Redis, filas e e-mail    | Sim ou não                                  | ✅                      |
+|  9 | Autenticação             | JWT, Session/Cookies, OAuth-only ou Nenhuma | ✅                      |
+| 10 | RBAC e Permissions       | Sim ou não                                  | ✅ Condicional          |
+| 11 | Criar `.env`             | Sim ou não                                  | ✅                      |
 
-Pergunta:
+### Nome do projeto
 
-Qual o nome do seu projeto?
+| Situação                | Resultado esperado           |
+| ----------------------- | ---------------------------- |
+| Nome informado          | Usa o nome informado         |
+| Enter sem informar nome | Usa `my-nest-api`            |
+| Ctrl+C                  | Cancela sem criar projeto    |
+| Pasta já existente      | Exibe erro e não sobrescreve |
 
-Situação Resultado
-━━━━━━━━━━━━━━━━━━━━ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Nome informado Usa o nome informado
-──────────────────── ───────────────────────────────
-Enter direto Usa my-nest-api
-──────────────────── ───────────────────────────────
-Ctrl+C Cancela sem criar projeto
-──────────────────── ───────────────────────────────
-Pasta já existente Mostra erro e não sobrescreve
+Ainda não existe validação completa para todos os nomes inválidos de pacotes npm.
 
-Ainda não existe validação completa para nomes de pacotes npm.
+### Linguagem
 
-### Passo 2 — Linguagem
-
-Pergunta:
-
-TypeScript ou JavaScript?
-
-Opção Resultado
-━━━━━━━━━━━━ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TypeScript ✅ Gera fontes .ts
-──────────── ──────────────────────────────────
-JavaScript ✅ Transpila o template para .js
+| Opção      | Resultado                                               |
+| ---------- | ------------------------------------------------------- |
+| TypeScript | Mantém fontes e configurações `.ts`                     |
+| JavaScript | Transpila o template e atualiza scripts e configurações |
 
 Na geração JavaScript:
 
-- arquivos .ts são convertidos para .js;
-- arquivos de configuração do Vitest passam a usar .js;
-- tsconfig.json, tsconfig.build.json e nest-cli.json são removidos;
-- scripts de execução deixam de usar Nest CLI;
-- scripts Prisma ou TypeORM são ajustados para JavaScript;
-- dependências exclusivamente TypeScript são removidas.
+* arquivos `.ts` são convertidos para `.js`;
+* configurações do Vitest passam a usar JavaScript;
+* configurações de migrations são atualizadas;
+* `tsconfig.json` e arquivos exclusivos do TypeScript são removidos;
+* scripts deixam de depender do Nest CLI e de executores TypeScript;
+* dependências exclusivamente TypeScript são removidas.
 
-### Passo 3 — ORM / Query Builder
+### ORM / Query Builder
 
-Pergunta:
+| Opção       | Resultado                 |
+| ----------- | ------------------------- |
+| Prisma      | ✅ Gera o template Prisma  |
+| TypeORM     | ✅ Gera o template TypeORM |
+| Drizzle ORM | ✅ Gera o template Drizzle |
+| Nenhum      | ❌ Exibe erro amigável     |
 
-Escolha o ORM/Query Builder:
+### Banco de dados
 
-Opção Hint Resultado
-━━━━━━━━━━━━━ ━━━━━━━━━━━━━ ━━━━━━━━━━━━━━━━━━
-Prisma Recomendado ✅ Funciona
-───────────── ───────────── ──────────────────
-TypeORM — ✅ Funciona
-───────────── ───────────── ──────────────────
-Drizzle ORM Em breve ❌ Erro amigável
-───────────── ───────────── ──────────────────
-Nenhum — ❌ Erro amigável
+| Opção      | Resultado                                |
+| ---------- | ---------------------------------------- |
+| PostgreSQL | ✅ Funciona com Prisma, TypeORM e Drizzle |
+| MySQL      | ✅ Funciona com Prisma, TypeORM e Drizzle |
+| SQLite     | ✅ Funciona com Prisma, TypeORM e Drizzle |
+| MongoDB    | ❌ Exibe erro amigável                    |
 
-### Passo 4 — Banco de dados
+A CLI deve remover os drivers dos bancos que não foram selecionados.
 
-Pergunta:
+| Banco      | Driver TypeORM/Drizzle |
+| ---------- | ---------------------- |
+| PostgreSQL | `pg`                   |
+| MySQL      | `mysql2`               |
+| SQLite     | `better-sqlite3`       |
 
-Qual banco de dados você quer usar?
+### Docker
 
-Opção Hint Resultado
-━━━━━━━━━━━━ ━━━━━━━━━━━━━ ━━━━━━━━━━━━━━━━━━
-PostgreSQL Recomendado ✅ Funciona
-──────────── ───────────── ──────────────────
-MySQL — ✅ Funciona
-──────────── ───────────── ──────────────────
-SQLite — ✅ Funciona
-──────────── ───────────── ──────────────────
-MongoDB Em breve ❌ Erro amigável
+Quando desabilitado, devem ser removidos:
 
-Com Prisma, a CLI ajusta:
+```text
+Dockerfile
+docker-compose.yml
+```
 
-- provider do schema.prisma;
-- DATABASE_URL;
-- Docker Compose;
-- workflow CI.
-
-Com TypeORM, a CLI ajusta:
-
-- DB_TYPE;
-- DATABASE_URL;
-- tipos de colunas específicos do banco;
-- Docker Compose;
-- workflow CI;
-- driver instalado.
-
-Drivers TypeORM:
-
-Banco Driver
-━━━━━━━━━━━━ ━━━━━━━━━━━━━━━━
-PostgreSQL pg
-──────────── ────────────────
-MySQL mysql2
-──────────── ────────────────
-SQLite better-sqlite3
-
-Os drivers não selecionados são removidos.
-
-### Passo 5 — Docker
-
-Pergunta:
-
-Deseja adicionar Docker?
-
-Padrão: sim.
-
-Quando a resposta é “Não”:
-
-- Dockerfile é removido;
-- docker-compose.yml é removido.
-
-### Passo 6 — Swagger
-
-Pergunta:
-
-Deseja incluir documentação Swagger/OpenAPI?
-
-Padrão: sim.
+### Swagger/OpenAPI
 
 Quando desabilitado:
 
-- bootstrap do Swagger é removido;
-- decorators Swagger são removidos;
-- @nestjs/swagger é removido.
+* o bootstrap do Swagger é removido;
+* a rota `/docs` deixa de existir;
+* decorators Swagger são removidos;
+* `@nestjs/swagger` é removido das dependências.
 
-### Passo 7 — Validação global
+### Validação global
 
-Pergunta:
+Quando desabilitada:
 
-Deseja validação global (Zod) habilitada?
+* `ZodValidationPipe` é removido do bootstrap;
+* o pipe também é removido do setup E2E.
 
-Padrão: sim.
+Os DTOs continuam existindo, mas deixam de ser validados pelo pipe global.
 
-Quando desabilitada, ZodValidationPipe é removido do bootstrap e da infraestrutura E2E.
+### Redis, filas e e-mail
 
-Os DTOs Zod continuam existindo como classes.
+Quando desabilitado, devem ser removidos:
 
-### Passo 8 — Redis
+* `MailModule`;
+* `MailService`;
+* `MailProcessor`;
+* BullMQ;
+* Redis;
+* indicador de saúde do Redis;
+* recuperação de senha por e-mail;
+* verificação de e-mail;
+* dependências relacionadas.
 
-Pergunta:
+### Autenticação JWT
 
-Deseja incluir Redis (cache/filas + e-mail via BullMQ)?
+Deve manter:
 
-Padrão: sim.
+* cadastro;
+* login;
+* `TokenService`;
+* `JwtStrategy`;
+* `JwtAuthGuard`;
+* access token;
+* refresh token;
+* rotação e revogação;
+* logout;
+* OAuth Google e GitHub.
 
-Quando desabilitado, são removidos:
+Deve remover os recursos exclusivos de Session/Cookies.
 
-- MailModule;
-- MailService;
-- MailProcessor;
-- BullMQ;
-- indicador de saúde do Redis;
-- recuperação de senha por e-mail;
-- verificação de e-mail;
-- dependências Redis, BullMQ e Nodemailer.
+### Session/Cookies
 
-### Passo 9 — Autenticação
+Deve manter:
 
-Pergunta:
+* cadastro;
+* login;
+* `SessionService`;
+* `SessionAuthGuard`;
+* `express-session`;
+* cookie `nestforge.sid`;
+* endpoint `/auth/csrf-token`;
+* proteção CSRF;
+* persistência da sessão;
+* OAuth Google e GitHub.
 
-Qual estratégia de autenticação você quer usar?
+Persistência utilizada:
 
-Opção Resultado
-━━━━━━━━━━━━━━━━━ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-JWT ✅ Access token, refresh token e OAuth
-───────────────── ────────────────────────────────────────
-Session/Cookies ✅ Sessão persistente e proteção CSRF
-───────────────── ────────────────────────────────────────
-OAuth-only ✅ Google/GitHub sem login por senha
-───────────────── ────────────────────────────────────────
-Nenhuma ✅ Remove autenticação e usuários
+| ORM     | Store                          |
+| ------- | ------------------------------ |
+| Prisma  | `@quixo3/prisma-session-store` |
+| TypeORM | `connect-typeorm`              |
+| Drizzle | `DrizzleSessionStore`          |
 
-#### JWT
+Deve remover arquivos, dependências, variáveis e scripts exclusivos de JWT.
 
-Mantém:
+### OAuth-only
 
-- TokenService;
-- JwtStrategy;
-- JwtAuthGuard;
-- refresh tokens persistidos;
-- endpoints de refresh e logout;
-- OAuth Google e GitHub.
+Deve remover:
 
-#### Session/Cookies
+* cadastro por senha;
+* login por senha;
+* recuperação de senha;
+* redefinição de senha;
+* verificação de e-mail;
+* DTOs baseados em senha;
+* testes baseados em senha.
 
-Mantém:
+Deve manter:
 
-- SessionService;
-- SessionAuthGuard;
-- express-session;
-- cookie nestforge.sid;
-- token CSRF associado à sessão;
-- endpoint /auth/csrf-token;
-- OAuth Google e GitHub.
+* Google OAuth;
+* GitHub OAuth;
+* emissão de tokens;
+* refresh;
+* logout;
+* proteção das rotas autenticadas.
 
-Persistência por ORM:
+### Nenhuma autenticação
 
-ORM Store
-━━━━━━━━━ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Prisma @quixo3/prisma-session-store
-───────── ──────────────────────────────
-TypeORM connect-typeorm
+Deve remover completamente:
 
-Arquivos e dependências exclusivos de JWT são removidos.
+```text
+src/auth
+src/users
+```
 
-#### OAuth-only
+A pergunta de RBAC não deve aparecer.
 
-Remove:
+### RBAC e Permissions
 
-- cadastro por senha;
-- login por senha;
-- recuperação de senha;
-- redefinição de senha;
-- verificação de e-mail;
-- DTOs e testes baseados em senha.
+Quando desabilitado, devem ser removidos:
 
-Mantém Google, GitHub e emissão de tokens após o callback OAuth.
+* `RolesGuard`;
+* `PermissionsGuard`;
+* decorators de roles;
+* decorators de permissions;
+* constantes de permissions;
+* regras de RBAC dos controllers.
 
-#### Nenhuma
+As rotas continuam exigindo autenticação quando alguma estratégia estiver ativa.
 
-Remove completamente:
-
-src/auth/
-src/users/
-
-A pergunta de RBAC não aparece.
-
-### Passo 10 — RBAC e Permissions
-
-Pergunta:
-
-Deseja incluir controle de acesso (RBAC + Permissions)?
-
-Essa pergunta aparece somente quando a estratégia de autenticação não é “Nenhuma”.
-
-Quando desabilitado, são removidos:
-
-- RolesGuard;
-- PermissionsGuard;
-- decorators de roles e permissions;
-- constantes de permissions;
-- regras específicas aplicadas aos controllers.
-
-As rotas continuam exigindo autenticação.
-
-### Passo 11 — Criação do .env
-
-Pergunta:
-
-Deseja criar o arquivo .env automaticamente?
+### Criação do `.env`
 
 Quando habilitado:
 
+```text
 .env.example → .env
+```
 
-Quando desabilitado, a CLI exibe:
+Quando desabilitado, a CLI deve exibir:
 
+```bash
 cp .env.example .env
+```
 
-## 6. Comandos finais
+## 7. Comandos finais exibidos
 
 ### Prisma
 
-A CLI exibe:
-
+```bash
 cd <nome-do-projeto>
 npm install
 docker compose up -d <serviços>
 npx prisma migrate dev
 npm run start:dev
+```
 
-A linha do Docker aparece somente quando Docker estiver habilitado e houver serviços para iniciar.
+A linha do Docker aparece somente quando Docker está habilitado e existe algum serviço para iniciar.
 
 ### TypeORM
 
-A CLI exibe:
-
+```bash
 cd <nome-do-projeto>
 npm install
 docker compose up -d <serviços>
@@ -367,71 +359,90 @@ npm run migration:generate -- src/database/migrations/InitialSchema
 npm run migration:run
 npm run seed
 npm run start:dev
+```
 
-npm run seed aparece somente nas estratégias JWT e Session/Cookies.
+### Drizzle
 
-## 7. Checklist de geração
+```bash
+cd <nome-do-projeto>
+npm install
+docker compose up -d <serviços>
+npm run drizzle:generate
+npm run drizzle:migrate
+npm run seed
+npm run start:dev
+```
 
-### Geral
+O comando `npm run seed` aparece somente para JWT e Session/Cookies.
 
-- [ ] Nome padrão cria my-nest-api
-- [ ] Nome customizado atualiza package.json
-- [ ] Nome customizado atualiza o título do README
-- [ ] Pasta existente não é sobrescrita
-- [ ] Ctrl+C cancela sem stacktrace
-- [ ] .env é criado quando solicitado
-- [ ] .env não é criado quando recusado
+## 8. Checklist geral de geração
 
-### Prisma
+* [ ] Nome padrão cria `my-nest-api`
+* [ ] Nome personalizado atualiza `package.json`
+* [ ] Nome personalizado atualiza o título do README
+* [ ] Pasta existente não é sobrescrita
+* [ ] Ctrl+C cancela sem stack trace
+* [ ] `.env` é criado quando solicitado
+* [ ] `.env` não é criado quando recusado
+* [ ] Docker desabilitado remove os arquivos
+* [ ] Swagger desabilitado remove código e dependência
+* [ ] Validação desabilitada remove o pipe global
+* [ ] Redis desabilitado remove código e dependências
+* [ ] RBAC desabilitado remove guards, decorators e constantes
+* [ ] JWT remove recursos de Session/Cookies
+* [ ] Session/Cookies remove recursos de JWT
+* [ ] OAuth-only remove fluxos de senha
+* [ ] Nenhuma autenticação remove auth e users
+* [ ] ORM “Nenhum” exibe erro antes de criar a pasta
+* [ ] MongoDB exibe erro antes de criar a pasta
 
-- [ ] TypeScript + Prisma + PostgreSQL + JWT
-- [ ] TypeScript + Prisma + MySQL + JWT
-- [ ] TypeScript + Prisma + SQLite + JWT
-- [ ] JavaScript + Prisma + PostgreSQL + JWT
-- [ ] Prisma + Session/Cookies
-- [ ] Prisma + OAuth-only
-- [ ] Prisma + autenticação “Nenhuma”
+## 9. Checklist Prisma
 
-### TypeORM
+* [ ] TypeScript + Prisma + PostgreSQL + JWT
+* [ ] TypeScript + Prisma + MySQL + JWT
+* [ ] TypeScript + Prisma + SQLite + JWT
+* [ ] JavaScript + Prisma
+* [ ] Prisma + Session/Cookies
+* [ ] Prisma + OAuth-only
+* [ ] Prisma + nenhuma autenticação
 
-- [x] TypeScript + TypeORM + SQLite + JWT
-- [x] TypeScript + TypeORM + SQLite + Session/Cookies
-- [x] JavaScript + TypeORM + SQLite
-- [x] Configuração TypeORM + PostgreSQL
-- [x] Configuração TypeORM + MySQL
-- [ ] Smoke real com TypeORM + PostgreSQL
-- [ ] Smoke real com TypeORM + MySQL
+## 10. Checklist TypeORM
 
-Os testes reais com PostgreSQL e MySQL exigem os bancos disponíveis localmente ou por Docker.
+* [x] TypeScript + TypeORM + SQLite + JWT
+* [x] TypeScript + TypeORM + SQLite + Session/Cookies
+* [x] JavaScript + TypeORM + SQLite
+* [x] Configuração TypeORM + PostgreSQL
+* [x] Configuração TypeORM + MySQL
+* [ ] Smoke real TypeORM + PostgreSQL
+* [ ] Smoke real TypeORM + MySQL
 
-### Recursos opcionais
+## 11. Checklist Drizzle
 
-- [ ] Docker habilitado mantém os arquivos
-- [ ] Docker desabilitado remove os arquivos
-- [ ] Swagger desabilitado remove código e dependência
-- [ ] Validação desabilitada remove o pipe global
-- [ ] Redis desabilitado remove código e dependências
-- [ ] RBAC desabilitado remove guards, decorators e constantes
-- [ ] JWT remove recursos de Session
-- [ ] Session remove recursos de JWT
-- [ ] OAuth-only remove fluxos de senha
-- [ ] Autenticação “Nenhuma” remove auth e users
+* [x] TypeScript + Drizzle + SQLite + JWT
+* [x] TypeScript + Drizzle + SQLite + Session/Cookies
+* [x] JavaScript + Drizzle
+* [x] Configuração Drizzle + PostgreSQL
+* [x] Configuração Drizzle + MySQL
+* [x] Schema correto para PostgreSQL
+* [x] Schema correto para MySQL
+* [x] Schema correto para SQLite
+* [x] Remoção dos drivers não selecionados
+* [x] Scripts Drizzle em TypeScript
+* [x] Scripts Drizzle em JavaScript
+* [ ] Smoke real Drizzle + PostgreSQL
+* [ ] Smoke real Drizzle + MySQL
 
-### Opções não implementadas
+Os smoke tests reais com PostgreSQL e MySQL exigem os bancos disponíveis localmente ou por Docker.
 
-- [ ] Drizzle apresenta erro amigável
-- [ ] ORM “Nenhum” apresenta erro amigável
-- [ ] MongoDB apresenta erro amigável
-- [ ] Nenhuma opção recusada cria uma pasta parcial
-
-## 8. Smoke test Prisma com SQLite
-
-SQLite permite validar o projeto sem Docker.
+## 12. Smoke test Prisma com SQLite
 
 Depois de gerar o projeto:
 
+```powershell
 Set-Location .\<projeto-prisma>
+```
 
+```bash
 npm install
 npm run prisma:generate
 npm run build
@@ -439,15 +450,19 @@ npm test
 npm run prisma:migrate -- --name init
 npm run seed
 npm run test:e2e
+```
 
-Confira os scripts disponíveis no package.json, pois os nomes podem variar conforme a versão do template.
+Confira os scripts disponíveis no `package.json`, pois eles podem variar conforme a versão do template.
 
-## 9. Smoke test TypeORM com SQLite
+## 13. Smoke test TypeORM com SQLite
 
 Depois de gerar o projeto:
 
+```powershell
 Set-Location .\<projeto-typeorm>
+```
 
+```bash
 npm install
 npm run build
 npm test
@@ -455,91 +470,189 @@ npm run migration:generate -- .\src\database\migrations\InitialSchema
 npm run migration:run
 npm run seed
 npm run test:e2e
+```
 
-Valide também:
+Confira o driver:
 
+```bash
 npm ls better-sqlite3
+```
 
-O template usa uma versão do better-sqlite3 compatível com Node 24.
+### Smokes TypeORM validados
 
-### Smoke JWT validado
+Configurações validadas:
 
-Configuração utilizada:
+```text
+TypeScript + TypeORM + SQLite + JWT
+TypeScript + TypeORM + SQLite + Session/Cookies
+```
 
+Resultados:
+
+* instalação concluída;
+* build concluído;
+* testes unitários concluídos;
+* migration gerada;
+* migration aplicada;
+* seed executado;
+* testes E2E concluídos.
+
+## 14. Smoke test Drizzle com SQLite
+
+Depois de gerar o projeto:
+
+```powershell
+Set-Location .\<projeto-drizzle>
+```
+
+```bash
+npm install
+npm run drizzle:generate
+npm run drizzle:migrate
+npm run seed
+npm run build
+npm test
+npm run test:e2e
+```
+
+O `pretest:e2e` aplica automaticamente as migrations usando o banco definido em `.env.test`.
+
+Confira as dependências:
+
+```bash
+npm ls drizzle-orm drizzle-kit better-sqlite3
+```
+
+Confira os artefatos de migrations:
+
+```powershell
+Get-ChildItem .\drizzle -Recurse
+```
+
+### Smoke Drizzle com JWT validado
+
+Configuração:
+
+```text
 Linguagem: TypeScript
-ORM: TypeORM
+ORM: Drizzle
 Banco: SQLite
 Redis: Não
 Autenticação: JWT
 RBAC: Sim
+```
 
-Resultado validado:
+Resultado:
 
-- instalação concluída;
-- build concluído;
-- testes unitários concluídos;
-- migration gerada;
-- migration aplicada;
-- seed executado;
-- testes E2E concluídos.
+* instalação concluída;
+* migrations geradas;
+* migrations aplicadas;
+* seed executado;
+* build concluído;
+* testes unitários concluídos;
+* testes E2E concluídos.
 
-### Smoke Session/Cookies validado
+### Smoke Drizzle com Session/Cookies validado
 
-Configuração utilizada:
+Configuração:
 
+```text
 Linguagem: TypeScript
-ORM: TypeORM
+ORM: Drizzle
 Banco: SQLite
 Redis: Não
 Autenticação: Session/Cookies
 RBAC: Sim
+```
 
-Resultado validado:
+Resultado:
 
-- instalação concluída;
-- build concluído;
-- testes unitários concluídos;
-- migration gerada;
-- migration aplicada;
-- seed executado;
-- testes E2E de sessão concluídos.
+* instalação concluída;
+* migrations geradas;
+* migrations aplicadas;
+* seed executado;
+* build concluído;
+* testes unitários concluídos;
+* testes de CSRF concluídos;
+* testes E2E de sessão concluídos.
 
-## 10. Conferência do pacote publicado
+## 15. Varredura do template Drizzle
 
-O build da CLI deve copiar os templates da raiz para dentro do pacote:
+Confira referências indevidas a Prisma ou TypeORM:
 
+```powershell
+Get-ChildItem `
+  .\templates\drizzle `
+  -Recurse `
+  -File |
+  Select-String -Pattern `
+    '@prisma/client|PrismaService|PrismaModule|@nestjs/typeorm|typeorm|TypeOrm|DataSource|InjectRepository|Repository'
+```
+
+Referências em arquivos executáveis indicam algo que precisa ser revisado.
+
+Referências históricas ou comparativas em documentação devem ser avaliadas individualmente.
+
+Confira os marcadores:
+
+```powershell
+Get-ChildItem `
+  .\templates\drizzle `
+  -Recurse `
+  -File |
+  Select-String -Pattern 'nestforge:feature'
+```
+
+## 16. Conferir o pacote publicado
+
+Na pasta da CLI:
+
+```powershell
 Set-Location C:\Users\Jeiel\Music\nestforge\packages\cli
 npm run build
+```
 
-Confira:
+Confira os templates copiados:
 
+```powershell
 Test-Path .\templates\prisma
 Test-Path .\templates\typeorm
+Test-Path .\templates\drizzle
+```
 
-Os dois resultados devem ser:
+Resultado esperado:
 
+```text
 True
 True
+True
+```
 
-Depois confira se o pacote contém os arquivos esperados:
+Confira o conteúdo do pacote:
 
+```bash
 npm pack --dry-run
+```
 
 O pacote deve incluir:
 
+```text
 dist/
 templates/prisma/
 templates/typeorm/
+templates/drizzle/
 README.md
 TESTING.md
 package.json
+```
 
-## 11. Escopo ainda não implementado
+## 17. Escopo ainda não implementado
 
-- Drizzle ORM
-- Opção sem ORM
-- MongoDB
-- Validação completa do nome do pacote
-- Publicação final no npm
+* ORM “Nenhum”;
+* MongoDB;
+* validação completa do nome do pacote;
+* smoke tests reais de PostgreSQL;
+* smoke tests reais de MySQL;
+* publicação final no npm.
 
-Esses itens devem continuar retornando erro claro enquanto não estiverem implementados.
+ORM “Nenhum” e MongoDB devem continuar retornando um erro claro antes da criação da pasta do projeto.
