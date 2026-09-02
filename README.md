@@ -11,15 +11,18 @@ npx nestforge
 ```text
 /
 ├── packages/
-│   └── cli/ → pacote `nestforge` publicado no npm
+│   └── cli/       → pacote `nestforge` publicado no npm
 └── templates/
-    ├── prisma/ → template NestJS com Prisma
-    └── typeorm/ → template NestJS com TypeORM
+    ├── prisma/    → template NestJS com Prisma
+    ├── typeorm/   → template NestJS com TypeORM
+    └── drizzle/  → template NestJS com Drizzle ORM
 ```
 
-* packages/cli — código-fonte da CLI, incluindo prompts, gerador, transformações e testes automatizados.
-* templates/prisma — projeto NestJS completo usando Prisma.
-* templates/typeorm — projeto NestJS completo usando TypeORM e repositories.
+* `packages/cli` — código-fonte da CLI, incluindo prompts, gerador, transformações e
+  testes automatizados.
+* `templates/prisma` — projeto NestJS completo usando Prisma.
+* `templates/typeorm` — projeto NestJS completo usando TypeORM e repositories.
+* `templates/drizzle` — projeto NestJS completo usando Drizzle ORM.
 
 Durante o build, os templates são copiados para dentro do pacote da CLI para que ele funcione depois de publicado no npm.
 
@@ -31,8 +34,8 @@ Ao executar `npx nestforge`, você responde às perguntas do fluxo interativo e 
 
 1. **Nome do projeto** — texto livre — ✅ Disponível
 2. **Linguagem** — TypeScript ou JavaScript — ✅ Ambas disponíveis
-3. **ORM** — Prisma ou TypeORM — ✅ Disponíveis
-4. **ORM** — Drizzle ou Nenhum — ⏳ Ainda não implementados
+3. **ORM / Query Builder** — Prisma, TypeORM ou Drizzle — ✅ Disponíveis
+4. **ORM / Query Builder** — Nenhum — ⏳ Ainda não implementado
 5. **Banco de dados** — PostgreSQL, MySQL ou SQLite — ✅ Disponíveis
 6. **Banco de dados** — MongoDB — ⏳ Ainda não implementado
 7. **Docker** — sim ou não — ✅ Toggle real
@@ -69,17 +72,33 @@ O template Prisma inclui:
 O template TypeORM inclui:
 
 * entidades com decorators;
-* repositories injetados com TypeOrmModule.forFeature;
-* DataSource configurado por banco;
+* repositories injetados com `TypeOrmModule.forFeature`;
+* `DataSource` configurado por banco;
 * migrations;
 * seed;
-* PostgreSQL com pg;
-* MySQL com mysql2;
-* SQLite com better-sqlite3;
-* store persistente com connect-typeorm;
-* health check baseado em DataSource.
+* PostgreSQL com `pg`;
+* MySQL com `mysql2`;
+* SQLite com `better-sqlite3`;
+* store persistente com `connect-typeorm`;
+* health check baseado em `DataSource`.
 
-A CLI mantém somente o driver necessário para o banco selecionado.
+### Drizzle ORM
+
+O template Drizzle inclui:
+
+* schemas tipados por banco;
+* query builder tipado;
+* configuração com Drizzle Kit;
+* migrations SQL;
+* seed;
+* PostgreSQL com `pg`;
+* MySQL com `mysql2`;
+* SQLite com `better-sqlite3`;
+* `DrizzleSessionStore` para Session/Cookies;
+* health check usando o driver nativo selecionado;
+* transações adaptadas ao comportamento do SQLite.
+
+A CLI mantém somente o template, o schema e o driver necessários para o ORM e o banco selecionados.
 
 ## Recursos dos templates
 
@@ -96,17 +115,18 @@ As estratégias disponíveis são:
 A estratégia JWT inclui:
 
 * rotação de refresh token;
+* refresh tokens únicos;
 * revogação;
 * logout;
 * recuperação de senha;
-* verificação de e-mail, quando Redis/e-mail estão habilitados.
+* verificação de e-mail, quando Redis e e-mail estão habilitados.
 
 A estratégia Session/Cookies inclui:
 
-* cookie httpOnly;
+* cookie `httpOnly`;
 * regeneração de sessão;
 * persistência no banco;
-* SessionAuthGuard;
+* `SessionAuthGuard`;
 * proteção CSRF com token associado à sessão;
 * logout com destruição da sessão.
 
@@ -116,10 +136,10 @@ Na opção “Nenhuma”, os diretórios `src/auth` e `src/users` são removidos
 
 Os templates incluem:
 
-* roles ADMIN, MANAGER e USER;
+* roles `ADMIN`, `MANAGER` e `USER`;
 * permissions granulares;
-* RolesGuard;
-* PermissionsGuard;
+* `RolesGuard`;
+* `PermissionsGuard`;
 * decorators para proteger endpoints.
 
 ### Usuários
@@ -130,7 +150,7 @@ Os templates incluem:
 * busca;
 * upload de avatar;
 * serialização segura;
-* remoção do passwordHash das respostas.
+* remoção do `passwordHash` das respostas.
 
 ### Redis, filas e e-mail
 
@@ -153,17 +173,18 @@ Quando desabilitado, arquivos e dependências relacionados são removidos.
 * CORS configurável;
 * rate limiting;
 * Zod;
-* serialização com ClassSerializerInterceptor;
+* serialização com `ClassSerializerInterceptor`;
 * hash de senhas com bcrypt;
 * hash de refresh tokens;
 * proteção CSRF para Session/Cookies;
-* cookies seguros em produção.
+* cookies seguros em produção;
+* validação das variáveis de ambiente.
 
 ### Observabilidade
 
 * logs estruturados com Pino;
-* health check em /health;
-* métricas Prometheus em /metrics;
+* health check em `/health`;
+* métricas Prometheus em `/metrics`;
 * indicadores de banco, Redis, memória e disco.
 
 ### Testes
@@ -173,15 +194,20 @@ Quando desabilitado, arquivos e dependências relacionados são removidos.
 * banco de teste isolado;
 * helpers para inicializar a aplicação;
 * limpeza de tabelas entre testes;
-* testes específicos de JWT e Session/Cookies.
+* testes específicos de JWT e Session/Cookies;
+* testes de CSRF;
+* testes de RBAC;
+* testes dos health checks.
 
 ### Docker e CI
 
 * Dockerfile multi-stage;
 * Docker Compose;
 * PostgreSQL ou MySQL conforme a escolha;
+* SQLite sem serviço externo;
 * Redis e Mailpit quando aplicáveis;
 * GitHub Actions;
+* geração e aplicação de migrations;
 * build, lint, testes unitários e E2E.
 
 ## Validação atual
@@ -191,33 +217,76 @@ As seguintes combinações TypeORM foram validadas com smoke tests completos:
 * TypeScript + TypeORM + SQLite + JWT;
 * TypeScript + TypeORM + SQLite + Session/Cookies.
 
-Os smoke tests executaram:
+As seguintes combinações Drizzle foram validadas com smoke tests completos:
+
+* TypeScript + Drizzle + SQLite + JWT;
+* TypeScript + Drizzle + SQLite + Session/Cookies.
+
+Os smoke tests executaram inicialmente:
 
 ```bash
 npm install
 npm run build
 npm test
+```
+
+Para TypeORM, também foram executados:
+
+```bash
 npm run migration:generate
 npm run migration:run
 npm run seed
 npm run test:e2e
 ```
 
-PostgreSQL e MySQL possuem cobertura automatizada de geração, configuração de colunas e poda de drivers. Smoke tests reais desses bancos ainda exigem os serviços locais ou Docker.
+Para Drizzle, também foram executados:
+
+```bash
+npm run drizzle:generate
+npm run drizzle:migrate
+npm run seed
+npm run test:e2e
+```
+
+Os testes automatizados do gerador também cobrem:
+
+* PostgreSQL;
+* MySQL;
+* SQLite;
+* Prisma;
+* TypeORM;
+* Drizzle;
+* TypeScript;
+* JavaScript;
+* JWT;
+* OAuth-only;
+* Session/Cookies;
+* projetos sem autenticação;
+* remoção de recursos opcionais;
+* recusa de opções ainda não implementadas.
+
+PostgreSQL e MySQL possuem cobertura automatizada de geração, configuração de schema e remoção dos drivers não utilizados. Smoke tests reais desses bancos ainda exigem os serviços locais ou Docker.
 
 ## Documentação dos templates
 
 ### Prisma
 
-* [Readme Template Prisma](templates/prisma/README.md)
-* [Architecture Template Prisma](templates/prisma/ARCHITECTURE.md)
-* [Docs Template Prisma](templates/prisma/docs)
+* [README do template Prisma](templates/prisma/README.md)
+* [Arquitetura do template Prisma](templates/prisma/ARCHITECTURE.md)
+* [Documentação do template Prisma](templates/prisma/docs)
 
 ### TypeORM
 
-* [Readme Template TypeORM](templates/typeorm/README.md)
-* [Architecture Template TypeORM](templates/typeorm/ARCHITECTURE.md)
-* [Docs Template TypeORM](templates/typeorm/docs)
+* [README do template TypeORM](templates/typeorm/README.md)
+* [Arquitetura do template TypeORM](templates/typeorm/ARCHITECTURE.md)
+* [Documentação do template TypeORM](templates/typeorm/docs)
+
+### Drizzle
+
+* [README do template Drizzle](templates/drizzle/README.md)
+* [Arquitetura do template Drizzle](templates/drizzle/ARCHITECTURE.md)
+* [Roadmap do template Drizzle](templates/drizzle/ROADMAP.md)
+* [Documentação do template Drizzle](templates/drizzle/docs)
 
 ## Desenvolvimento local
 
@@ -229,7 +298,7 @@ cd packages/cli
 npm run dev
 ```
 
-Para executar os testes automatizados:
+Para executar os testes automatizados da CLI:
 
 ```bash
 npm test
@@ -254,20 +323,24 @@ npm pack --dry-run
 npm publish
 ```
 
-O build compila a CLI e copia os templates Prisma e TypeORM para o pacote publicado.
+O build compila a CLI e copia os templates Prisma, TypeORM e Drizzle para o pacote publicado.
 
 ## Roadmap
 
 Próximos itens planejados:
 
-* Drizzle ORM;
 * opção sem ORM;
 * MongoDB;
 * validação completa do nome do pacote;
-* ampliação da matriz de smoke tests.
+* ampliação da matriz de smoke tests com bancos executados em serviços reais;
+* exemplos de deploy automatizado.
 
-O status detalhado fica em [README do CLI](packages/cli/README.md).
+O status detalhado fica no [README da CLI](packages/cli/README.md).
 
 ## Licença
 
-MIT — consulte [LICENSE Prisma](templates/prisma/LICENSE) ou [LICENSE TypeORM](templates/typeorm/LICENSE)
+MIT — consulte:
+
+* [Licença do template Prisma](templates/prisma/LICENSE)
+* [Licença do template TypeORM](templates/typeorm/LICENSE)
+* [Licença do template Drizzle](templates/drizzle/LICENSE)
