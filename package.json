@@ -2,7 +2,7 @@
   "name": "nestforge-monorepo",
   "version": "0.1.0",
   "private": true,
-  "description": "Monorepo do NestForge — CLI (create-nestforge) e templates de boilerplate NestJS",
+  "description": "NestForge monorepo — CLI and production-ready NestJS starter templates",
   "license": "MIT",
   "workspaces": [
     "packages/*"
