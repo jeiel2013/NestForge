@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
 import { HealthController } from './health.controller';
-import { TypeOrmHealthIndicator } from './indicators/typeorm-health.indicator';
+import { DrizzleHealthIndicator } from './indicators/drizzle-health.indicator';
 // nestforge:feature:redis
 import { RedisHealthIndicator } from './indicators/redis-health.indicator';
 // nestforge:feature:redis:end
@@ -10,7 +10,7 @@ import { RedisHealthIndicator } from './indicators/redis-health.indicator';
     imports: [TerminusModule],
     controllers: [HealthController],
     providers: [
-        TypeOrmHealthIndicator,
+        DrizzleHealthIndicator,
         // nestforge:feature:redis
         RedisHealthIndicator,
         // nestforge:feature:redis:end
