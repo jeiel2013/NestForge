@@ -18,18 +18,31 @@ async function main() {
             .filter(Boolean)
             .join(' ');
 
+        const shouldRunSeed = [
+            'jwt',
+            'session',
+        ].includes(options.authStrategy);
+
+        const seedSteps = shouldRunSeed
+            ? ['npm run seed']
+            : [];
+
         const databaseSteps =
             options.orm === 'typeorm'
                 ? [
                     'npm run migration:generate -- src/database/migrations/InitialSchema',
                     'npm run migration:run',
-                    ...(['jwt', 'session'].includes(
-                        options.authStrategy,
-                    )
-                        ? ['npm run seed']
-                        : []),
+                    ...seedSteps,
                 ]
-                : ['npx prisma migrate dev'];
+                : options.orm === 'drizzle'
+                    ? [
+                        'npm run drizzle:generate',
+                        'npm run drizzle:migrate',
+                        ...seedSteps,
+                    ]
+                    : [
+                        'npx prisma migrate dev',
+                    ];
 
         const steps = [
             `cd ${relativeDir}`,
