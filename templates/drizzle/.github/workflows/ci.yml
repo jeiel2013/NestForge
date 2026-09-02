@@ -56,26 +56,26 @@ jobs:
           --health-retries 5
       # nestforge:feature:redis:end
 
-      env:
-        # nestforge:feature:database:postgres
-        DB_TYPE: postgres
-        DATABASE_URL: postgresql://nestforge:nestforge@localhost:5432/nestforge?schema=public
-        # nestforge:feature:database:postgres:end
+    env:
+      # nestforge:feature:database:postgres
+      DB_TYPE: postgres
+      DATABASE_URL: postgresql://nestforge:nestforge@localhost:5432/nestforge?schema=public
+      # nestforge:feature:database:postgres:end
 
-        # nestforge:feature:database:mysql
-        DB_TYPE: mysql
-        DATABASE_URL: mysql://nestforge:nestforge@localhost:3306/nestforge
-        # nestforge:feature:database:mysql:end
+      # nestforge:feature:database:mysql
+      DB_TYPE: mysql
+      DATABASE_URL: mysql://nestforge:nestforge@localhost:3306/nestforge
+      # nestforge:feature:database:mysql:end
 
-        # nestforge:feature:database:sqlite
-        DB_TYPE: sqlite
-        DATABASE_URL: file:./ci-dev.db
-        # nestforge:feature:database:sqlite:end
+      # nestforge:feature:database:sqlite
+      DB_TYPE: sqlite
+      DATABASE_URL: file:./ci-dev.db
+      # nestforge:feature:database:sqlite:end
 
-        # nestforge:feature:auth:token
-        JWT_ACCESS_SECRET: ci-access-secret-0123456789
-        JWT_REFRESH_SECRET: ci-refresh-secret-0123456789
-        # nestforge:feature:auth:token:end
+      # nestforge:feature:auth:token
+      JWT_ACCESS_SECRET: ci-access-secret-0123456789
+      JWT_REFRESH_SECRET: ci-refresh-secret-0123456789
+      # nestforge:feature:auth:token:end
 
     steps:
       - name: Checkout
@@ -90,8 +90,11 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
+      - name: Gerar migrations
+        run: npx drizzle-kit generate
+
       - name: Rodar migrations
-        run: npx typeorm-ts-node-commonjs -d src/database/data-source.ts migration:run
+        run: npx drizzle-kit migrate
 
       - name: Lint
         run: npm run lint
