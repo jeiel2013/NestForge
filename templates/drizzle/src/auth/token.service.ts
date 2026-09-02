@@ -40,6 +40,11 @@ export class TokenService {
             role,
         };
 
+        const refreshPayload = {
+            ...payload,
+            jti: randomUUID(),
+        };
+
         const accessTokenExpiresIn = (
             process.env.JWT_ACCESS_EXPIRES_IN ??
             '15m'
@@ -59,7 +64,7 @@ export class TokenService {
         );
 
         const refreshToken = this.jwtService.sign(
-            payload,
+            refreshPayload,
             {
                 secret: process.env.JWT_REFRESH_SECRET,
                 expiresIn: refreshTokenExpiresIn,
