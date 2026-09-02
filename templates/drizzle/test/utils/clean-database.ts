@@ -1,65 +1,50 @@
 // nestforge:feature-file:auth:enabled
-import { DataSource } from 'typeorm';
-import { UserEntity } from '../../src/users/entities/user.entity';
-import { OAuthAccountEntity } from '../../src/auth/entities/oauth-account.entity';
+import type { DrizzleDatabase } from '../../src/database/database.types';
+import {
+    oauthAccounts,
+    users,
+} from '../../src/database/schema';
 
 // nestforge:feature:auth:token
-import { RefreshTokenEntity } from '../../src/auth/entities/refresh-token.entity';
+import { refreshTokens } from '../../src/database/schema';
 // nestforge:feature:auth:token:end
 
 // nestforge:feature:redis,auth:password
-import { PasswordResetTokenEntity } from '../../src/auth/entities/password-reset-token.entity';
-import { EmailVerificationTokenEntity } from '../../src/auth/entities/email-verification-token.entity';
+import {
+    emailVerificationTokens,
+    passwordResetTokens,
+} from '../../src/database/schema';
 // nestforge:feature:redis,auth:password:end
 
 // nestforge:feature:auth:session
-import { SessionEntity } from '../../src/auth/entities/session.entity';
+import { sessions } from '../../src/database/schema';
 // nestforge:feature:auth:session:end
 
 export async function cleanDatabase(
-    dataSource: DataSource,
-) {
-    await dataSource.transaction(async (manager) => {
-        // nestforge:feature:auth:session
-        await manager
-            .createQueryBuilder()
-            .delete()
-            .from(SessionEntity)
-            .execute();
-        // nestforge:feature:auth:session:end
+    database: DrizzleDatabase,
+): Promise<void> {
+    await database.transaction(
+        async (transaction) => {
+            // nestforge:feature:auth:session
+            await transaction.delete(sessions);
+            // nestforge:feature:auth:session:end
 
-        // nestforge:feature:auth:token
-        await manager
-            .createQueryBuilder()
-            .delete()
-            .from(RefreshTokenEntity)
-            .execute();
-        // nestforge:feature:auth:token:end
+            // nestforge:feature:auth:token
+            await transaction.delete(refreshTokens);
+            // nestforge:feature:auth:token:end
 
-        // nestforge:feature:redis,auth:password
-        await manager
-            .createQueryBuilder()
-            .delete()
-            .from(PasswordResetTokenEntity)
-            .execute();
+            // nestforge:feature:redis,auth:password
+            await transaction.delete(
+                passwordResetTokens,
+            );
 
-        await manager
-            .createQueryBuilder()
-            .delete()
-            .from(EmailVerificationTokenEntity)
-            .execute();
-        // nestforge:feature:redis,auth:password:end
+            await transaction.delete(
+                emailVerificationTokens,
+            );
+            // nestforge:feature:redis,auth:password:end
 
-        await manager
-            .createQueryBuilder()
-            .delete()
-            .from(OAuthAccountEntity)
-            .execute();
-
-        await manager
-            .createQueryBuilder()
-            .delete()
-            .from(UserEntity)
-            .execute();
-    });
+            await transaction.delete(oauthAccounts);
+            await transaction.delete(users);
+        },
+    );
 }
