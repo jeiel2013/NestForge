@@ -16,6 +16,7 @@ const MONOREPO_TEMPLATES_ROOT = path.resolve(__dirname, '../../../templates');
 const IMPLEMENTED_ORMS = [
     'prisma',
     'typeorm',
+    'drizzle',
 ];
 const IMPLEMENTED_LANGUAGES = ['typescript', 'javascript'];
 const IMPLEMENTED_DATABASES = ['postgres', 'mysql', 'sqlite'];
@@ -40,7 +41,7 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
     }
 
     if (orm === 'none') {
-        throw new Error('Ainda não existe um template sem ORM. Escolha "prisma" ou "typeorm".');
+        throw new Error('Ainda não existe um template sem ORM. Escolha "prisma", "typeorm" ou "drizzle".');
     }
 
     if (!IMPLEMENTED_ORMS.includes(orm)) {

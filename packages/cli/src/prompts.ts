@@ -73,7 +73,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
         options: [
             { value: 'prisma', label: 'Prisma', hint: 'Recomendado' },
             { value: 'typeorm', label: 'TypeORM' },
-            { value: 'drizzle', label: 'Drizzle ORM', hint: 'em breve' },
+            { value: 'drizzle', label: 'Drizzle ORM' },
             { value: 'none', label: 'Nenhum' },
         ],
     });
