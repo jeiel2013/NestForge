@@ -12,7 +12,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PACKAGE_TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
 const MONOREPO_TEMPLATES_ROOT = path.resolve(__dirname, '../../../templates');
 
-// só isso está de fato pronto por enquanto — ver packages/cli/README.md
+// These are the options currently implemented — see packages/cli/README.md
 const IMPLEMENTED_ORMS = [
     'prisma',
     'typeorm',
@@ -36,29 +36,29 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
 
     if (!IMPLEMENTED_LANGUAGES.includes(language)) {
         throw new Error(
-            `Geração em "${language}" ainda não está pronta — só "typescript" está implementado por enquanto. Contribuições são bem-vindas!`,
+            `Generation in "${language}" is not ready yet — only "typescript" is currently implemented. Contributions are welcome!`,
         );
     }
 
     if (orm === 'none') {
-        throw new Error('Ainda não existe um template sem ORM. Escolha "prisma", "typeorm" ou "drizzle".');
+        throw new Error('A template without an ORM is not available yet. Choose "prisma", "typeorm", or "drizzle".');
     }
 
     if (!IMPLEMENTED_ORMS.includes(orm)) {
         throw new Error(
-            `O template para "${orm}" ainda não está pronto — hoje estão disponíveis: ${IMPLEMENTED_ORMS.join(', ',)}. Contribuições são bem-vindas!`,
+            `The template for "${orm}" is not ready yet — currently available: ${IMPLEMENTED_ORMS.join(', ',)}. Contributions are welcome!`,
         );
     }
 
     if (!IMPLEMENTED_DATABASES.includes(database)) {
         throw new Error(
-            `O banco "${database}" ainda não está pronto — hoje só ${IMPLEMENTED_DATABASES.join(', ')} estão implementados. Contribuições são bem-vindas!`,
+            `The "${database}" database is not ready yet — currently implemented: ${IMPLEMENTED_DATABASES.join(', ')}. Contributions are welcome!`,
         );
     }
 
     if (!IMPLEMENTED_AUTH_STRATEGIES.includes(authStrategy)) {
         throw new Error(
-            `A estratégia de autenticação "${authStrategy}" ainda não está pronta — hoje só ${IMPLEMENTED_AUTH_STRATEGIES.join(', ')} estão implementadas ("jwt" já inclui OAuth Google/GitHub). Contribuições são bem-vindas!`,
+            `The "${authStrategy}" authentication strategy is not ready yet — currently implemented: ${IMPLEMENTED_AUTH_STRATEGIES.join(', ')} ("jwt" already includes Google/GitHub OAuth). Contributions are welcome!`,
         );
     }
 
@@ -67,7 +67,7 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
     const targetDir = path.resolve(process.cwd(), projectName);
 
     if (await fs.pathExists(targetDir)) {
-        throw new Error(`A pasta "${projectName}" já existe. Escolha outro nome ou remova a pasta.`);
+        throw new Error(`The "${projectName}" directory already exists. Choose another name or remove the directory.`);
     }
 
     await fs.copy(templateDir, targetDir);
