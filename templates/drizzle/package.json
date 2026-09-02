@@ -57,7 +57,7 @@
     "drizzle-orm": "^0.45.2",
     "pg": "^8.23.0",
     "mysql2": "^3.24.2",
-    "better-sqlite3": "^12.11.1"
+    "better-sqlite3": "^13.0.3"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",

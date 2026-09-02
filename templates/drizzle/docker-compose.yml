@@ -17,7 +17,9 @@ services:
       # nestforge:feature:database:mysql
       - mysql
       # nestforge:feature:database:mysql:end
+      # nestforge:feature:redis
       - redis
+      # nestforge:feature:redis:end
     volumes:
       - ./src:/app/src
     command: npm run start:dev
@@ -53,6 +55,7 @@ services:
       - mysql_data:/var/lib/mysql
   # nestforge:feature:database:mysql:end
 
+  # nestforge:feature:redis
   redis:
     image: redis:7-alpine
     container_name: nestforge-redis
@@ -67,6 +70,7 @@ services:
     ports:
       - "8025:8025" # UI
       - "1025:1025" # SMTP
+  # nestforge:feature:redis:end
 
   # nestforge:feature:database:postgres
 volumes:
