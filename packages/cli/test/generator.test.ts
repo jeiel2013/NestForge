@@ -753,6 +753,17 @@ test(
                     'utf8',
                 );
 
+                const healthIndicator = await readFile(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'health',
+                        'indicators',
+                        'drizzle-health.indicator.ts',
+                    ),
+                    'utf8',
+                )
+
                 const usersService = await readFile(
                     path.join(
                         targetDir,
@@ -804,6 +815,36 @@ test(
                 assert.doesNotMatch(
                     authController,
                     /getCsrfToken/,
+                );
+
+                assert.match(
+                    healthIndicator,
+                    /export class DrizzleHealthIndicator/,
+                );
+
+                assert.match(
+                    healthIndicator,
+                    /this\.client\.prepare\('SELECT 1'\)\.get\(\)/,
+                );
+
+                assert.doesNotMatch(
+                    healthIndicator,
+                    /describe\('DrizzleHealthIndicator'/,
+                );
+
+                assert.doesNotMatch(
+                    healthIndicator,
+                    /from ['"]vitest['"]/,
+                );
+
+                assert.doesNotMatch(
+                    healthIndicator,
+                    /from ['"]\.\/drizzle-health\.indicator['"]/,
+                );
+
+                assert.doesNotMatch(
+                    healthIndicator,
+                    /nestforge:feature/,
                 );
 
                 assert.match(
