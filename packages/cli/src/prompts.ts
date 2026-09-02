@@ -18,7 +18,7 @@ export interface ProjectOptions {
     createEnv: boolean;
 }
 
-// vermelho -> laranja, as cores do NestJS
+// red -> orange, the NestJS colors
 const nestforgeGradient = gradient(['#e0234e', '#ff8a65']);
 
 const logo = `
@@ -35,12 +35,12 @@ const logo = `
 function showBanner(): void {
     console.log();
     console.log(nestforgeGradient.multiline(logo));
-    console.log(pc.dim('  Gere um projeto NestJS pronto pra produção em segundos\n'));
+    console.log(pc.dim('  Generate a production-ready NestJS project in seconds\n'));
 }
 
 function handleCancel(value: unknown): void {
     if (isCancel(value)) {
-        cancel('Operação cancelada.');
+        cancel('Operation cancelled.');
         process.exit(0);
     }
 }
@@ -49,110 +49,110 @@ export async function runPrompts(): Promise<ProjectOptions> {
     showBanner();
     intro(pc.bgMagenta(pc.black(' NestForge ')));
 
-    // 1. Nome do projeto
+    // 1. Project name
     const projectName = await text({
-        message: 'Qual o nome do seu projeto?',
+        message: 'What is your project name?',
         placeholder: 'my-nest-api',
         defaultValue: 'my-nest-api',
     });
     handleCancel(projectName);
 
-    // 2. Linguagem
+    // 2. Language
     const language = await select({
-        message: 'TypeScript ou JavaScript?',
+        message: 'TypeScript or JavaScript?',
         options: [
-            { value: 'typescript', label: 'TypeScript', hint: 'Recomendado' },
+            { value: 'typescript', label: 'TypeScript', hint: 'Recommended' },
             { value: 'javascript', label: 'JavaScript' },
         ],
     });
     handleCancel(language);
 
-    // 3. Escolha do ORM
+    // 3. ORM selection
     const orm = await select({
-        message: 'Escolha o ORM/Query Builder:',
+        message: 'Choose the ORM/Query Builder:',
         options: [
-            { value: 'prisma', label: 'Prisma', hint: 'Recomendado' },
+            { value: 'prisma', label: 'Prisma', hint: 'Recommended' },
             { value: 'typeorm', label: 'TypeORM' },
             { value: 'drizzle', label: 'Drizzle ORM' },
-            { value: 'none', label: 'Nenhum' },
+            { value: 'none', label: 'None' },
         ],
     });
     handleCancel(orm);
 
-    // 4. Banco de dados
+    // 4. Database
     const database = await select({
-        message: 'Qual banco de dados você quer usar?',
+        message: 'Which database do you want to use?',
         options: [
-            { value: 'postgres', label: 'PostgreSQL', hint: 'Recomendado' },
+            { value: 'postgres', label: 'PostgreSQL', hint: 'Recommended' },
             { value: 'mysql', label: 'MySQL' },
             { value: 'sqlite', label: 'SQLite' },
-            { value: 'mongodb', label: 'MongoDB', hint: 'em breve' },
+            { value: 'mongodb', label: 'MongoDB', hint: 'coming soon' },
         ],
     });
     handleCancel(database);
 
-    // 5. Recursos adicionais (um a um, sim ou não)
+    // 5. Additional features (one yes/no prompt at a time)
     const features: string[] = [];
 
     const wantsDocker = await confirm({
-        message: 'Deseja adicionar Docker?',
+        message: 'Do you want to add Docker?',
         initialValue: true,
     });
     handleCancel(wantsDocker);
     if (wantsDocker) features.push('docker');
 
     const wantsSwagger = await confirm({
-        message: 'Deseja incluir documentação Swagger/OpenAPI?',
+        message: 'Do you want to include Swagger/OpenAPI documentation?',
         initialValue: true,
     });
     handleCancel(wantsSwagger);
     if (wantsSwagger) features.push('swagger');
 
     const wantsValidation = await confirm({
-        message: 'Deseja validação global (Zod) habilitada?',
+        message: 'Do you want to enable global validation with Zod?',
         initialValue: true,
     });
     handleCancel(wantsValidation);
     if (wantsValidation) features.push('validation');
 
     const wantsRedis = await confirm({
-        message: 'Deseja incluir Redis (cache/filas + e-mail via BullMQ)?',
+        message: 'Do you want to include Redis (cache/queues + email through BullMQ)?',
         initialValue: true,
     });
     handleCancel(wantsRedis);
     if (wantsRedis) features.push('redis');
 
-    // 6. Estratégia de autenticação
+    // 6. Authentication strategy
     const authStrategy = await select({
-        message: 'Qual estratégia de autenticação você quer usar?',
+        message: 'Which authentication strategy do you want to use?',
         options: [
-            { value: 'jwt', label: 'JWT', hint: 'Recomendado — já inclui OAuth Google/GitHub' },
-            { value: 'session', label: 'Session/Cookies', hint: 'sessão persistente no banco de dados' },
-            { value: 'oauth', label: 'OAuth (Google/GitHub) apenas', hint: 'sem login por senha' },
-            { value: 'none', label: 'Nenhuma' },
+            { value: 'jwt', label: 'JWT', hint: 'Recommended — includes Google/GitHub OAuth' },
+            { value: 'session', label: 'Session/Cookies', hint: 'persistent database-backed session' },
+            { value: 'oauth', label: 'OAuth (Google/GitHub) only', hint: 'no password login' },
+            { value: 'none', label: 'None' },
         ],
     });
     handleCancel(authStrategy);
 
-    // 7. Controle de acesso (só faz sentido se houver autenticação)
+    // 7. Access control (only applicable when authentication is enabled)
     let accessControl = false;
     if (authStrategy !== 'none') {
         const wantsAccessControl = await confirm({
-            message: '🛡️  Deseja incluir controle de acesso (RBAC + Permissions)?',
+            message: '🛡️  Do you want to include access control (RBAC + Permissions)?',
             initialValue: true,
         });
         handleCancel(wantsAccessControl);
         accessControl = wantsAccessControl as boolean;
     }
 
-    // 8. Criação automática do .env
+    // 8. Automatic .env creation
     const createEnv = await confirm({
-        message: 'Deseja criar o arquivo .env automaticamente (a partir do .env.example)?',
+        message: 'Do you want to create the .env file automatically (from .env.example)?',
         initialValue: true,
     });
     handleCancel(createEnv);
 
-    outro(pc.green('Prontinho! Gerando o projeto...'));
+    outro(pc.green('All set! Generating the project...'));
 
     return {
         projectName: projectName as string,
