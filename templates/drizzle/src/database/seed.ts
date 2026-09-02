@@ -1,8 +1,29 @@
 // nestforge:feature-file:auth:password
+import {
+    randomUUID,
+} from 'node:crypto';
 import * as bcrypt from 'bcryptjs';
-import dataSource from './data-source';
-import { UserEntity } from '../users/entities/user.entity';
+import { eq } from 'drizzle-orm';
 import { Role } from '../common/constants/role.enum';
+import {
+    users,
+} from './schema';
+import * as schema from './schema';
+
+// nestforge:feature:database:postgres
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
+// nestforge:feature:database:postgres:end
+
+// nestforge:feature:database:mysql
+import { createPool } from 'mysql2/promise';
+import { drizzle } from 'drizzle-orm/mysql2';
+// nestforge:feature:database:mysql:end
+
+// nestforge:feature:database:sqlite
+import BetterSqlite3 from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+// nestforge:feature:database:sqlite:end
 
 interface SeedUser {
     name: string;
@@ -32,36 +53,74 @@ const SEED_USERS: SeedUser[] = [
     },
 ];
 
-async function seed() {
-    await dataSource.initialize();
+const databaseUrl = process.env.DATABASE_URL;
 
+if (!databaseUrl) {
+    throw new Error(
+        'DATABASE_URL não foi definida',
+    );
+}
+
+// nestforge:feature:database:postgres
+const client = new Pool({
+    connectionString: databaseUrl,
+});
+
+const database = drizzle(client, {
+    schema,
+});
+// nestforge:feature:database:postgres:end
+
+// nestforge:feature:database:mysql
+const client = createPool(databaseUrl);
+
+const database = drizzle(client, {
+    schema,
+    mode: 'default',
+});
+// nestforge:feature:database:mysql:end
+
+// nestforge:feature:database:sqlite
+const databasePath = databaseUrl.replace(
+    /^file:/,
+    '',
+);
+
+const client = new BetterSqlite3(
+    databasePath,
+);
+
+const database = drizzle(client, {
+    schema,
+});
+// nestforge:feature:database:sqlite:end
+
+async function seed(): Promise<void> {
     try {
-        const usersRepository =
-            dataSource.getRepository(UserEntity);
-
         for (const seedUser of SEED_USERS) {
-            const existingUser =
-                await usersRepository.findOne({
-                    where: {
-                        email: seedUser.email,
-                    },
-                });
+            const [existingUser] = await database
+                .select({
+                    id: users.id,
+                })
+                .from(users)
+                .where(eq(users.email, seedUser.email))
+                .limit(1);
 
             if (!existingUser) {
-                const passwordHash = await bcrypt.hash(
-                    seedUser.password,
-                    10,
-                );
+                const passwordHash =
+                    await bcrypt.hash(
+                        seedUser.password,
+                        10,
+                    );
 
-                const user = usersRepository.create({
+                await database.insert(users).values({
+                    id: randomUUID(),
                     name: seedUser.name,
                     email: seedUser.email,
                     passwordHash,
                     role: seedUser.role,
                     emailVerifiedAt: new Date(),
                 });
-
-                await usersRepository.save(user);
             }
 
             console.log(
@@ -69,13 +128,25 @@ async function seed() {
             );
         }
     } finally {
-        if (dataSource.isInitialized) {
-            await dataSource.destroy();
-        }
+        // nestforge:feature:database:postgres
+        await client.end();
+        // nestforge:feature:database:postgres:end
+
+        // nestforge:feature:database:mysql
+        await client.end();
+        // nestforge:feature:database:mysql:end
+
+        // nestforge:feature:database:sqlite
+        client.close();
+        // nestforge:feature:database:sqlite:end
     }
 }
 
 seed().catch((error: unknown) => {
-    console.error('Erro ao executar o seed:', error);
+    console.error(
+        'Erro ao executar o seed:',
+        error,
+    );
+
     process.exitCode = 1;
 });
