@@ -1,5 +1,7 @@
 # NestForge
 
+**English** | [Português](README.pt-BR.md)
+
 > Production-ready NestJS starter with TypeORM, Authentication, Docker, Testing, CI/CD and Clean Architecture.
 
 [![CI](https://github.com/jeiel2013/nestforge/actions/workflows/ci.yml/badge.svg)](https://github.com/jeiel2013/nestforge/actions/workflows/ci.yml)
@@ -7,62 +9,62 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
 [![NestJS](https://img.shields.io/badge/NestJS-11-red)](https://nestjs.com)
 
-NestForge é um boilerplate de NestJS pensado para acelerar o início de projetos backend sérios, com autenticação completa, arquitetura limpa, segurança e observabilidade já configuradas. A ideia é você clonar, rodar `docker compose up` e já ter uma API pronta para evoluir.
+NestForge is a NestJS starter designed to accelerate the beginning of serious backend projects, with complete authentication, clean architecture, security, and observability already configured. The idea is to clone it, run `docker compose up`, and have an API ready to evolve.
 
 ## ✨ Features
 
-- 🔐 **Autenticação configurável** — JWT com access/refresh token, Session/Cookies persistida no TypeORM, OAuth-only ou nenhuma autenticação
-- 🌐 **OAuth** — Google e GitHub, integrado à estratégia de token ou sessão escolhida
-- 👥 **RBAC** — Roles (Admin, Manager, User) e Permissions granulares
-- 🛡️ **Segurança** — Helmet, CORS, Rate Limiting, validação e serialização com Zod
-- 🗄️ **Banco de dados** — TypeORM com PostgreSQL, MySQL ou SQLite
-- 📨 **E-mails** — filas com BullMQ + Redis, testado localmente com Mailpit
-- 📄 **Documentação automática** — Swagger
-- 🪵 **Logs estruturados** — Pino
-- ✅ **Testes** — unitários e de integração com Vitest
-- 🐳 **Docker** — ambiente completo com um comando
+- 🔐 **Configurable authentication** — JWT with access/refresh tokens, TypeORM-backed Session/Cookies, OAuth-only, or no authentication
+- 🌐 **OAuth** — Google and GitHub, integrated with the selected token or session strategy
+- 👥 **RBAC** — Roles (Admin, Manager, User) and granular Permissions
+- 🛡️ **Security** — Helmet, CORS, Rate Limiting, validation, and serialization with Zod
+- 🗄️ **Database** — TypeORM with PostgreSQL, MySQL, or SQLite
+- 📨 **Email** — queues with BullMQ + Redis, locally tested with Mailpit
+- 📄 **Automatic documentation** — Swagger
+- 🪵 **Structured logs** — Pino
+- ✅ **Tests** — unit and integration tests with Vitest
+- 🐳 **Docker** — complete environment with a single command
 - ⚙️ **CI/CD** — GitHub Actions (build, lint, test)
 
 ## 🧱 Stack
 
-| Camada | Tecnologia |
+| Layer | Technology |
 |---|---|
 | Framework | NestJS + TypeScript |
 | ORM | TypeORM |
-| Banco | PostgreSQL, MySQL ou SQLite |
-| Cache / Filas | Redis + BullMQ |
-| Autenticação | JWT, Session/Cookies ou OAuth com Passport |
-| Validação | Zod + nestjs-zod (schemas viram DTO + Swagger automaticamente) |
+| Database | PostgreSQL, MySQL, or SQLite |
+| Cache / Queues | Redis + BullMQ |
+| Authentication | JWT, Session/Cookies, or OAuth with Passport |
+| Validation | Zod + nestjs-zod (schemas automatically become DTOs + Swagger) |
 | Docs | Swagger |
-| E-mail (dev) | Mailpit |
-| Testes | Vitest |
+| Email (dev) | Mailpit |
+| Tests | Vitest |
 | CI | GitHub Actions |
 
-## 📁 Estrutura de pastas
+## 📁 Folder structure
 
 ```
 src/
 │
-├── auth/          # login, sessões/tokens, OAuth, guards e strategies
-├── users/         # CRUD de usuários
-├── common/        # decorators, filters, guards, interceptors, pipes, utils
-├── config/        # configuração tipada e validada (env)
-├── database/      # DataSource, configuração, migrations e seed
-├── modules/       # módulos de domínio adicionais
-├── shared/        # código compartilhado entre módulos
-├── jobs/          # filas e workers (BullMQ)
-├── mail/          # templates e envio de e-mail
+├── auth/          # login, sessions/tokens, OAuth, guards, and strategies
+├── users/         # user CRUD
+├── common/        # decorators, filters, guards, interceptors, pipes, utilities
+├── config/        # typed and validated configuration (env)
+├── database/      # DataSource, configuration, migrations, and seed
+├── modules/       # additional domain modules
+├── shared/        # code shared between modules
+├── jobs/          # queues and workers (BullMQ)
+├── mail/          # email templates and delivery
 └── main.ts
 ```
 
-## 🚀 Começando
+## 🚀 Getting started
 
-### Pré-requisitos
+### Prerequisites
 
 - Node.js 20+
-- Docker e Docker Compose
+- Docker and Docker Compose
 
-### Rodando com Docker (recomendado)
+### Running with Docker (recommended)
 
 ```bash
 git clone https://github.com/jeiel2013/nestforge.git
@@ -71,9 +73,9 @@ cp .env.example .env
 docker compose up
 ```
 
-Isso sobe: API, PostgreSQL, Redis e Mailpit (interface de e-mail em `http://localhost:8025`).
+This starts the API, PostgreSQL, Redis, and Mailpit (email interface at `http://localhost:8025`).
 
-### Rodando localmente
+### Running locally
 
 ```bash
 npm install
@@ -84,41 +86,41 @@ npm run seed
 npm run start:dev
 ```
 
-A documentação Swagger fica disponível em `http://localhost:3000/docs`.
+Swagger documentation is available at `http://localhost:3000/docs`.
 
 ## 🔑 Roles & Permissions
 
-| Role | Descrição |
+| Role | Description |
 |---|---|
-| `ADMIN` | acesso total ao sistema |
-| `MANAGER` | gerencia usuários e relatórios |
-| `USER` | acesso padrão |
+| `ADMIN` | full system access |
+| `MANAGER` | manages users and reports |
+| `USER` | standard access |
 
-Permissions são granulares (`user:create`, `user:delete`, `report:read`, etc) e combinadas com roles via decorators (`@Roles()`, `@Permissions()`).
+Permissions are granular (`user:create`, `user:delete`, `report:read`, etc.) and combined with roles through decorators (`@Roles()`, `@Permissions()`).
 
 ## 🗺️ Roadmap
 
-- [x] Autenticação por JWT
-- [x] Autenticação por Session/Cookies
-- [x] OAuth Google/GitHub
-- [x] Estratégia OAuth-only
-- [x] Geração sem autenticação
+- [x] JWT authentication
+- [x] Session/Cookies authentication
+- [x] Google/GitHub OAuth
+- [x] OAuth-only strategy
+- [x] Generation without authentication
 - [x] Refresh Token
 - [x] Docker
 - [x] CI (build, lint, test)
 - [x] OAuth (Google/GitHub)
-- [x] Upload de arquivos
-- [x] Filas (BullMQ)
-- [x] E-mails transacionais
-- [x] RBAC completo (permissions granulares)
-- [x] Testes de integração completos
-- [x] Documentação completa (Swagger + guia de arquitetura)
+- [x] File uploads
+- [x] Queues (BullMQ)
+- [x] Transactional email
+- [x] Complete RBAC (granular permissions)
+- [x] Complete integration tests
+- [x] Complete documentation (Swagger + architecture guide)
 
-Veja o [ROADMAP.md](ROADMAP.md) detalhado.
+See the detailed [ROADMAP.md](ROADMAP.md).
 
-### Configurando o login social (OAuth)
+### Configuring social login (OAuth)
 
-Para habilitar login via Google e GitHub, crie um OAuth App em cada provedor e preencha no `.env`:
+To enable login through Google and GitHub, create an OAuth App with each provider and fill in `.env`:
 
 ```bash
 APP_URL=http://localhost:3000
@@ -130,43 +132,43 @@ GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
 ```
 
-- **Google**: crie as credenciais no [Google Cloud Console](https://console.cloud.google.com/apis/credentials) e configure a URL de callback como `{APP_URL}/auth/google/callback`.
-- **GitHub**: crie um OAuth App em `Settings > Developer settings > OAuth Apps` e configure a mesma URL de callback, trocando para `{APP_URL}/auth/github/callback`.
+- **Google**: create credentials in the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) and configure the callback URL as `{APP_URL}/auth/google/callback`.
+- **GitHub**: create an OAuth App under `Settings > Developer settings > OAuth Apps` and configure the callback URL as `{APP_URL}/auth/github/callback`.
 
-Depois é só acessar `GET /auth/google` ou `GET /auth/github`. No callback, a API emite access/refresh tokens ou estabelece uma sessão por cookie, conforme a estratégia escolhida. Se for o primeiro acesso, uma conta é criada e vinculada ao provedor.
+Then access `GET /auth/google` or `GET /auth/github`. On callback, the API issues access/refresh tokens or establishes a cookie-based session according to the selected strategy. On first access, an account is created and linked to the provider.
 
-### Autenticação por Session/Cookies
+### Session/Cookies authentication
 
-Quando o projeto é gerado com Session/Cookies, cadastro e login criam uma sessão persistida no banco por `connect-typeorm`. O identificador é enviado no cookie `nestforge.sid`, configurado com `httpOnly`, `sameSite=lax` e `secure` em produção.
+When the project is generated with Session/Cookies, registration and login create a session persisted in the database through `connect-typeorm`. The identifier is sent in the `nestforge.sid` cookie, configured with `httpOnly`, `sameSite=lax`, and `secure` in production.
 
-Configure no `.env`:
+Configure `.env`:
 
 ```bash
-SESSION_SECRET=use-um-segredo-com-pelo-menos-32-caracteres
+SESSION_SECRET=use-a-secret-with-at-least-32-characters
 SESSION_MAX_AGE=604800000
 ```
 
-### Recuperação de senha e verificação de e-mail
+### Password recovery and email verification
 
-Todo cadastro (`POST /auth/register`) já dispara um e-mail de verificação automaticamente. Os e-mails são enfileirados com BullMQ/Redis e processados por um worker que envia via SMTP — em desenvolvimento, tudo cai no Mailpit (`http://localhost:8025`), então nada sai pra internet de verdade.
+Every registration (`POST /auth/register`) automatically sends a verification email. Emails are queued with BullMQ/Redis and processed by a worker that sends them over SMTP. In development, everything goes to Mailpit (`http://localhost:8025`), so nothing is actually sent over the internet.
 
-| Rota | O que faz |
+| Route | What it does |
 |---|---|
-| `POST /auth/forgot-password` | Recebe um `email` e enfileira o envio do link de redefinição (resposta sempre genérica, não revela se o e-mail existe) |
-| `POST /auth/reset-password` | Recebe `token` + `password` e troca a senha; também revoga os refresh tokens ativos do usuário |
-| `GET /auth/verify-email?token=...` | Confirma o e-mail a partir do link recebido |
+| `POST /auth/forgot-password` | Receives an `email` and queues the password reset link (the response is always generic and does not reveal whether the email exists) |
+| `POST /auth/reset-password` | Receives a `token` + `password` and changes the password; it also revokes the user's active refresh tokens |
+| `GET /auth/verify-email?token=...` | Confirms the email from the received link |
 
-Os tokens de reset e verificação expiram em 1 hora e 24 horas, respectivamente, e são de uso único.
+Reset and verification tokens expire after 1 hour and 24 hours, respectively, and can only be used once.
 
 ## 🔑 Roles & Permissions
 
-| Role | Descrição |
+| Role | Description |
 |---|---|
-| `ADMIN` | acesso total ao sistema |
-| `MANAGER` | gerencia usuários e relatórios |
-| `USER` | acesso padrão |
+| `ADMIN` | full system access |
+| `MANAGER` | manages users and reports |
+| `USER` | standard access |
 
-Cada role tem um conjunto fixo de permissões, mapeado em `src/common/constants/role-permissions.ts`:
+Each role has a fixed set of permissions mapped in `src/common/constants/role-permissions.ts`:
 
 | Permission | ADMIN | MANAGER | USER |
 |---|:---:|:---:|:---:|
@@ -176,88 +178,88 @@ Cada role tem um conjunto fixo de permissões, mapeado em `src/common/constants/
 | `user:delete` | ✅ | ❌ | ❌ |
 | `report:read` | ✅ | ✅ | ❌ |
 
-Nas rotas, use `@Permissions(Permission.UserCreate)` para exigir uma permissão específica, ou `@Roles(Role.ADMIN)` quando o controle por cargo já for suficiente. Os dois guards (`RolesGuard` e `PermissionsGuard`) rodam globalmente e só bloqueiam a rota se ela tiver o decorator correspondente.
+On routes, use `@Permissions(Permission.UserCreate)` to require a specific permission or `@Roles(Role.ADMIN)` when role-based control is enough. Both guards (`RolesGuard` and `PermissionsGuard`) run globally and only block a route when it has the corresponding decorator.
 
-## 👥 Usuários: paginação, filtros e avatar
+## 👥 Users: pagination, filters, and avatar
 
-`GET /users` aceita query params pra paginar e filtrar a listagem:
+`GET /users` accepts query parameters for paginating and filtering the list:
 
 ```bash
 GET /users?page=2&limit=20&search=jeiel&role=ADMIN
 ```
 
-| Parâmetro | Descrição |
+| Parameter | Description |
 |---|---|
-| `page` | página atual (padrão: 1) |
-| `limit` | itens por página, até 100 (padrão: 10) |
-| `search` | busca por nome ou e-mail (case-insensitive) |
-| `role` | filtra por `ADMIN`, `MANAGER` ou `USER` |
+| `page` | current page (default: 1) |
+| `limit` | items per page, up to 100 (default: 10) |
+| `search` | searches by name or email (case-insensitive) |
+| `role` | filters by `ADMIN`, `MANAGER`, or `USER` |
 
-A resposta vem no formato `{ data, meta: { total, page, limit, totalPages } }`.
+The response uses the format `{ data, meta: { total, page, limit, totalPages } }`.
 
-Pra trocar o avatar do usuário autenticado:
+To change the authenticated user's avatar:
 
 ```bash
 curl -X POST http://localhost:3000/users/me/avatar \
   -H "Authorization: Bearer <accessToken>" \
-  -F "file=@/caminho/da/foto.png"
+  -F "file=@/path/to/photo.png"
 ```
 
-Aceita PNG, JPEG e WEBP até 2MB; o arquivo fica salvo em `./uploads/avatars` e é servido em `/uploads/avatars/<arquivo>`.
+PNG, JPEG, and WEBP files up to 2 MB are accepted. The file is saved under `./uploads/avatars` and served at `/uploads/avatars/<file>`.
 
-## 🛡️ Segurança: serialização e CSRF
+## 🛡️ Security: serialization and CSRF
 
-Toda validação de entrada (`body`, `query`) usa **Zod** via [`nestjs-zod`](https://github.com/BenLorantfy/nestjs-zod): cada DTO é um `z.object({...})` transformado em classe com `createZodDto(schema)`, validado globalmente pelo `ZodValidationPipe`. O `patchNestJsSwagger()` no bootstrap ensina o Swagger a ler esses schemas automaticamente — não precisa duplicar validação (Zod) e documentação (`@ApiProperty`) como no `class-validator`. Os schemas exportados (ex.: `createUserSchema`) também podem ser reaproveitados/combinados (como o `updateUserSchema`, que é só um `createUserSchema.partial()`).
+All input validation (`body`, `query`) uses **Zod** through [`nestjs-zod`](https://github.com/BenLorantfy/nestjs-zod): each DTO is a `z.object({...})` transformed into a class with `createZodDto(schema)` and globally validated by `ZodValidationPipe`. During bootstrap, `patchNestJsSwagger()` teaches Swagger to read these schemas automatically, so validation (Zod) and documentation (`@ApiProperty`) do not need to be duplicated as they would with `class-validator`. Exported schemas (for example, `createUserSchema`) can also be reused and combined (such as `updateUserSchema`, which is simply `createUserSchema.partial()`).
 
-- 🪵 **Observabilidade** — logs estruturados com Pino, health checks (`/health`) e métricas Prometheus (`/metrics`)
+- 🪵 **Observability** — structured logs with Pino, health checks (`/health`), and Prometheus metrics (`/metrics`)
 
-O seed cria três contas de teste, uma por role:
+The seed creates three test accounts, one for each role:
 
-| E-mail | Senha | Role |
+| Email | Password | Role |
 |---|---|---|
 | `admin@nestforge.dev` | `admin123` | ADMIN |
 | `manager@nestforge.dev` | `manager123` | MANAGER |
 | `user@nestforge.dev` | `user1234` | USER |
 
-## 📈 Observabilidade
+## 📈 Observability
 
-`GET /health` retorna o status agregado da API — banco (TypeORM), Redis, memória (heap/RSS) e espaço em disco — usando `@nestjs/terminus`. Cada verificação aparece individualmente na resposta, então dá pra saber exatamente o que caiu.
+`GET /health` returns the aggregated status of the API — database (TypeORM), Redis, memory (heap/RSS), and disk space — using `@nestjs/terminus`. Each check appears individually in the response, making it clear which component failed.
 
-`GET /metrics` expõe métricas no formato do Prometheus (via `prom-client`): as métricas padrão de Node.js (CPU, memória, event loop) mais `http_request_duration_seconds` (histograma) e `http_requests_total` (contador), ambas com labels de `method`, `route` e `status_code`. Basta apontar um scrape job do Prometheus pra essa rota.
+`GET /metrics` exposes Prometheus-format metrics through `prom-client`: standard Node.js metrics (CPU, memory, event loop), plus `http_request_duration_seconds` (histogram) and `http_requests_total` (counter), both with `method`, `route`, and `status_code` labels. Simply point a Prometheus scrape job at this route.
 
-## 🧪 Testes
+## 🧪 Tests
 
 ```bash
-npm run test          # unitários
-npm run test:e2e      # integração (e2e)
-npm run test:cov      # cobertura
+npm run test          # unit tests
+npm run test:e2e      # integration tests (E2E)
+npm run test:cov      # coverage
 ```
 
-Os testes e2e (`test/*.e2e-spec.ts`) sobem a aplicação real (Nest + TypeORM + Redis) e batem nos endpoints com `supertest`, usando um banco isolado (`.env.test`, banco `nestforge_test` — nunca o de desenvolvimento). Antes de rodar pela primeira vez:
+E2E tests (`test/*.e2e-spec.ts`) start the real application (Nest + TypeORM + Redis) and call its endpoints with `supertest`, using an isolated database (`.env.test`, the `nestforge_test` database — never the development database). Before running them for the first time:
 
 ```bash
-createdb nestforge_test   # ou: psql -U nestforge -c "CREATE DATABASE nestforge_test;"
+createdb nestforge_test   # or: psql -U nestforge -c "CREATE DATABASE nestforge_test;"
 docker compose up -d postgres redis
 npm run test:e2e
 ```
 
-O script `pretest:e2e` já aplica as migrations nesse banco automaticamente antes de cada rodada. Cada teste limpa as tabelas antes de rodar (`test/utils/clean-database.ts`), então não precisa zerar nada manualmente entre execuções. Hoje cobrem o fluxo de autenticação completo (registro, login, refresh, logout, e-mail duplicado, credenciais inválidas) e o CRUD de usuários com RBAC (ADMIN consegue tudo, USER lê mas não cria, `/users/me`, acesso sem token).
+The `pretest:e2e` script automatically applies migrations to this database before every run. Each test cleans the tables before running (`test/utils/clean-database.ts`), so nothing needs to be reset manually between runs. Current coverage includes the complete authentication flow (registration, login, refresh, logout, duplicate email, invalid credentials) and user CRUD with RBAC (ADMIN can do everything, USER can read but cannot create, `/users/me`, and access without a token).
 
-Os testes unitários (`src/**/*.spec.ts`) rodam isolados, com os repositories do TypeORM e o `ioredis` mockados (`vi.fn()` / `vi.mock()`) — não precisam de banco nem Redis de verdade. Hoje cobrem: `AuthService` (registro/login), `UsersService` (CRUD completo + paginação + confirmação de que o `passwordHash` não vaza na serialização via `instanceToPlain`), `RolesGuard`, `PermissionsGuard` e os indicadores de saúde (`TypeOrmHealthIndicator`, `RedisHealthIndicator`).
+Unit tests (`src/**/*.spec.ts`) run in isolation with the TypeORM repositories and `ioredis` mocked (`vi.fn()` / `vi.mock()`), so they do not require a real database or Redis. Current coverage includes `AuthService` (registration/login), `UsersService` (complete CRUD + pagination + confirmation through `instanceToPlain` that `passwordHash` is not leaked during serialization), `RolesGuard`, `PermissionsGuard`, and health indicators (`TypeOrmHealthIndicator`, `RedisHealthIndicator`).
 
-## 📚 Documentação adicional
+## 📚 Additional documentation
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — como o projeto é organizado e por que certas decisões de design foram tomadas (Zod vs. class-validator, permissions em código vs. banco, BullMQ, etc.)
-- [docs/adding-a-module.md](docs/adding-a-module.md) — passo a passo pra adicionar um recurso novo seguindo as convenções do projeto
+- [ARCHITECTURE.md](ARCHITECTURE.md) — how the project is organized and why certain design decisions were made (Zod vs. class-validator, code-based vs. database-based permissions, BullMQ, etc.)
+- [docs/adding-a-module.md](docs/adding-a-module.md) — step-by-step instructions for adding a new feature according to the project's conventions
 
-## 🤝 Contribuindo
+## 🤝 Contributing
 
-Contribuições são bem-vindas! Veja o [CONTRIBUTING.md](CONTRIBUTING.md) para o guia completo.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the complete guide.
 
-## 📄 Licença
+## 📄 License
 
-Este projeto está sob a licença MIT — veja [LICENSE](LICENSE).
+This project is licensed under the MIT License — see [LICENSE](LICENSE).
 
 ---
 
-Feito por [Jeiel Alves](https://github.com/jeiel2013) · [jeieldev.com.br](https://jeieldev.com.br)
+Made by [Jeiel Alves](https://github.com/jeiel2013) · [jeieldev.com.br](https://jeieldev.com.br)
