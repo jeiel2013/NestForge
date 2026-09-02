@@ -958,6 +958,259 @@ test(
     },
 );
 
+test(
+    'configura PostgreSQL e MySQL no template Drizzle',
+    { concurrency: false },
+    async () => {
+        const cases = [
+            {
+                database: 'postgres' as const,
+                projectName: 'drizzle-postgres',
+                dbType: 'postgres',
+                dialect: 'postgresql',
+                schemaFile: 'postgres.schema.ts',
+                schemaBuilder: 'pgTable',
+                driver: 'pg',
+                connectionPattern: /new Pool/,
+            },
+            {
+                database: 'mysql' as const,
+                projectName: 'drizzle-mysql',
+                dbType: 'mysql',
+                dialect: 'mysql',
+                schemaFile: 'mysql.schema.ts',
+                schemaBuilder: 'mysqlTable',
+                driver: 'mysql2',
+                connectionPattern: /createPool/,
+            },
+        ];
+
+        for (const testCase of cases) {
+            await withGeneratedProject(
+                makeOptions({
+                    projectName:
+                        testCase.projectName,
+                    orm: 'drizzle',
+                    database:
+                        testCase.database,
+                    authStrategy: 'jwt',
+                    features: [],
+                    accessControl: false,
+                }),
+                async (targetDir) => {
+                    const envExample =
+                        await readFile(
+                            path.join(
+                                targetDir,
+                                '.env.example',
+                            ),
+                            'utf8',
+                        );
+
+                    const drizzleConfig =
+                        await readFile(
+                            path.join(
+                                targetDir,
+                                'drizzle.config.ts',
+                            ),
+                            'utf8',
+                        );
+
+                    const schema =
+                        await readFile(
+                            path.join(
+                                targetDir,
+                                'src',
+                                'database',
+                                'schema',
+                                testCase.schemaFile,
+                            ),
+                            'utf8',
+                        );
+
+                    const databaseModule =
+                        await readFile(
+                            path.join(
+                                targetDir,
+                                'src',
+                                'database',
+                                'database.module.ts',
+                            ),
+                            'utf8',
+                        );
+
+                    const packageJson =
+                        await fs.readJson(
+                            path.join(
+                                targetDir,
+                                'package.json',
+                            ),
+                        );
+
+                    assert.match(
+                        envExample,
+                        new RegExp(
+                            `^DB_TYPE=${testCase.dbType}$`,
+                            'm',
+                        ),
+                    );
+
+                    assert.match(
+                        drizzleConfig,
+                        new RegExp(
+                            `dialect:\\s*'${testCase.dialect}'`,
+                        ),
+                    );
+
+                    assert.match(
+                        drizzleConfig,
+                        new RegExp(
+                            testCase.schemaFile.replace(
+                                '.',
+                                '\\.',
+                            ),
+                        ),
+                    );
+
+                    assert.doesNotMatch(
+                        drizzleConfig,
+                        /nestforge:feature/,
+                    );
+
+                    assert.match(
+                        schema,
+                        new RegExp(
+                            testCase.schemaBuilder,
+                        ),
+                    );
+
+                    assert.doesNotMatch(
+                        schema,
+                        /nestforge:feature/,
+                    );
+
+                    assert.match(
+                        databaseModule,
+                        testCase.connectionPattern,
+                    );
+
+                    assert.doesNotMatch(
+                        databaseModule,
+                        /nestforge:feature/,
+                    );
+
+                    assert.notEqual(
+                        packageJson.dependencies[
+                        testCase.driver
+                        ],
+                        undefined,
+                    );
+
+                    assert.notEqual(
+                        packageJson.dependencies[
+                        'drizzle-orm'
+                        ],
+                        undefined,
+                    );
+
+                    assert.notEqual(
+                        packageJson.devDependencies[
+                        'drizzle-kit'
+                        ],
+                        undefined,
+                    );
+
+                    if (
+                        testCase.database ===
+                        'postgres'
+                    ) {
+                        assert.equal(
+                            packageJson.dependencies
+                                .mysql2,
+                            undefined,
+                        );
+
+                        assert.equal(
+                            packageJson.dependencies[
+                            'better-sqlite3'
+                            ],
+                            undefined,
+                        );
+
+                        assert.equal(
+                            await fs.pathExists(
+                                path.join(
+                                    targetDir,
+                                    'src',
+                                    'database',
+                                    'schema',
+                                    'mysql.schema.ts',
+                                ),
+                            ),
+                            false,
+                        );
+
+                        assert.equal(
+                            await fs.pathExists(
+                                path.join(
+                                    targetDir,
+                                    'src',
+                                    'database',
+                                    'schema',
+                                    'sqlite.schema.ts',
+                                ),
+                            ),
+                            false,
+                        );
+                    }
+
+                    if (
+                        testCase.database === 'mysql'
+                    ) {
+                        assert.equal(
+                            packageJson.dependencies.pg,
+                            undefined,
+                        );
+
+                        assert.equal(
+                            packageJson.dependencies[
+                            'better-sqlite3'
+                            ],
+                            undefined,
+                        );
+
+                        assert.equal(
+                            await fs.pathExists(
+                                path.join(
+                                    targetDir,
+                                    'src',
+                                    'database',
+                                    'schema',
+                                    'postgres.schema.ts',
+                                ),
+                            ),
+                            false,
+                        );
+
+                        assert.equal(
+                            await fs.pathExists(
+                                path.join(
+                                    targetDir,
+                                    'src',
+                                    'database',
+                                    'schema',
+                                    'sqlite.schema.ts',
+                                ),
+                            ),
+                            false,
+                        );
+                    }
+                },
+            );
+        }
+    },
+);
+
 test('gera projeto em JavaScript', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
@@ -1142,6 +1395,225 @@ test(
                     'better-sqlite3'
                     ],
                     undefined,
+                );
+            },
+        );
+    },
+);
+
+test(
+    'gera projeto Drizzle em JavaScript',
+    { concurrency: false },
+    async () => {
+        await withGeneratedProject(
+            makeOptions({
+                projectName:
+                    'drizzle-javascript',
+                orm: 'drizzle',
+                database: 'sqlite',
+                language: 'javascript',
+                authStrategy: 'jwt',
+                features: ['validation'],
+                accessControl: false,
+            }),
+            async (targetDir) => {
+                const packageJson =
+                    await fs.readJson(
+                        path.join(
+                            targetDir,
+                            'package.json',
+                        ),
+                    );
+
+                const workflow = await readFile(
+                    path.join(
+                        targetDir,
+                        '.github',
+                        'workflows',
+                        'ci.yml',
+                    ),
+                    'utf8',
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'main.js',
+                        ),
+                    ),
+                    true,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'main.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'drizzle.config.js',
+                        ),
+                    ),
+                    true,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'drizzle.config.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'database',
+                            'schema',
+                            'sqlite.schema.js',
+                        ),
+                    ),
+                    true,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'database',
+                            'schema',
+                            'sqlite.schema.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'database',
+                            'seed.js',
+                        ),
+                    ),
+                    true,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'database',
+                            'seed.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.equal(
+                    packageJson.scripts[
+                    'drizzle:generate'
+                    ],
+                    'dotenv -e .env -- drizzle-kit generate --config=drizzle.config.js',
+                );
+
+                assert.equal(
+                    packageJson.scripts[
+                    'drizzle:migrate'
+                    ],
+                    'dotenv -e .env -- drizzle-kit migrate --config=drizzle.config.js',
+                );
+
+                assert.equal(
+                    packageJson.scripts[
+                    'pretest:e2e'
+                    ],
+                    'dotenv -e .env.test -- drizzle-kit migrate --config=drizzle.config.js',
+                );
+
+                assert.equal(
+                    packageJson.scripts.seed,
+                    'dotenv -e .env -- node src/database/seed.js',
+                );
+
+                assert.equal(
+                    packageJson.scripts[
+                    'test:e2e'
+                    ],
+                    'dotenv -e .env.test -- vitest run --config ./vitest.e2e.config.js',
+                );
+
+                assert.equal(
+                    packageJson.devDependencies
+                        .typescript,
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.devDependencies[
+                    'ts-node'
+                    ],
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.devDependencies[
+                    '@types/better-sqlite3'
+                    ],
+                    undefined,
+                );
+
+                assert.notEqual(
+                    packageJson.dependencies[
+                    'better-sqlite3'
+                    ],
+                    undefined,
+                );
+
+                assert.notEqual(
+                    packageJson.dependencies[
+                    'drizzle-orm'
+                    ],
+                    undefined,
+                );
+
+                assert.notEqual(
+                    packageJson.devDependencies[
+                    'drizzle-kit'
+                    ],
+                    undefined,
+                );
+
+                assert.match(
+                    workflow,
+                    /drizzle-kit generate --config=drizzle\.config\.js/,
+                );
+
+                assert.match(
+                    workflow,
+                    /drizzle-kit migrate --config=drizzle\.config\.js/,
+                );
+
+                assert.doesNotMatch(
+                    workflow,
+                    /drizzle\.config\.ts/,
                 );
             },
         );
