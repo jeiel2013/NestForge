@@ -691,6 +691,273 @@ test(
     },
 );
 
+test(
+    'gera Drizzle com SQLite e JWT',
+    { concurrency: false },
+    async () => {
+        await withGeneratedProject(
+            makeOptions({
+                projectName: 'drizzle-sqlite-jwt',
+                orm: 'drizzle',
+                database: 'sqlite',
+                language: 'typescript',
+                authStrategy: 'jwt',
+                features: ['validation'],
+                accessControl: false,
+            }),
+            async (targetDir) => {
+                const envExample = await readFile(
+                    path.join(
+                        targetDir,
+                        '.env.example',
+                    ),
+                    'utf8',
+                );
+
+                const drizzleConfig = await readFile(
+                    path.join(
+                        targetDir,
+                        'drizzle.config.ts',
+                    ),
+                    'utf8',
+                );
+
+                const sqliteSchema = await readFile(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'database',
+                        'schema',
+                        'sqlite.schema.ts',
+                    ),
+                    'utf8',
+                );
+
+                const databaseModule = await readFile(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'database',
+                        'database.module.ts',
+                    ),
+                    'utf8',
+                );
+
+                const usersService = await readFile(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'users',
+                        'users.service.ts',
+                    ),
+                    'utf8',
+                );
+
+                const packageJson =
+                    await fs.readJson(
+                        path.join(
+                            targetDir,
+                            'package.json',
+                        ),
+                    );
+
+                assert.match(
+                    envExample,
+                    /^DB_TYPE=sqlite$/m,
+                );
+
+                assert.match(
+                    envExample,
+                    /DATABASE_URL="file:\.\/dev\.db"/,
+                );
+
+                assert.match(
+                    drizzleConfig,
+                    /dialect:\s*'sqlite'/,
+                );
+
+                assert.match(
+                    drizzleConfig,
+                    /sqlite\.schema\.ts/,
+                );
+
+                assert.doesNotMatch(
+                    drizzleConfig,
+                    /dialect:\s*'postgresql'/,
+                );
+
+                assert.doesNotMatch(
+                    drizzleConfig,
+                    /dialect:\s*'mysql'/,
+                );
+
+                assert.doesNotMatch(
+                    drizzleConfig,
+                    /nestforge:feature/,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'database',
+                            'schema',
+                            'postgres.schema.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'database',
+                            'schema',
+                            'mysql.schema.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.match(
+                    sqliteSchema,
+                    /export const users/,
+                );
+
+                assert.match(
+                    sqliteSchema,
+                    /export const refreshTokens/,
+                );
+
+                assert.doesNotMatch(
+                    sqliteSchema,
+                    /export const sessions/,
+                );
+
+                assert.doesNotMatch(
+                    sqliteSchema,
+                    /passwordResetTokens/,
+                );
+
+                assert.doesNotMatch(
+                    sqliteSchema,
+                    /nestforge:feature/,
+                );
+
+                assert.match(
+                    databaseModule,
+                    /BetterSqlite3/,
+                );
+
+                assert.doesNotMatch(
+                    databaseModule,
+                    /new Pool/,
+                );
+
+                assert.doesNotMatch(
+                    databaseModule,
+                    /createPool/,
+                );
+
+                assert.doesNotMatch(
+                    databaseModule,
+                    /nestforge:feature/,
+                );
+
+                assert.match(
+                    usersService,
+                    /@InjectDatabase\(\)/,
+                );
+
+                assert.doesNotMatch(
+                    usersService,
+                    /InjectRepository|Repository|typeorm/,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'auth',
+                            'token.service.ts',
+                        ),
+                    ),
+                    true,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'auth',
+                            'drizzle-session.store.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.notEqual(
+                    packageJson.dependencies[
+                    'drizzle-orm'
+                    ],
+                    undefined,
+                );
+
+                assert.notEqual(
+                    packageJson.devDependencies[
+                    'drizzle-kit'
+                    ],
+                    undefined,
+                );
+
+                assert.notEqual(
+                    packageJson.dependencies[
+                    'better-sqlite3'
+                    ],
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.dependencies.pg,
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.dependencies.mysql2,
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.dependencies.typeorm,
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.dependencies[
+                    '@nestjs/typeorm'
+                    ],
+                    undefined,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'Dockerfile',
+                        ),
+                    ),
+                    false,
+                );
+            },
+        );
+    },
+);
+
 test('gera projeto em JavaScript', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
@@ -882,10 +1149,16 @@ test(
 );
 
 test('recusa opções ainda não implementadas sem criar projeto', { concurrency: false }, async () => {
-    const unsupportedOptions: Array<[string, Partial<ProjectOptions>]> = [
-        ['Drizzle', { orm: 'drizzle' }],
-        ['MongoDB', { database: 'mongodb' }],
-    ];
+    const unsupportedOptions: Array<
+        [string, Partial<ProjectOptions>]
+    > = [
+            [
+                'MongoDB',
+                {
+                    database: 'mongodb',
+                },
+            ],
+        ];
 
     for (const [label, overrides] of unsupportedOptions) {
         await withTempDirectory(async (tempDir) => {
@@ -899,4 +1172,4 @@ test('recusa opções ainda não implementadas sem criar projeto', { concurrency
             assert.equal(await fs.pathExists(path.join(tempDir, projectName)), false);
         });
     }
-})
+});
