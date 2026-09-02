@@ -1,325 +1,328 @@
 # nestforge
 
-CLI interativa que gera projetos NestJS a partir dos templates `../../templates/prisma`, `../../templates/typeorm` e `../../templates/drizzle` do NestForge.
+**English** | [Português](README.pt-BR.md)
+
+Interactive CLI that generates NestJS projects from NestForge's [Prisma](../../templates/prisma), [TypeORM](../../templates/typeorm), and [Drizzle](../../templates/drizzle) templates.
 
 ```bash
 npx nestforge
 ```
 
-Para o guia de testes, perguntas da CLI e checklist completo, consulte `TESTING.md` (`TESTING.md`).
+For the testing guide, CLI prompts, and complete checklist, see [`TESTING.md`](TESTING.md).
 
-## O que já funciona
+## What already works
 
-* Prompts interativos usando @clack/prompts;
-* geração em TypeScript ou JavaScript;
-* Prisma, TypeORM e Drizzle ORM;
-* PostgreSQL, MySQL e SQLite;
-* autenticação JWT, Session/Cookies, OAuth-only ou nenhuma;
-* Docker opcional;
-* Swagger/OpenAPI opcional;
-* validação global com Zod opcional;
-* Redis, filas e e-mail opcionais;
-* RBAC e Permissions opcionais;
-* criação opcional do .env;
-* testes automatizados das combinações geradas.
+- Interactive prompts using `@clack/prompts`;
+- TypeScript or JavaScript generation;
+- Prisma, TypeORM, and Drizzle ORM;
+- PostgreSQL, MySQL, and SQLite;
+- JWT, Session/Cookies, OAuth-only, or no authentication;
+- optional Docker;
+- optional Swagger/OpenAPI;
+- optional global validation with Zod;
+- optional Redis, queues, and email;
+- optional RBAC and Permissions;
+- optional `.env` creation;
+- automated tests for generated combinations.
 
-Os projetos incluem recursos como upload de avatar, paginação, filtros, health checks, métricas, testes unitários e testes E2E.
+Generated projects include features such as avatar upload, pagination, filters, health checks, metrics, unit tests, and E2E tests.
 
-## Linguagens
+## Languages
 
-A CLI gera projetos em:
+The CLI generates projects in:
 
-* TypeScript;
-* JavaScript.
+- TypeScript;
+- JavaScript.
 
-A opção JavaScript é produzida automaticamente a partir dos templates TypeScript durante a geração.
+The JavaScript option is produced automatically from the TypeScript templates during generation.
 
-A transformação:
+The transformation:
 
-* transpila arquivos .ts;
-* remove arquivos TypeScript que não devem permanecer;
-* atualiza scripts do package.json;
-* atualiza configurações do Vitest;
-* atualiza configurações de migrations;
-* adapta os comandos conforme o ORM selecionado.
+- transpiles `.ts` files;
+- removes TypeScript files that should not remain;
+- updates `package.json` scripts;
+- updates Vitest configuration;
+- updates migration configuration;
+- adapts commands according to the selected ORM.
 
-## ORMs e bancos disponíveis
+## Available ORMs and databases
 
 ### Prisma
 
-Disponível com:
+Available with:
 
-* PostgreSQL;
-* MySQL;
-* SQLite.
+- PostgreSQL;
+- MySQL;
+- SQLite.
 
-A CLI ajusta o provider do schema.prisma, a URL do banco e os recursos específicos do provider.
+The CLI adjusts the `schema.prisma` provider, database URL, and provider-specific resources.
 
 ### TypeORM
 
-Disponível com:
+Available with:
 
-* PostgreSQL usando pg;
-* MySQL usando mysql2;
-* SQLite usando better-sqlite3.
+- PostgreSQL using `pg`;
+- MySQL using `mysql2`;
+- SQLite using `better-sqlite3`.
 
-A CLI ajusta:
+The CLI adjusts:
 
-* DB_TYPE;
-* DATABASE_URL;
-* tipos de colunas;
-* configuração do DataSource;
-* scripts de migration;
-* driver instalado.
+- `DB_TYPE`;
+- `DATABASE_URL`;
+- column types;
+- `DataSource` configuration;
+- migration scripts;
+- installed driver.
 
-Somente o driver necessário permanece no projeto gerado.
+Only the required driver remains in the generated project.
 
 ### Drizzle ORM
 
-Disponível com:
+Available with:
 
-* PostgreSQL usando pg;
-* MySQL usando mysql2;
-* SQLite usando better-sqlite3.
+- PostgreSQL using `pg`;
+- MySQL using `mysql2`;
+- SQLite using `better-sqlite3`.
 
-O template Drizzle inclui:
+The Drizzle template includes:
 
-* schema específico para cada banco;
-* configuração com Drizzle Kit;
-* migrations SQL;
-* seed;
-* injeção tipada do banco;
-* health check baseado no driver selecionado;
-* DrizzleSessionStore;
-* transações adaptadas ao SQLite.
+- a database-specific schema;
+- Drizzle Kit configuration;
+- SQL migrations;
+- seed;
+- typed database injection;
+- health check based on the selected driver;
+- `DrizzleSessionStore`;
+- transactions adapted to SQLite.
 
-Depois da geração, somente o schema e o driver do banco selecionado permanecem no projeto.
+After generation, only the schema and driver for the selected database remain in the project.
 
-## Estratégias de autenticação
+## Authentication strategies
 
 ### JWT
 
-A estratégia JWT mantém:
+The JWT strategy keeps:
 
-* cadastro;
-* login;
-* access token;
-* refresh token;
-* rotação de refresh token;
-* revogação;
-* logout;
-* OAuth com Google e GitHub;
-* recuperação de senha;
-* verificação de e-mail.
+- registration;
+- login;
+- access tokens;
+- refresh tokens;
+- refresh token rotation;
+- revocation;
+- logout;
+- Google and GitHub OAuth;
+- password recovery;
+- email verification.
 
-As rotas de recuperação de senha e verificação de e-mail dependem do recurso Redis, filas e e-mail.
+Password recovery and email verification routes depend on the Redis, queues, and email feature.
 
 ### Session/Cookies
 
-A estratégia Session/Cookies:
+The Session/Cookies strategy:
 
-* mantém cadastro e login com senha;
-* cria uma sessão persistida no banco;
-* envia um cookie httpOnly;
-* regenera a sessão após o login;
-* usa SessionAuthGuard;
-* protege operações mutáveis com CSRF;
-* destrói a sessão no logout;
-* inicia sessão depois dos callbacks OAuth;
-* remove arquivos, dependências e variáveis exclusivos de JWT.
+- keeps password registration and login;
+- creates a session persisted in the database;
+- sends an `httpOnly` cookie;
+- regenerates the session after login;
+- uses `SessionAuthGuard`;
+- protects state-changing operations with CSRF;
+- destroys the session on logout;
+- starts a session after OAuth callbacks;
+- removes JWT-only files, dependencies, and variables.
 
-Cada template usa uma integração apropriada:
+Each template uses an appropriate integration:
 
-* Prisma usa @quixo3/prisma-session-store;
-* TypeORM usa connect-typeorm;
-* Drizzle usa o DrizzleSessionStore implementado no próprio template.
+- Prisma uses `@quixo3/prisma-session-store`;
+- TypeORM uses `connect-typeorm`;
+- Drizzle uses the template's own `DrizzleSessionStore`.
 
 ### OAuth-only
 
-A estratégia OAuth-only remove os fluxos baseados em senha:
+The OAuth-only strategy removes password-based flows:
 
-* register;
-* login;
-* forgot-password;
-* reset-password;
-* verify-email.
+- `register`;
+- `login`;
+- `forgot-password`;
+- `reset-password`;
+- `verify-email`.
 
-Continuam disponíveis:
+The following remain available:
 
-* OAuth Google;
-* OAuth GitHub;
-* access token;
-* refresh token;
-* logout;
-* proteção das rotas autenticadas.
+- Google OAuth;
+- GitHub OAuth;
+- access tokens;
+- refresh tokens;
+- logout;
+- protection for authenticated routes.
 
-### Nenhuma autenticação
+### No authentication
 
-Quando a opção “Nenhuma” é selecionada, a CLI remove completamente:
+When “None” is selected, the CLI completely removes:
 
-* src/auth;
-* src/users;
-* DTOs relacionados;
-* guards de autenticação;
-* testes de autenticação;
-* testes de usuários.
+- `src/auth`;
+- `src/users`;
+- related DTOs;
+- authentication guards;
+- authentication tests;
+- user tests.
 
-O projeto mantém somente o core selecionado, como health checks, métricas e recursos de infraestrutura.
+The project keeps only the selected core, such as health checks, metrics, and infrastructure features.
 
-## Recursos opcionais
+## Optional features
 
 ### Docker
 
-Quando Docker é desabilitado, a CLI remove:
+When Docker is disabled, the CLI removes:
 
-* Dockerfile;
-* docker-compose.yml.
+- `Dockerfile`;
+- `docker-compose.yml`.
 
 ### Swagger/OpenAPI
 
-Quando Swagger é desabilitado, a CLI remove:
+When Swagger is disabled, the CLI removes:
 
-* bootstrap do Swagger no main.ts;
-* rota /docs;
-* decorators como @ApiTags;
-* @ApiOperation;
-* @ApiResponse;
-* demais decorators de documentação.
+- the Swagger bootstrap from `main.ts`;
+- the `/docs` route;
+- decorators such as `@ApiTags`;
+- `@ApiOperation`;
+- `@ApiResponse`;
+- other documentation decorators.
 
-A pergunta sobre Swagger/OpenAPI também controla a documentação da API. Não existe uma segunda opção separada.
+The Swagger/OpenAPI prompt also controls API documentation. There is no separate second option.
 
-### Validação global
+### Global validation
 
-Quando a validação global é desabilitada:
+When global validation is disabled:
 
-* ZodValidationPipe não é registrado no main.ts;
-* o pipe também não é registrado no setup E2E.
+- `ZodValidationPipe` is not registered in `main.ts`;
+- the pipe is not registered in the E2E setup.
 
-Os DTOs continuam existindo como classes, mas deixam de ser validados automaticamente pelo pipe global.
+DTOs remain as classes, but they are no longer automatically validated by the global pipe.
 
-### Redis, filas e e-mail
+### Redis, queues, and email
 
-Quando habilitado, o projeto inclui:
+When enabled, the project includes:
 
-* Redis;
-* BullMQ;
-* filas de e-mail;
-* Nodemailer;
-* Mailpit;
-* recuperação de senha;
-* verificação de e-mail;
-* health check do Redis.
+- Redis;
+- BullMQ;
+- email queues;
+- Nodemailer;
+- Mailpit;
+- password recovery;
+- email verification;
+- Redis health check.
 
-Quando desabilitado, os módulos, rotas e dependências relacionados são removidos.
+When disabled, related modules, routes, and dependencies are removed.
 
-### RBAC e Permissions
+### RBAC and Permissions
 
-Quando habilitado, o projeto inclui:
+When enabled, the project includes:
 
-* roles ADMIN, MANAGER e USER;
-* permissions granulares;
-* RolesGuard;
-* PermissionsGuard;
-* decorators de autorização.
+- `ADMIN`, `MANAGER`, and `USER` roles;
+- granular permissions;
+- `RolesGuard`;
+- `PermissionsGuard`;
+- authorization decorators.
 
-Quando desabilitado, guards, decorators e constantes de RBAC são removidos. As rotas continuam exigindo autenticação quando uma estratégia de autenticação estiver ativa, mas deixam de exigir permissions específicas.
+When disabled, RBAC guards, decorators, and constants are removed. Routes still require authentication when an authentication strategy is active, but they no longer require specific permissions.
 
-### Arquivo .env
+### `.env` file
 
-Quando solicitado, a CLI cria automaticamente o .env a partir do .env.example já
-processado.
+When requested, the CLI automatically creates `.env` from the already processed `.env.example`.
 
-## Estado das opções
+## Option status
 
-| Escolha               | Status             |
-| --------------------- | ------------------ |
-| Linguagem: TypeScript | ✅ Implementada     |
-| Linguagem: JavaScript | ✅ Implementada     |
-| ORM: Prisma           | ✅ Implementado     |
-| ORM: TypeORM          | ✅ Implementado     |
-| ORM: Drizzle          | ✅ Implementado     |
-| ORM: Nenhum           | ❌ Não implementado |
-| Banco: PostgreSQL     | ✅ Implementado     |
-| Banco: MySQL          | ✅ Implementado     |
-| Banco: SQLite         | ✅ Implementado     |
-| Banco: MongoDB        | ❌ Não implementado |
-| Auth: JWT             | ✅ Implementada     |
-| Auth: Session/Cookies | ✅ Implementada     |
-| Auth: OAuth-only      | ✅ Implementada     |
-| Auth: Nenhuma         | ✅ Implementada     |
+| Choice | Status |
+| --- | --- |
+| Language: TypeScript | ✅ Implemented |
+| Language: JavaScript | ✅ Implemented |
+| ORM: Prisma | ✅ Implemented |
+| ORM: TypeORM | ✅ Implemented |
+| ORM: Drizzle | ✅ Implemented |
+| ORM: None | ❌ Not implemented |
+| Database: PostgreSQL | ✅ Implemented |
+| Database: MySQL | ✅ Implemented |
+| Database: SQLite | ✅ Implemented |
+| Database: MongoDB | ❌ Not implemented |
+| Auth: JWT | ✅ Implemented |
+| Auth: Session/Cookies | ✅ Implemented |
+| Auth: OAuth-only | ✅ Implemented |
+| Auth: None | ✅ Implemented |
 
-A CLI recusa opções ainda não implementadas antes de criar a pasta do projeto.
+The CLI rejects options that are not implemented before creating the project directory.
 
-## Testes automatizados
+## Automated tests
 
-Os testes do gerador ficam em:
+Generator tests are located at:
 
-`packages/cli/test/generator.test.ts`
+```text
+packages/cli/test/generator.test.ts
+```
 
-Execute dentro de packages/cli:
+Run them from `packages/cli`:
 
 ```bash
 npm test
 ```
 
-A cobertura inclui:
+Coverage includes:
 
-* Prisma com PostgreSQL;
-* Prisma com MySQL;
-* Prisma com SQLite;
-* TypeORM com SQLite;
-* Drizzle com PostgreSQL;
-* Drizzle com MySQL;
-* Drizzle com SQLite;
-* JWT;
-* Session/Cookies;
-* OAuth-only;
-* nenhuma autenticação;
-* TypeScript;
-* JavaScript;
-* remoção de Redis;
-* remoção de recursos opcionais;
-* drivers corretos por banco;
-* scripts de migrations;
-* schemas gerados;
-* recusa de opções não implementadas.
+- Prisma with PostgreSQL;
+- Prisma with MySQL;
+- Prisma with SQLite;
+- TypeORM with SQLite;
+- Drizzle with PostgreSQL;
+- Drizzle with MySQL;
+- Drizzle with SQLite;
+- JWT;
+- Session/Cookies;
+- OAuth-only;
+- no authentication;
+- TypeScript;
+- JavaScript;
+- Redis removal;
+- removal of optional features;
+- correct database drivers;
+- migration scripts;
+- generated schemas;
+- rejection of unimplemented options.
 
-## Smoke tests realizados
+## Completed smoke tests
 
-Foram validadas com instalação, build, testes unitários, migrations, seed e testes E2E:
+The following combinations were validated with installation, build, unit tests, migrations, seed, and E2E tests:
 
-* TypeScript + TypeORM + SQLite + JWT;
-* TypeScript + TypeORM + SQLite + Session/Cookies;
-* TypeScript + Drizzle + SQLite + JWT;
-* TypeScript + Drizzle + SQLite + Session/Cookies.
+- TypeScript + TypeORM + SQLite + JWT;
+- TypeScript + TypeORM + SQLite + Session/Cookies;
+- TypeScript + Drizzle + SQLite + JWT;
+- TypeScript + Drizzle + SQLite + Session/Cookies.
 
-PostgreSQL e MySQL possuem testes automatizados de geração, configuração e remoção dos drivers não utilizados. Smoke tests completos desses bancos ainda exigem serviços locais ou Docker.
+PostgreSQL and MySQL have automated generation, configuration, and unused-driver removal tests. Complete smoke tests for these databases still require local services or Docker.
 
-## Limitações conhecidas
+## Known limitations
 
-### Redis nos templates anteriores
+### Redis in earlier templates
 
-Nos templates Prisma e TypeORM, o docker-compose.yml e os arquivos de ambiente ainda podem manter serviços ou variáveis de Redis e Mailpit quando o recurso é desabilitado.
+In the Prisma and TypeORM templates, `docker-compose.yml` and environment files may still keep Redis and Mailpit services or variables when the feature is disabled.
 
-Esse conteúdo extra não impede o projeto de compilar ou executar, mas ainda pode ser limpo para deixar a geração completamente enxuta.
+This extra content does not prevent the project from compiling or running, but it can still be cleaned up to make generation completely minimal.
 
-### Nenhuma autenticação com Prisma
+### No authentication with Prisma
 
-No template Prisma, o schema.prisma ainda mantém models como User, RefreshToken e OAuthAccount quando nenhuma autenticação é selecionada.
+In the Prisma template, `schema.prisma` still keeps models such as `User`, `RefreshToken`, and `OAuthAccount` when no authentication is selected.
 
-O prisma/seed.ts também pode continuar relacionado aos usuários de demonstração.
+`prisma/seed.ts` may also remain related to the demonstration users.
 
-O código da aplicação é removido corretamente, mas o schema ainda pode criar tabelas que não serão utilizadas.
+The application code is removed correctly, but the schema may still create tables that are not used.
 
-### Criação administrativa no OAuth-only
+### Administrative creation with OAuth-only
 
-Na estratégia OAuth-only, o endpoint administrativo POST /users continua permitindo a criação manual de um usuário.
+With OAuth-only, the administrative `POST /users` endpoint still allows a user to be created manually.
 
-A CLI ainda não diferencia a estratégia usada para login da forma como um administrador cadastra usuários pelo painel.
+The CLI does not yet distinguish the strategy used for login from how an administrator registers users through a management interface.
 
-## Desenvolvimento local
+## Local development
 
-Na raiz do monorepo:
+From the monorepo root:
 
 ```bash
 npm install
@@ -327,15 +330,15 @@ cd packages/cli
 npm run dev
 ```
 
-O comando npm run dev executa a CLI diretamente pelo TypeScript usando tsx.
+`npm run dev` runs the CLI directly from TypeScript using `tsx`.
 
-Para rodar os testes:
+To run the tests:
 
 ```bash
 npm test
 ```
 
-Para testar como uma CLI instalada:
+To test the CLI as an installed package:
 
 ```bash
 npm run build
@@ -343,9 +346,9 @@ npm link
 nestforge
 ```
 
-## Publicação
+## Publishing
 
-Dentro de packages/cli:
+From `packages/cli`:
 
 ```bash
 npm run build
@@ -353,16 +356,16 @@ npm pack --dry-run
 npm publish
 ```
 
-O build:
+The build:
 
-1. compila a CLI;
-2. copia os templates Prisma, TypeORM e Drizzle;
-3. prepara o pacote publicado no npm.
+1. compiles the CLI;
+2. copies the Prisma, TypeORM, and Drizzle templates;
+3. prepares the package published to npm.
 
-## Próximos itens
+## Next steps
 
-* opção sem ORM;
-* MongoDB;
-* validação mais completa do nome do projeto e do pacote;
-* ampliação da matriz de smoke tests com PostgreSQL e MySQL reais;
-* redução das limitações conhecidas dos templates anteriores.
+- an option without an ORM;
+- MongoDB;
+- more complete project and package name validation;
+- expand the smoke-test matrix with real PostgreSQL and MySQL services;
+- reduce the known limitations in the earlier templates.
