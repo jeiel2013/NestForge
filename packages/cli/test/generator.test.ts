@@ -81,6 +81,24 @@ test('gera o projeto padrão com PostgreSQL e JWT', { concurrency: false }, asyn
         assert.equal(await fs.pathExists(path.join(targetDir, 'src', 'users')), true);
         assert.equal(await fs.pathExists(path.join(targetDir, 'Dockerfile')), true);
         assert.equal(await fs.pathExists(path.join(targetDir, 'docker-compose.yml')), true);
+
+        const englishReadme = await readFile(
+            path.join(targetDir, 'README.md'),
+            'utf8',
+        );
+        const portugueseReadme = await readFile(
+            path.join(targetDir, 'README.pt-BR.md'),
+            'utf8',
+        );
+
+        assert.match(
+            englishReadme,
+            /^# nestforge-test/m,
+        );
+        assert.match(
+            portugueseReadme,
+            /^# nestforge-test/m,
+        );
     });
 });
 
