@@ -1,71 +1,52 @@
 import {
-    describe,
-    expect,
-    it,
-    vi,
-} from 'vitest';
-import { HealthCheckError } from '@nestjs/terminus';
+    Inject,
+    Injectable,
+} from '@nestjs/common';
+import {
+    HealthCheckError,
+    HealthIndicatorResult,
+} from '@nestjs/terminus';
+import { DATABASE_CLIENT } from '../../database/database.constants';
 import type { DatabaseClient } from '../../database/database.types';
-import { DrizzleHealthIndicator } from './drizzle-health.indicator';
 
-describe('DrizzleHealthIndicator', () => {
-    it('retorna status up quando a consulta executa com sucesso', async () => {
-        const get = vi.fn().mockReturnValue({
-            result: 1,
-        });
+@Injectable()
+export class DrizzleHealthIndicator {
+    constructor(
+        @Inject(DATABASE_CLIENT)
+        private readonly client: DatabaseClient,
+    ) { }
 
-        const databaseClient = {
-            query: vi.fn().mockResolvedValue([
-                {
-                    result: 1,
+    async isHealthy(
+        key: string,
+    ): Promise<HealthIndicatorResult> {
+        try {
+            // nestforge:feature:database:postgres
+            await this.client.query('SELECT 1');
+            // nestforge:feature:database:postgres:end
+
+            // nestforge:feature:database:mysql
+            await this.client.query('SELECT 1');
+            // nestforge:feature:database:mysql:end
+
+            // nestforge:feature:database:sqlite
+            this.client.prepare('SELECT 1').get();
+            // nestforge:feature:database:sqlite:end
+
+            return {
+                [key]: {
+                    status: 'up',
                 },
-            ]),
-            prepare: vi.fn(() => ({
-                get,
-            })),
-        };
-
-        const indicator =
-            new DrizzleHealthIndicator(
-                databaseClient as unknown as DatabaseClient,
+            };
+        } catch (error) {
+            throw new HealthCheckError(
+                'Banco de dados indisponível',
+                {
+                    [key]: {
+                        status: 'down',
+                        message: (error as Error).message,
+                    },
+                },
             );
-
-        const result = await indicator.isHealthy(
-            'database',
-        );
-
-        expect(result).toEqual({
-            database: {
-                status: 'up',
-            },
-        });
-    });
-
-    it('lança HealthCheckError quando a consulta falha', async () => {
-        const get = vi.fn(() => {
-            throw new Error('conexão recusada');
-        });
-
-        const databaseClient = {
-            query: vi
-                .fn()
-                .mockRejectedValue(
-                    new Error('conexão recusada'),
-                ),
-            prepare: vi.fn(() => ({
-                get,
-            })),
-        };
-
-        const indicator =
-            new DrizzleHealthIndicator(
-                databaseClient as unknown as DatabaseClient,
-            );
-
-        await expect(
-            indicator.isHealthy('database'),
-        ).rejects.toBeInstanceOf(
-            HealthCheckError,
-        );
-    });
-});
+        }
+    }
+}
