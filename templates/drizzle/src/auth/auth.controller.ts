@@ -66,6 +66,7 @@ export class AuthController {
   getCsrfToken(@Req() request: Request) {
     return this.sessionService.issueCsrfToken(request);
   }
+  // nestforge:feature:auth:session:end
 
   // nestforge:feature:auth:token,auth:password
   @Public()

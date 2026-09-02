@@ -722,6 +722,16 @@ test(
                     'utf8',
                 );
 
+                const authController = await readFile(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'auth',
+                        'auth.controller.ts',
+                    ),
+                    'utf8',
+                );
+
                 const sqliteSchema = await readFile(
                     path.join(
                         targetDir,
@@ -769,6 +779,31 @@ test(
                 assert.match(
                     envExample,
                     /DATABASE_URL="file:\.\/dev\.db"/,
+                );
+
+                assert.match(
+                    authController,
+                    /@Post\('register'\)/,
+                );
+
+                assert.match(
+                    authController,
+                    /@Post\('login'\)/,
+                );
+
+                assert.match(
+                    authController,
+                    /async register\(/,
+                );
+
+                assert.match(
+                    authController,
+                    /async login\(/,
+                );
+
+                assert.doesNotMatch(
+                    authController,
+                    /getCsrfToken/,
                 );
 
                 assert.match(
