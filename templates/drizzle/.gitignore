@@ -7,3 +7,6 @@ coverage/
 .DS_Store
 /generated
 uploads/
+*.db
+*.db-shm
+*.db-wal
