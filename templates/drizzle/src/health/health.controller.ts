@@ -9,7 +9,7 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 // nestforge:feature:swagger:end
 import { Public } from '../common/decorators/public.decorator';
-import { TypeOrmHealthIndicator } from './indicators/typeorm-health.indicator';
+import { DrizzleHealthIndicator } from './indicators/drizzle-health.indicator';
 // nestforge:feature:redis
 import { RedisHealthIndicator } from './indicators/redis-health.indicator';
 // nestforge:feature:redis:end
@@ -21,7 +21,7 @@ import { RedisHealthIndicator } from './indicators/redis-health.indicator';
 export class HealthController {
     constructor(
         private readonly health: HealthCheckService,
-        private readonly databaseIndicator: TypeOrmHealthIndicator,
+        private readonly databaseIndicator: DrizzleHealthIndicator,
         // nestforge:feature:redis
         private readonly redisIndicator: RedisHealthIndicator,
         // nestforge:feature:redis:end
