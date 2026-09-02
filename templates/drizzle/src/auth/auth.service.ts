@@ -273,6 +273,7 @@ export class AuthService {
       10,
     );
 
+    // nestforge:feature:database:postgres
     await this.database.transaction(
       async (transaction) => {
         await transaction
@@ -281,7 +282,9 @@ export class AuthService {
             passwordHash,
             updatedAt: new Date(),
           })
-          .where(eq(users.id, stored.userId));
+          .where(
+            eq(users.id, stored.userId),
+          );
 
         await transaction
           .update(passwordResetTokens)
@@ -320,6 +323,114 @@ export class AuthService {
         // nestforge:feature:auth:token:end
       },
     );
+    // nestforge:feature:database:postgres:end
+
+    // nestforge:feature:database:mysql
+    await this.database.transaction(
+      async (transaction) => {
+        await transaction
+          .update(users)
+          .set({
+            passwordHash,
+            updatedAt: new Date(),
+          })
+          .where(
+            eq(users.id, stored.userId),
+          );
+
+        await transaction
+          .update(passwordResetTokens)
+          .set({
+            usedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(
+                passwordResetTokens.id,
+                stored.id,
+              ),
+              isNull(
+                passwordResetTokens.usedAt,
+              ),
+            ),
+          );
+
+        // nestforge:feature:auth:token
+        await transaction
+          .update(refreshTokens)
+          .set({
+            revokedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(
+                refreshTokens.userId,
+                stored.userId,
+              ),
+              isNull(
+                refreshTokens.revokedAt,
+              ),
+            ),
+          );
+        // nestforge:feature:auth:token:end
+      },
+    );
+    // nestforge:feature:database:mysql:end
+
+    // nestforge:feature:database:sqlite
+    this.database.transaction(
+      (transaction) => {
+        transaction
+          .update(users)
+          .set({
+            passwordHash,
+            updatedAt: new Date(),
+          })
+          .where(
+            eq(users.id, stored.userId),
+          )
+          .run();
+
+        transaction
+          .update(passwordResetTokens)
+          .set({
+            usedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(
+                passwordResetTokens.id,
+                stored.id,
+              ),
+              isNull(
+                passwordResetTokens.usedAt,
+              ),
+            ),
+          )
+          .run();
+
+        // nestforge:feature:auth:token
+        transaction
+          .update(refreshTokens)
+          .set({
+            revokedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(
+                refreshTokens.userId,
+                stored.userId,
+              ),
+              isNull(
+                refreshTokens.revokedAt,
+              ),
+            ),
+          )
+          .run();
+        // nestforge:feature:auth:token:end
+      },
+    );
+    // nestforge:feature:database:sqlite:end
 
     return {
       message: 'Senha redefinida com sucesso',
@@ -350,6 +461,7 @@ export class AuthService {
       );
     }
 
+    // nestforge:feature:database:postgres
     await this.database.transaction(
       async (transaction) => {
         await transaction
@@ -358,7 +470,9 @@ export class AuthService {
             emailVerifiedAt: new Date(),
             updatedAt: new Date(),
           })
-          .where(eq(users.id, stored.userId));
+          .where(
+            eq(users.id, stored.userId),
+          );
 
         await transaction
           .update(emailVerificationTokens)
@@ -378,6 +492,75 @@ export class AuthService {
           );
       },
     );
+    // nestforge:feature:database:postgres:end
+
+    // nestforge:feature:database:mysql
+    await this.database.transaction(
+      async (transaction) => {
+        await transaction
+          .update(users)
+          .set({
+            emailVerifiedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(
+            eq(users.id, stored.userId),
+          );
+
+        await transaction
+          .update(emailVerificationTokens)
+          .set({
+            usedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(
+                emailVerificationTokens.id,
+                stored.id,
+              ),
+              isNull(
+                emailVerificationTokens.usedAt,
+              ),
+            ),
+          );
+      },
+    );
+    // nestforge:feature:database:mysql:end
+
+    // nestforge:feature:database:sqlite
+    this.database.transaction(
+      (transaction) => {
+        transaction
+          .update(users)
+          .set({
+            emailVerifiedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(
+            eq(users.id, stored.userId),
+          )
+          .run();
+
+        transaction
+          .update(emailVerificationTokens)
+          .set({
+            usedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(
+                emailVerificationTokens.id,
+                stored.id,
+              ),
+              isNull(
+                emailVerificationTokens.usedAt,
+              ),
+            ),
+          )
+          .run();
+      },
+    );
+    // nestforge:feature:database:sqlite:end
 
     return {
       message: 'E-mail verificado com sucesso',
