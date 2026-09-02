@@ -46,6 +46,10 @@ export async function applyLanguageTransform(
     await fs.remove(path.join(targetDir, 'nest-cli.json'));
 
     await updatePackageJson(targetDir, orm);
+
+    if (orm === 'drizzle') {
+        await updateDrizzleWorkflow(targetDir);
+    }
 }
 
 async function collectTypeScriptFiles(dir: string): Promise<string[]> {
@@ -195,6 +199,41 @@ async function updatePackageJson(
         delete packageJson.scripts['prisma:seed'];
     }
 
+    if (orm === 'drizzle') {
+        packageJson.scripts[
+            'drizzle:generate'
+        ] =
+            'dotenv -e .env -- drizzle-kit generate --config=drizzle.config.js';
+
+        packageJson.scripts[
+            'drizzle:migrate'
+        ] =
+            'dotenv -e .env -- drizzle-kit migrate --config=drizzle.config.js';
+
+        packageJson.scripts[
+            'drizzle:push'
+        ] =
+            'dotenv -e .env -- drizzle-kit push --config=drizzle.config.js';
+
+        packageJson.scripts[
+            'drizzle:studio'
+        ] =
+            'dotenv -e .env -- drizzle-kit studio --config=drizzle.config.js';
+
+        packageJson.scripts[
+            'pretest:e2e'
+        ] =
+            'dotenv -e .env.test -- drizzle-kit migrate --config=drizzle.config.js';
+
+        packageJson.scripts.seed =
+            'dotenv -e .env -- node src/database/seed.js';
+
+        delete packageJson.prisma;
+        delete packageJson.scripts[
+            'prisma:seed'
+        ];
+    }
+
     for (const dependency of TYPESCRIPT_DEV_DEPENDENCIES) {
         delete packageJson.dependencies?.[dependency];
         delete packageJson.devDependencies?.[dependency];
@@ -204,5 +243,41 @@ async function updatePackageJson(
         packageJsonPath,
         packageJson,
         { spaces: 2 },
+    );
+}
+
+async function updateDrizzleWorkflow(
+    targetDir: string,
+): Promise<void> {
+    const workflowPath = path.join(
+        targetDir,
+        '.github',
+        'workflows',
+        'ci.yml',
+    );
+
+    if (!(await fs.pathExists(workflowPath))) {
+        return;
+    }
+
+    const workflow = await fs.readFile(
+        workflowPath,
+        'utf8',
+    );
+
+    const updated = workflow
+        .replace(
+            'npx drizzle-kit generate',
+            'npx drizzle-kit generate --config=drizzle.config.js',
+        )
+        .replace(
+            'npx drizzle-kit migrate',
+            'npx drizzle-kit migrate --config=drizzle.config.js',
+        );
+
+    await fs.writeFile(
+        workflowPath,
+        updated,
+        'utf8',
     );
 }
