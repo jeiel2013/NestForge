@@ -1,85 +1,154 @@
 # Adicionando um módulo
 
-Este guia mostra como adicionar um módulo `posts` ao projeto usando NestJS, TypeORM e Zod.
+Este guia mostra como adicionar um módulo `posts` ao projeto usando NestJS, Drizzle ORM e Zod.
 
-## 1. Crie a entidade
+## 1. Adicione a tabela ao schema
 
-Crie `src/posts/entities/post.entity.ts`:
+Abra o schema correspondente ao banco escolhido:
+
+* PostgreSQL: `src/database/schema/postgres.schema.ts`
+* MySQL: `src/database/schema/mysql.schema.ts`
+* SQLite: `src/database/schema/sqlite.schema.ts`
+
+Adicione a tabela `posts` usando a implementação correspondente ao banco.
+
+### PostgreSQL
+
+Adicione `index` aos imports, caso ainda não esteja presente, e inclua:
 
 ```ts
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { UserEntity } from '../../users/entities/user.entity';
-
-@Entity({ name: 'posts' })
-export class PostEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
-  @Column({
-    type: 'varchar',
-    length: 200,
-  })
-  title!: string;
-
-  @Column({
-    type: 'text',
-  })
-  content!: string;
-
-  @Column({
-    name: 'author_id',
-    type: 'varchar',
-    length: 36,
-  })
-  authorId!: string;
-
-  @ManyToOne(() => UserEntity, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({
-    name: 'author_id',
-  })
-  author!: UserEntity;
-
-  @CreateDateColumn({
-    name: 'created_at',
-  })
-  createdAt!: Date;
-
-  @UpdateDateColumn({
-    name: 'updated_at',
-  })
-  updatedAt!: Date;
-
-  constructor(partial?: Partial<PostEntity>) {
-    if (partial) {
-      Object.assign(this, partial);
-    }
-  }
-}
+export const posts = pgTable(
+  'posts',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    title: varchar('title', {
+      length: 200,
+    }).notNull(),
+    content: text('content').notNull(),
+    authorId: uuid('author_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'cascade',
+      }),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'date',
+    })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+      mode: 'date',
+    })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index('posts_author_id_idx').on(
+      table.authorId,
+    ),
+  ],
+);
 ```
+
+### MySQL
+
+Adicione:
+
+```ts
+export const posts = mysqlTable(
+  'posts',
+  {
+    id: varchar('id', {
+      length: 36,
+    }).primaryKey(),
+    title: varchar('title', {
+      length: 200,
+    }).notNull(),
+    content: text('content').notNull(),
+    authorId: varchar('author_id', {
+      length: 36,
+    })
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'cascade',
+      }),
+    createdAt: datetime('created_at', {
+      mode: 'date',
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: datetime('updated_at', {
+      mode: 'date',
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index('posts_author_id_idx').on(
+      table.authorId,
+    ),
+  ],
+);
+```
+
+### SQLite
+
+Adicione:
+
+```ts
+export const posts = sqliteTable(
+  'posts',
+  {
+    id: text('id').primaryKey(),
+    title: text('title').notNull(),
+    content: text('content').notNull(),
+    authorId: text('author_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'cascade',
+      }),
+    createdAt: integer('created_at', {
+      mode: 'timestamp_ms',
+    })
+      .default(sql`(unixepoch() * 1000)`)
+      .notNull(),
+    updatedAt: integer('updated_at', {
+      mode: 'timestamp_ms',
+    })
+      .default(sql`(unixepoch() * 1000)`)
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index('posts_author_id_idx').on(
+      table.authorId,
+    ),
+  ],
+);
+```
+
+No final do schema, adicione os tipos inferidos:
+
+```ts
+export type Post = typeof posts.$inferSelect;
+export type NewPost = typeof posts.$inferInsert;
+```
+
+O arquivo `src/database/schema/index.ts` já exporta o schema selecionado pela CLI. Portanto, não é necessário criar outro arquivo de exportação.
 
 ## 2. Crie os DTOs
 
 Crie `src/posts/dto/create-post.dto.ts`:
 
 ```ts
-import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
 export const createPostSchema = z.object({
-  title: z
-    .string()
-    .min(3)
-    .max(200),
+  title: z.string().min(3).max(200),
   content: z.string().min(1),
 });
 
@@ -107,53 +176,97 @@ export class UpdatePostDto extends createZodDto(
 Crie `src/posts/posts.service.ts`:
 
 ```ts
+import { randomUUID } from 'node:crypto';
 import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { PostEntity } from './entities/post.entity';
+import {
+  desc,
+  eq,
+} from 'drizzle-orm';
+import { InjectDatabase } from '../database/database.decorators';
+import type { DrizzleDatabase } from '../database/database.types';
+import {
+  posts,
+  users,
+  type NewPost,
+} from '../database/schema';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostsService {
   constructor(
-    @InjectRepository(PostEntity)
-    private readonly postsRepository: Repository<PostEntity>,
+    @InjectDatabase()
+    private readonly database: DrizzleDatabase,
   ) {}
 
   async create(
     authorId: string,
     dto: CreatePostDto,
   ) {
-    const post = this.postsRepository.create({
-      ...dto,
-      authorId,
-    });
+    const id = randomUUID();
 
-    return this.postsRepository.save(post);
+    const data: NewPost = {
+      id,
+      title: dto.title,
+      content: dto.content,
+      authorId,
+    };
+
+    await this.database
+      .insert(posts)
+      .values(data);
+
+    return this.findOne(id);
   }
 
   async findAll() {
-    return this.postsRepository.find({
-      relations: {
-        author: true,
-      },
-      order: {
-        createdAt: 'DESC',
-      },
-    });
+    return this.database
+      .select({
+        id: posts.id,
+        title: posts.title,
+        content: posts.content,
+        authorId: posts.authorId,
+        createdAt: posts.createdAt,
+        updatedAt: posts.updatedAt,
+        author: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+        },
+      })
+      .from(posts)
+      .innerJoin(
+        users,
+        eq(posts.authorId, users.id),
+      )
+      .orderBy(desc(posts.createdAt));
   }
 
   async findOne(id: string) {
-    const post = await this.postsRepository.findOne({
-      where: { id },
-      relations: {
-        author: true,
-      },
-    });
+    const [post] = await this.database
+      .select({
+        id: posts.id,
+        title: posts.title,
+        content: posts.content,
+        authorId: posts.authorId,
+        createdAt: posts.createdAt,
+        updatedAt: posts.updatedAt,
+        author: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+        },
+      })
+      .from(posts)
+      .innerJoin(
+        users,
+        eq(posts.authorId, users.id),
+      )
+      .where(eq(posts.id, id))
+      .limit(1);
 
     if (!post) {
       throw new NotFoundException(
@@ -168,17 +281,25 @@ export class PostsService {
     id: string,
     dto: UpdatePostDto,
   ) {
-    const post = await this.findOne(id);
+    await this.findOne(id);
 
-    Object.assign(post, dto);
+    await this.database
+      .update(posts)
+      .set({
+        ...dto,
+        updatedAt: new Date(),
+      })
+      .where(eq(posts.id, id));
 
-    return this.postsRepository.save(post);
+    return this.findOne(id);
   }
 
   async remove(id: string) {
-    const post = await this.findOne(id);
+    await this.findOne(id);
 
-    await this.postsRepository.remove(post);
+    await this.database
+      .delete(posts)
+      .where(eq(posts.id, id));
 
     return {
       message: 'Post removido com sucesso',
@@ -186,6 +307,8 @@ export class PostsService {
   }
 }
 ```
+
+O ID é criado no service para manter o mesmo comportamento entre PostgreSQL, MySQL e SQLite.
 
 ## 4. Crie o controller
 
@@ -202,10 +325,10 @@ import {
   Post,
   Req,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { PostsService } from './posts.service';
+import type { Request } from 'express';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { PostsService } from './posts.service';
 
 @Controller('posts')
 export class PostsController {
@@ -249,25 +372,18 @@ export class PostsController {
 }
 ```
 
-Se o projeto não usa autenticação, remova `@Req()` e receba `authorId` de outra forma adequada ao domínio.
+Se o projeto não usa autenticação, remova `@Req()` e receba o `authorId` de outra forma adequada ao domínio.
 
-## 5. Registre o repository no módulo
+## 5. Crie o módulo
 
 Crie `src/posts/posts.module.ts`:
 
 ```ts
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { PostEntity } from './entities/post.entity';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      PostEntity,
-    ]),
-  ],
   controllers: [PostsController],
   providers: [PostsService],
   exports: [PostsService],
@@ -275,95 +391,195 @@ import { PostsService } from './posts.service';
 export class PostsModule {}
 ```
 
-Depois importe `PostsModule` em `src/app.module.ts`.
+O `DatabaseModule` é global. Não é necessário registrar tabelas ou repositórios dentro de cada módulo.
+
+Depois, importe `PostsModule` em `src/app.module.ts`:
+
+```ts
+import { PostsModule } from './posts/posts.module';
+
+@Module({
+  imports: [
+    PostsModule,
+  ],
+})
+export class AppModule {}
+```
+
+Preserve os outros módulos que já estiverem registrados no `AppModule`.
 
 ## 6. Gere e aplique a migration
 
-```bash
-npm run migration:generate -- src/database/migrations/AddPosts
-npm run migration:run
-```
-
-Confira o arquivo gerado antes de executar a migration em produção.
-
-Para desfazer a última migration:
+Depois de alterar o schema, gere uma migration:
 
 ```bash
-npm run migration:revert
+npm run drizzle:generate
 ```
+
+Confira os arquivos criados em `drizzle/` antes de aplicar a migration.
+
+Aplique as migrations:
+
+```bash
+npm run drizzle:migrate
+```
+
+Durante o desenvolvimento, também é possível sincronizar diretamente o schema:
+
+```bash
+npm run drizzle:push
+```
+
+Prefira migrations em ambientes compartilhados e em produção.
 
 ## 7. Adicione testes unitários
 
-O teste unitário deve mockar o repository:
+Nos testes unitários, injete um mock de `DrizzleDatabase` diretamente no service:
 
 ```ts
-import { Repository } from 'typeorm';
-import { vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { DrizzleDatabase } from '../database/database.types';
 import { PostsService } from './posts.service';
-import { PostEntity } from './entities/post.entity';
 
-const postsRepository = {
-  findOne: vi.fn(),
-  find: vi.fn(),
-  create: vi.fn(),
-  save: vi.fn(),
-  remove: vi.fn(),
-};
+describe('PostsService', () => {
+  let database: Record<string, ReturnType<typeof vi.fn>>;
+  let service: PostsService;
 
-const postsService = new PostsService(
-  postsRepository as unknown as Repository<PostEntity>,
-);
+  beforeEach(() => {
+    database = {
+      select: vi.fn(),
+      insert: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    };
+
+    service = new PostsService(
+      database as unknown as DrizzleDatabase,
+    );
+  });
+
+  it('deve ser definido', () => {
+    expect(service).toBeDefined();
+  });
+});
 ```
 
-Dessa forma, o teste não precisa iniciar o Nest nem conectar ao banco.
+Cada consulta Drizzle usa uma cadeia de métodos. O mock deve reproduzir apenas a cadeia utilizada pelo método testado.
+
+Exemplo para uma consulta que termina em `limit()`:
+
+```ts
+const limit = vi.fn().mockResolvedValue([
+  {
+    id: 'post-1',
+    title: 'Meu post',
+  },
+]);
+
+const where = vi.fn().mockReturnValue({
+  limit,
+});
+
+const innerJoin = vi.fn().mockReturnValue({
+  where,
+});
+
+const from = vi.fn().mockReturnValue({
+  innerJoin,
+});
+
+database.select.mockReturnValue({
+  from,
+});
+```
+
+Use `src/users/users.service.spec.ts` como referência para mocks mais completos.
 
 ## 8. Atualize a limpeza E2E
 
-Em `test/utils/clean-database.ts`, exclua posts antes de usuários:
+Em `test/utils/clean-database.ts`, importe `posts`:
 
 ```ts
-await manager
-  .createQueryBuilder()
-  .delete()
-  .from(PostEntity)
-  .execute();
+import {
+  oauthAccounts,
+  posts,
+  users,
+} from '../../src/database/schema';
 ```
 
-A ordem é importante por causa da chave estrangeira `posts.author_id`.
+Exclua os posts antes dos usuários por causa da chave estrangeira `posts.author_id`.
+
+Para PostgreSQL e MySQL:
+
+```ts
+await transaction.delete(posts);
+await transaction.delete(users);
+```
+
+Para SQLite:
+
+```ts
+transaction.delete(posts).run();
+transaction.delete(users).run();
+```
+
+No SQLite com `better-sqlite3`, o callback da transação deve ser síncrono e as consultas devem ser executadas com `.run()`.
 
 ## 9. Use transações quando necessário
 
-Quando várias operações precisarem ser atômicas, injete `DataSource`:
+PostgreSQL e MySQL aceitam callbacks assíncronos:
 
 ```ts
-constructor(
-  private readonly dataSource: DataSource,
-) {}
-```
+await this.database.transaction(
+  async (transaction) => {
+    await transaction
+      .insert(posts)
+      .values(post);
 
-E execute:
-
-```ts
-await this.dataSource.transaction(
-  async (manager) => {
-    await manager.save(...);
-    await manager.update(...);
+    await transaction
+      .update(users)
+      .set({
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, authorId));
   },
 );
 ```
 
-Se uma operação falhar, a transação inteira será revertida.
+Com SQLite e `better-sqlite3`, use um callback síncrono:
+
+```ts
+this.database.transaction(
+  (transaction) => {
+    transaction
+      .insert(posts)
+      .values(post)
+      .run();
+
+    transaction
+      .update(users)
+      .set({
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, authorId))
+      .run();
+  },
+);
+```
+
+Se o código precisar oferecer os três bancos simultaneamente, mantenha implementações separadas usando os marcadores de banco do NestForge.
 
 ## Checklist
 
-- [ ] Entidade criada
-- [ ] DTOs Zod criados
-- [ ] Service usa `Repository<Entity>`
-- [ ] Repository registrado com `TypeOrmModule.forFeature`
-- [ ] Controller criado
-- [ ] Módulo importado no `AppModule`
-- [ ] Migration gerada e revisada
-- [ ] Migration aplicada
-- [ ] Testes unitários adicionados
-- [ ] Limpeza dos testes E2E atualizada
-- [ ] Swagger e permissões adicionados, quando aplicáveis
+* [ ] Tabela adicionada ao schema do banco selecionado
+* [ ] Tipos `Post` e `NewPost` exportados
+* [ ] DTOs Zod criados
+* [ ] Service usa `InjectDatabase` e `DrizzleDatabase`
+* [ ] Controller criado
+* [ ] Módulo importado no `AppModule`
+* [ ] Migration gerada e revisada
+* [ ] Migration aplicada
+* [ ] Testes unitários adicionados
+* [ ] Limpeza dos testes E2E atualizada
+* [ ] Transações adaptadas ao driver utilizado
+* [ ] Swagger e permissões adicionados, quando aplicáveis
