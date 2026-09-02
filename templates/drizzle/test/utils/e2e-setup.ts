@@ -15,23 +15,22 @@ import { HttpExceptionFilter } from '../../src/common/filters/http-exception.fil
 
 // nestforge:feature:auth:session
 import session from 'express-session';
-import { TypeormStore } from 'connect-typeorm';
-import { DataSource } from 'typeorm';
-import { SessionEntity } from '../../src/auth/entities/session.entity';
+import { DrizzleSessionStore } from '../../src/auth/drizzle-session.store';
 // nestforge:feature:auth:session:end
 
 export async function createTestApp(): Promise<INestApplication> {
-    const moduleRef = await Test.createTestingModule({
-        imports: [AppModule],
-    }).compile();
+    const moduleRef =
+        await Test.createTestingModule({
+            imports: [AppModule],
+        }).compile();
 
     const app =
         moduleRef.createNestApplication<NestExpressApplication>();
 
     // nestforge:feature:auth:session
-    const dataSource = app.get(DataSource);
-    const sessionsRepository =
-        dataSource.getRepository(SessionEntity);
+    const sessionStore = app.get(
+        DrizzleSessionStore,
+    );
 
     const sessionMaxAge = Number(
         process.env.SESSION_MAX_AGE ??
@@ -41,14 +40,11 @@ export async function createTestApp(): Promise<INestApplication> {
     app.use(
         session({
             name: 'nestforge.sid',
-            secret: process.env.SESSION_SECRET as string,
+            secret:
+                process.env.SESSION_SECRET as string,
             resave: false,
             saveUninitialized: false,
-            store: new TypeormStore({
-                cleanupLimit: 2,
-                limitSubquery: false,
-                ttl: Math.floor(sessionMaxAge / 1000),
-            }).connect(sessionsRepository),
+            store: sessionStore,
             cookie: {
                 httpOnly: true,
                 secure: false,
@@ -60,10 +56,14 @@ export async function createTestApp(): Promise<INestApplication> {
     // nestforge:feature:auth:session:end
 
     // nestforge:feature:validation
-    app.useGlobalPipes(new ZodValidationPipe());
+    app.useGlobalPipes(
+        new ZodValidationPipe(),
+    );
     // nestforge:feature:validation:end
 
-    app.useGlobalFilters(new HttpExceptionFilter());
+    app.useGlobalFilters(
+        new HttpExceptionFilter(),
+    );
 
     app.useGlobalInterceptors(
         new ClassSerializerInterceptor(
