@@ -55,9 +55,9 @@ async function main() {
             'npm run start:dev',
         ];
 
-        note(steps.join('\n'), 'Próximos passos');
+        note(steps.join('\n'), 'Next steps');
 
-        outro(pc.green(`✅ Projeto "${options.projectName}" criado com sucesso!`));
+        outro(pc.green(`✅ Project "${options.projectName}" created successfully!`));
     } catch (error) {
         log.error(error instanceof Error ? error.message : String(error));
         process.exit(1);
