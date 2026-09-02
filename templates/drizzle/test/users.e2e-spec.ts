@@ -1,65 +1,69 @@
 // nestforge:feature-file:auth:password,auth:token
-import { INestApplication } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import {
-    DataSource,
-    Repository,
-} from 'typeorm';
+    INestApplication,
+} from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import request from 'supertest';
 import { Role } from '../src/common/constants/role.enum';
-import { UserEntity } from '../src/users/entities/user.entity';
+import { DRIZZLE_DATABASE } from '../src/database/database.constants';
+import type { DrizzleDatabase } from '../src/database/database.types';
+import { users } from '../src/database/schema';
 import { createTestApp } from './utils/e2e-setup';
 import { cleanDatabase } from './utils/clean-database';
 
 describe('Users (e2e)', () => {
     let app: INestApplication;
-    let dataSource: DataSource;
-    let usersRepository: Repository<UserEntity>;
+    let database: DrizzleDatabase;
 
     async function createUserWithRole(
         email: string,
         password: string,
         role: Role,
-    ) {
+    ): Promise<void> {
         const passwordHash = await bcrypt.hash(
             password,
             10,
         );
 
-        const user = usersRepository.create({
+        await database.insert(users).values({
+            id: randomUUID(),
             name: 'Usuário de teste',
             email,
             passwordHash,
             role,
             emailVerifiedAt: new Date(),
         });
-
-        await usersRepository.save(user);
     }
 
     async function loginAndGetToken(
         email: string,
         password: string,
-    ) {
+    ): Promise<string> {
         const response = await request(
             app.getHttpServer(),
         )
             .post('/auth/login')
-            .send({ email, password })
+            .send({
+                email,
+                password,
+            })
             .expect(200);
 
-        return response.body.accessToken as string;
+        return response.body
+            .accessToken as string;
     }
 
     beforeAll(async () => {
         app = await createTestApp();
-        dataSource = app.get(DataSource);
-        usersRepository =
-            dataSource.getRepository(UserEntity);
+
+        database = app.get<DrizzleDatabase>(
+            DRIZZLE_DATABASE,
+        );
     });
 
     beforeEach(async () => {
-        await cleanDatabase(dataSource);
+        await cleanDatabase(database);
     });
 
     afterAll(async () => {
@@ -86,9 +90,14 @@ describe('Users (e2e)', () => {
 
         const server = app.getHttpServer();
 
-        const createResponse = await request(server)
+        const createResponse = await request(
+            server,
+        )
             .post('/users')
-            .set('Authorization', `Bearer ${token}`)
+            .set(
+                'Authorization',
+                `Bearer ${token}`,
+            )
             .send({
                 name: 'Novo Usuário',
                 email: 'novo.e2e@example.com',
@@ -96,15 +105,20 @@ describe('Users (e2e)', () => {
             })
             .expect(201);
 
-        expect(createResponse.body).not.toHaveProperty(
-            'passwordHash',
-        );
+        expect(
+            createResponse.body,
+        ).not.toHaveProperty('passwordHash');
 
         const userId = createResponse.body.id;
 
-        const listResponse = await request(server)
+        const listResponse = await request(
+            server,
+        )
             .get('/users')
-            .set('Authorization', `Bearer ${token}`)
+            .set(
+                'Authorization',
+                `Bearer ${token}`,
+            )
             .expect(200);
 
         expect(
@@ -113,7 +127,10 @@ describe('Users (e2e)', () => {
 
         await request(server)
             .patch(`/users/${userId}`)
-            .set('Authorization', `Bearer ${token}`)
+            .set(
+                'Authorization',
+                `Bearer ${token}`,
+            )
             .send({
                 name: 'Nome Atualizado',
             })
@@ -121,7 +138,10 @@ describe('Users (e2e)', () => {
 
         await request(server)
             .delete(`/users/${userId}`)
-            .set('Authorization', `Bearer ${token}`)
+            .set(
+                'Authorization',
+                `Bearer ${token}`,
+            )
             .expect(200);
     });
 
@@ -142,12 +162,18 @@ describe('Users (e2e)', () => {
 
         await request(server)
             .get('/users')
-            .set('Authorization', `Bearer ${token}`)
+            .set(
+                'Authorization',
+                `Bearer ${token}`,
+            )
             .expect(200);
 
         await request(server)
             .post('/users')
-            .set('Authorization', `Bearer ${token}`)
+            .set(
+                'Authorization',
+                `Bearer ${token}`,
+            )
             .send({
                 name: 'Não deveria criar',
                 email: 'bloqueado.e2e@example.com',
@@ -173,7 +199,10 @@ describe('Users (e2e)', () => {
             app.getHttpServer(),
         )
             .get('/users/me')
-            .set('Authorization', `Bearer ${token}`)
+            .set(
+                'Authorization',
+                `Bearer ${token}`,
+            )
             .expect(200);
 
         expect(response.body.email).toBe(

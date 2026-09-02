@@ -1,21 +1,25 @@
 // nestforge:feature-file:auth:password,auth:session
 import { INestApplication } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DRIZZLE_DATABASE } from '../src/database/database.constants';
+import type { DrizzleDatabase } from '../src/database/database.types';
 import request from 'supertest';
 import { createTestApp } from './utils/e2e-setup';
 import { cleanDatabase } from './utils/clean-database';
 
 describe('Session auth (e2e)', () => {
     let app: INestApplication;
-    let dataSource: DataSource;
+    let database: DrizzleDatabase;
 
     beforeAll(async () => {
         app = await createTestApp();
-        dataSource = app.get(DataSource);
-    })
+
+        database = app.get<DrizzleDatabase>(
+            DRIZZLE_DATABASE,
+        );
+    });
 
     beforeEach(async () => {
-        await cleanDatabase(dataSource);
+        await cleanDatabase(database);
     });
 
     afterAll(async () => {
