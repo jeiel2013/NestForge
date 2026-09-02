@@ -138,11 +138,35 @@ async function renameProject(targetDir: string, projectName: string): Promise<vo
     pkg.name = projectName;
     await fs.writeJson(pkgPath, pkg, { spaces: 2 });
 
-    const readmePath = path.join(targetDir, 'README.md');
-    if (await fs.pathExists(readmePath)) {
-        const readme = await fs.readFile(readmePath, 'utf-8');
-        const updated = readme.replace(/^# NestForge/m, `# ${projectName}`);
-        await fs.writeFile(readmePath, updated, 'utf-8');
+    const readmeNames = [
+        'README.md',
+        'README.pt-BR.md',
+    ];
+
+    for (const readmeName of readmeNames) {
+        const readmePath = path.join(
+            targetDir,
+            readmeName,
+        );
+
+        if (!(await fs.pathExists(readmePath))) {
+            continue;
+        }
+
+        const readme = await fs.readFile(
+            readmePath,
+            'utf-8',
+        );
+        const updated = readme.replace(
+            /^# NestForge/m,
+            `# ${projectName}`,
+        );
+
+        await fs.writeFile(
+            readmePath,
+            updated,
+            'utf-8',
+        );
     }
 }
 
