@@ -1,6 +1,6 @@
 # NestForge
 
-> Production-ready NestJS starter with TypeORM, Authentication, Docker, Testing, CI/CD and Clean Architecture.
+> Production-ready NestJS starter with Drizzle ORM, Authentication, Docker, Testing, CI/CD and Clean Architecture.
 
 [![CI](https://github.com/jeiel2013/nestforge/actions/workflows/ci.yml/badge.svg)](https://github.com/jeiel2013/nestforge/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -11,11 +11,11 @@ NestForge é um boilerplate de NestJS pensado para acelerar o início de projeto
 
 ## ✨ Features
 
-- 🔐 **Autenticação configurável** — JWT com access/refresh token, Session/Cookies persistida no TypeORM, OAuth-only ou nenhuma autenticação
+- 🔐 **Autenticação configurável** — JWT com access/refresh token, Session/Cookies persistida com Drizzle, OAuth-only ou nenhuma autenticação
 - 🌐 **OAuth** — Google e GitHub, integrado à estratégia de token ou sessão escolhida
 - 👥 **RBAC** — Roles (Admin, Manager, User) e Permissions granulares
 - 🛡️ **Segurança** — Helmet, CORS, Rate Limiting, validação e serialização com Zod
-- 🗄️ **Banco de dados** — TypeORM com PostgreSQL, MySQL ou SQLite
+- 🗄️ **Banco de dados** — Drizzle ORM com PostgreSQL, MySQL ou SQLite
 - 📨 **E-mails** — filas com BullMQ + Redis, testado localmente com Mailpit
 - 📄 **Documentação automática** — Swagger
 - 🪵 **Logs estruturados** — Pino
@@ -28,7 +28,7 @@ NestForge é um boilerplate de NestJS pensado para acelerar o início de projeto
 | Camada | Tecnologia |
 |---|---|
 | Framework | NestJS + TypeScript |
-| ORM | TypeORM |
+| ORM / Query Builder | Drizzle ORM |
 | Banco | PostgreSQL, MySQL ou SQLite |
 | Cache / Filas | Redis + BullMQ |
 | Autenticação | JWT, Session/Cookies ou OAuth com Passport |
@@ -47,7 +47,7 @@ src/
 ├── users/         # CRUD de usuários
 ├── common/        # decorators, filters, guards, interceptors, pipes, utils
 ├── config/        # configuração tipada e validada (env)
-├── database/      # DataSource, configuração, migrations e seed
+├── database/      # conexão Drizzle, schemas, configuração, migrations e seed
 ├── modules/       # módulos de domínio adicionais
 ├── shared/        # código compartilhado entre módulos
 ├── jobs/          # filas e workers (BullMQ)
@@ -71,30 +71,22 @@ cp .env.example .env
 docker compose up
 ```
 
-Isso sobe: API, PostgreSQL, Redis e Mailpit (interface de e-mail em `http://localhost:8025`).
+Isso sobe a API e os serviços escolhidos durante a geração, como PostgreSQL ou MySQL, Redis e Mailpit. Projetos SQLite não precisam de um container de banco.
 
 ### Rodando localmente
 
 ```bash
 npm install
 cp .env.example .env
-npm run migration:generate -- src/database/migrations/InitialSchema
-npm run migration:run
+npm run migration:generate
+npm run migration:migrate
 npm run seed
 npm run start:dev
 ```
 
+O Drizzle Kit lê `drizzle.config.ts`, gera as migrations SQL em `drizzle/` e usa apenas o schema correspondente ao banco escolhido durante a geração do projeto.
+
 A documentação Swagger fica disponível em `http://localhost:3000/docs`.
-
-## 🔑 Roles & Permissions
-
-| Role | Descrição |
-|---|---|
-| `ADMIN` | acesso total ao sistema |
-| `MANAGER` | gerencia usuários e relatórios |
-| `USER` | acesso padrão |
-
-Permissions são granulares (`user:create`, `user:delete`, `report:read`, etc) e combinadas com roles via decorators (`@Roles()`, `@Permissions()`).
 
 ## 🗺️ Roadmap
 
@@ -137,7 +129,7 @@ Depois é só acessar `GET /auth/google` ou `GET /auth/github`. No callback, a A
 
 ### Autenticação por Session/Cookies
 
-Quando o projeto é gerado com Session/Cookies, cadastro e login criam uma sessão persistida no banco por `connect-typeorm`. O identificador é enviado no cookie `nestforge.sid`, configurado com `httpOnly`, `sameSite=lax` e `secure` em produção.
+Quando o projeto é gerado com Session/Cookies, cadastro e login criam uma sessão persistida na tabela `sessions`. O `DrizzleSessionStore` integra o `express-session` ao banco escolhido sem depender de stores específicos do Prisma ou TypeORM. O identificador é enviado no cookie `nestforge.sid`, configurado com `httpOnly`, `sameSite=lax` e `secure` em produção.
 
 Configure no `.env`:
 
@@ -221,7 +213,7 @@ O seed cria três contas de teste, uma por role:
 
 ## 📈 Observabilidade
 
-`GET /health` retorna o status agregado da API — banco (TypeORM), Redis, memória (heap/RSS) e espaço em disco — usando `@nestjs/terminus`. Cada verificação aparece individualmente na resposta, então dá pra saber exatamente o que caiu.
+`GET /health` retorna o status agregado da API — banco, Redis, memória (heap/RSS) e espaço em disco — usando `@nestjs/terminus`. O `DrizzleHealthIndicator` consulta o cliente nativo do banco selecionado e cada verificação aparece individualmente na resposta.
 
 `GET /metrics` expõe métricas no formato do Prometheus (via `prom-client`): as métricas padrão de Node.js (CPU, memória, event loop) mais `http_request_duration_seconds` (histograma) e `http_requests_total` (contador), ambas com labels de `method`, `route` e `status_code`. Basta apontar um scrape job do Prometheus pra essa rota.
 
@@ -233,17 +225,16 @@ npm run test:e2e      # integração (e2e)
 npm run test:cov      # cobertura
 ```
 
-Os testes e2e (`test/*.e2e-spec.ts`) sobem a aplicação real (Nest + TypeORM + Redis) e batem nos endpoints com `supertest`, usando um banco isolado (`.env.test`, banco `nestforge_test` — nunca o de desenvolvimento). Antes de rodar pela primeira vez:
+Os testes e2e (`test/*.e2e-spec.ts`) sobem a aplicação real com NestJS e Drizzle e executam requisições com `supertest`, usando o banco isolado definido em `.env.test`. Antes da primeira execução, gere as migrations:
 
 ```bash
-createdb nestforge_test   # ou: psql -U nestforge -c "CREATE DATABASE nestforge_test;"
-docker compose up -d postgres redis
+npm run drizzle:generate
 npm run test:e2e
 ```
 
 O script `pretest:e2e` já aplica as migrations nesse banco automaticamente antes de cada rodada. Cada teste limpa as tabelas antes de rodar (`test/utils/clean-database.ts`), então não precisa zerar nada manualmente entre execuções. Hoje cobrem o fluxo de autenticação completo (registro, login, refresh, logout, e-mail duplicado, credenciais inválidas) e o CRUD de usuários com RBAC (ADMIN consegue tudo, USER lê mas não cria, `/users/me`, acesso sem token).
 
-Os testes unitários (`src/**/*.spec.ts`) rodam isolados, com os repositories do TypeORM e o `ioredis` mockados (`vi.fn()` / `vi.mock()`) — não precisam de banco nem Redis de verdade. Hoje cobrem: `AuthService` (registro/login), `UsersService` (CRUD completo + paginação + confirmação de que o `passwordHash` não vaza na serialização via `instanceToPlain`), `RolesGuard`, `PermissionsGuard` e os indicadores de saúde (`TypeOrmHealthIndicator`, `RedisHealthIndicator`).
+Os testes unitários (`src/**/*.spec.ts`) rodam isolados, com a instância do Drizzle e o `ioredis` simulados com `vi.fn()` e `vi.mock()`. Eles não dependem de banco ou Redis reais. A cobertura inclui `AuthService`, `UsersService`, `RolesGuard`, `PermissionsGuard`, `DrizzleHealthIndicator` e `RedisHealthIndicator`.
 
 ## 📚 Documentação adicional
 
