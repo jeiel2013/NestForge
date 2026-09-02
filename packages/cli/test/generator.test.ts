@@ -1035,6 +1035,299 @@ test(
 );
 
 test(
+    'gera Drizzle com SQLite e Session/Cookies',
+    { concurrency: false },
+    async () => {
+        await withGeneratedProject(
+            makeOptions({
+                projectName:
+                    'drizzle-sqlite-session',
+                orm: 'drizzle',
+                database: 'sqlite',
+                language: 'typescript',
+                authStrategy: 'session',
+                features: ['validation'],
+                accessControl: false,
+            }),
+            async (targetDir) => {
+                const schema = await readFile(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'database',
+                        'schema',
+                        'sqlite.schema.ts',
+                    ),
+                    'utf8',
+                );
+
+                const main = await readFile(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'main.ts',
+                    ),
+                    'utf8',
+                );
+
+                const authModule = await readFile(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'auth',
+                        'auth.module.ts',
+                    ),
+                    'utf8',
+                );
+
+                const sessionStore = await readFile(
+                    path.join(
+                        targetDir,
+                        'src',
+                        'auth',
+                        'drizzle-session.store.ts',
+                    ),
+                    'utf8',
+                );
+
+                const cleanDatabase = await readFile(
+                    path.join(
+                        targetDir,
+                        'test',
+                        'utils',
+                        'clean-database.ts',
+                    ),
+                    'utf8',
+                );
+
+                const envExample = await readFile(
+                    path.join(
+                        targetDir,
+                        '.env.example',
+                    ),
+                    'utf8',
+                );
+
+                const packageJson =
+                    await fs.readJson(
+                        path.join(
+                            targetDir,
+                            'package.json',
+                        ),
+                    );
+
+                assert.match(
+                    schema,
+                    /export const sessions/,
+                );
+
+                assert.doesNotMatch(
+                    schema,
+                    /export const refreshTokens/,
+                );
+
+                assert.doesNotMatch(
+                    schema,
+                    /passwordResetTokens/,
+                );
+
+                assert.doesNotMatch(
+                    schema,
+                    /nestforge:feature/,
+                );
+
+                assert.match(
+                    main,
+                    /DrizzleSessionStore/,
+                );
+
+                assert.match(
+                    main,
+                    /store:\s*sessionStore/,
+                );
+
+                assert.doesNotMatch(
+                    main,
+                    /TypeormStore|PrismaSessionStore|DataSource/,
+                );
+
+                assert.match(
+                    authModule,
+                    /DrizzleSessionStore/,
+                );
+
+                assert.match(
+                    authModule,
+                    /SessionService/,
+                );
+
+                assert.match(
+                    authModule,
+                    /SessionAuthGuard/,
+                );
+
+                assert.doesNotMatch(
+                    authModule,
+                    /JwtModule|JwtStrategy|JwtAuthGuard|TokenService/,
+                );
+
+                assert.match(
+                    sessionStore,
+                    /extends Store/,
+                );
+
+                assert.match(
+                    sessionStore,
+                    /\.onConflictDoUpdate\(/,
+                );
+
+                assert.doesNotMatch(
+                    sessionStore,
+                    /\.onDuplicateKeyUpdate\(/,
+                );
+
+                assert.doesNotMatch(
+                    sessionStore,
+                    /typeorm|TypeOrm|Prisma|connect-typeorm/,
+                );
+
+                assert.doesNotMatch(
+                    sessionStore,
+                    /nestforge:feature/,
+                );
+
+                assert.match(
+                    cleanDatabase,
+                    /\.delete\(sessions\)\.run\(\)/,
+                );
+
+                assert.doesNotMatch(
+                    cleanDatabase,
+                    /async \(transaction\)/,
+                );
+
+                assert.match(
+                    envExample,
+                    /SESSION_SECRET=/,
+                );
+
+                assert.match(
+                    envExample,
+                    /SESSION_MAX_AGE=/,
+                );
+
+                assert.doesNotMatch(
+                    envExample,
+                    /JWT_ACCESS_SECRET=/,
+                );
+
+                assert.doesNotMatch(
+                    envExample,
+                    /JWT_REFRESH_SECRET=/,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'src',
+                            'auth',
+                            'token.service.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'test',
+                            'session-auth.e2e-spec.ts',
+                        ),
+                    ),
+                    true,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'test',
+                            'auth.e2e-spec.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.equal(
+                    await fs.pathExists(
+                        path.join(
+                            targetDir,
+                            'test',
+                            'users.e2e-spec.ts',
+                        ),
+                    ),
+                    false,
+                );
+
+                assert.notEqual(
+                    packageJson.dependencies[
+                    'express-session'
+                    ],
+                    undefined,
+                );
+
+                assert.notEqual(
+                    packageJson.dependencies[
+                    'better-sqlite3'
+                    ],
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.dependencies[
+                    '@nestjs/jwt'
+                    ],
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.dependencies[
+                    'passport-jwt'
+                    ],
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.dependencies[
+                    'connect-typeorm'
+                    ],
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.dependencies[
+                    '@quixo3/prisma-session-store'
+                    ],
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.dependencies.pg,
+                    undefined,
+                );
+
+                assert.equal(
+                    packageJson.dependencies.mysql2,
+                    undefined,
+                );
+            },
+        );
+    },
+);
+
+test(
     'configura PostgreSQL e MySQL no template Drizzle',
     { concurrency: false },
     async () => {
