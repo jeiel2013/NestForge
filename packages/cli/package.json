@@ -1,7 +1,7 @@
 {
   "name": "nestforge",
   "version": "0.1.0",
-  "description": "CLI para gerar um projeto NestJS a partir do boilerplate NestForge",
+  "description": "Interactive CLI for generating a NestJS project from a NestForge starter template",
   "license": "MIT",
   "author": "Jeiel Alves <https://github.com/jeiel2013>",
   "type": "module",
