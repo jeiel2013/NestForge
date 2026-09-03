@@ -1,25 +1,29 @@
-# Código de Conduta
+# Code of Conduct
 
-## Nosso compromisso
+**English** | [Português](CODE_OF_CONDUCT.pt-BR.md)
 
-Nós, como membros, contribuintes e mantenedores, nos comprometemos a fazer da participação neste projeto uma experiência livre de assédio para todos, independentemente de idade, corpo, deficiência, etnia, identidade e expressão de gênero, nível de experiência, nacionalidade, aparência pessoal, raça, religião ou orientação sexual.
+## Our commitment
 
-## Nossos padrões
+We, as members, contributors, and maintainers, pledge to make participation in this project a harassment-free experience for everyone, regardless of age, body, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual orientation.
 
-Exemplos de comportamento que contribuem para um ambiente positivo:
-- Usar linguagem acolhedora e inclusiva
-- Respeitar pontos de vista e experiências diferentes
-- Aceitar críticas construtivas com elegância
-- Focar no que é melhor para a comunidade
+## Our standards
 
-Exemplos de comportamento inaceitável:
-- Uso de linguagem ou imagens sexualizadas
-- Comentários ofensivos ou ataques pessoais/políticos
-- Assédio público ou privado
-- Publicar informações privadas de terceiros sem permissão
+Examples of behavior that contributes to a positive environment:
 
-## Aplicação
+- Using welcoming and inclusive language
+- Respecting different viewpoints and experiences
+- Gracefully accepting constructive criticism
+- Focusing on what is best for the community
 
-Casos de comportamento abusivo podem ser reportados abrindo uma issue marcada como confidencial ou entrando em contato diretamente com o mantenedor do projeto. Todas as reclamações serão revisadas e investigadas.
+Examples of unacceptable behavior:
 
-Este Código de Conduta é adaptado do [Contributor Covenant](https://www.contributor-covenant.org), versão 2.1.
+- The use of sexualized language or imagery
+- Offensive comments or personal/political attacks
+- Public or private harassment
+- Publishing other people's private information without permission
+
+## Enforcement
+
+Instances of abusive behavior may be reported by opening an issue marked as confidential or by contacting the project maintainer directly. All complaints will be reviewed and investigated.
+
+This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.1.

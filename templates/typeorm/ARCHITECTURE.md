@@ -1,154 +1,158 @@
-# Arquitetura
+# Architecture
 
-Este documento explica como o NestForge com TypeORM está organizado e por que certas decisões de design foram tomadas.
+**English** | [Português](ARCHITECTURE.pt-BR.md)
 
-## Visão geral
+This document explains how NestForge with TypeORM is organized and why certain design decisions were made.
+
+## Overview
 
 ```text
-Request → main.ts (pipes, filters e interceptors globais)
-  → Guards de autenticação e autorização
-  → Controller (valida DTO e delega)
-  → Service (regra de negócio)
-  → Repository do TypeORM
-  → PostgreSQL, MySQL ou SQLite
+Request → main.ts (global pipes, filters, and interceptors)
+  → Authentication and authorization guards
+  → Controller (validates DTO and delegates)
+  → Service (business rules)
+  → TypeORM Repository
+  → PostgreSQL, MySQL, or SQLite
   → ClassSerializerInterceptor
   → Response
 ```
 
-Cada módulo de domínio segue a mesma estrutura:
+Each domain module follows the same structure:
 
 ```text
-<modulo>/
-├── dto/                    # schemas Zod e DTOs
-├── entities/               # entidades persistidas pelo TypeORM
-├── <modulo>.controller.ts  # recebe a request e chama o service
-├── <modulo>.service.ts     # regras de negócio
-├── <modulo>.service.spec.ts
-└── <modulo>.module.ts      # dependências, repositories e exports
+<module>/
+├── dto/                    # Zod schemas and DTOs
+├── entities/               # entities persisted by TypeORM
+├── <module>.controller.ts  # receives the request and calls the service
+├── <module>.service.ts     # business rules
+├── <module>.service.spec.ts
+└── <module>.module.ts      # dependencies, repositories, and exports
 ```
 
-Controllers não acessam repositories diretamente. Toda operação passa pelo service, mantendo as regras de negócio centralizadas e testáveis.
+Controllers do not access repositories directly. Every operation goes through the service, keeping business rules centralized and testable.
 
-Os módulos registram suas entidades com:
+Modules register their entities with:
 
 TypeOrmModule.forFeature([
     UserEntity,
 ])
 
-Os services recebem os repositories com:
+Services receive repositories with:
 
 @InjectRepository(UserEntity) private readonly usersRepository: Repository<UserEntity>
 
-A conexão global fica em src/database/database.module.ts. As opções específicas de PostgreSQL, MySQL e SQLite ficam em src/database/typeorm-options.ts.
+The global connection is located in src/database/database.module.ts. PostgreSQL-, MySQL-, and SQLite-specific options are located in src/database/typeorm-options.ts.
 
-## Decisões de design
+## Design decisions
 
-### Por que Zod em vez de class-validator?
+### Why Zod instead of class-validator?
 
-Com Zod, o schema é a fonte principal para validação e documentação. O nestjs-zod transforma schemas em DTOs, enquanto patchNestJsSwagger() permite que o Swagger interprete esses schemas.
+With Zod, the schema is the primary source for validation and documentation. nestjs-zod transforms schemas into DTOs, while patchNestJsSwagger() allows Swagger to interpret these schemas.
 
-Isso reduz a duplicação entre decorators de validação e documentação.
+This reduces duplication between validation and documentation decorators.
 
-### Por que usar os repositories do TypeORM diretamente?
+### Why use TypeORM repositories directly?
 
-Repository<Entity> já oferece uma abstração testável e tipada para persistência. Criar outra camada genérica de repository por cima adicionaria indireção sem trazer benefício para este boilerplate.
+Repository<Entity> already provides a testable, typed persistence abstraction. Creating another generic repository layer on top would add indirection without benefiting this starter.
 
-Os testes unitários substituem os repositories por objetos com vi.fn(), sem precisar iniciar banco ou aplicação Nest completa.
+Unit tests replace repositories with objects containing vi.fn(), without starting a database or the complete Nest application.
 
-Uma camada adicional pode ser criada posteriormente se o projeto precisar de regras complexas de persistência ou múltiplas fontes de dados.
+An additional layer can be created later if the project requires complex persistence rules or multiple data sources.
 
-### Por que synchronize fica desabilitado?
+### Why is synchronize disabled?
 
-O template usa:
+The template uses:
 
 synchronize: false
 
-Mudanças no banco devem passar por migrations versionadas. Isso evita alterações automáticas e potencialmente destrutivas no schema, principalmente em produção.
+Database changes must go through versioned migrations. This prevents automatic and potentially destructive schema changes, especially in production.
 
-As migrations são geradas e executadas com:
+Migrations are generated and run with:
 
-npm run migration:generate -- src/database/migrations/NomeDaMigration
+npm run migration:generate -- src/database/migrations/MigrationName
 npm run migration:run
 
-### Por que permissions são um mapa em código?
+### Why are permissions a map in code?
 
-O mapa ROLE_PERMISSIONS atende projetos com poucas roles fixas e deixa as permissões fáceis de auditar.
+The ROLE_PERMISSIONS map is suitable for projects with a few fixed roles and makes permissions easy to audit.
 
-Se o projeto precisar de roles criadas dinamicamente, o mapa pode ser substituído por entidades como Role, Permission e RolePermission.
+If the project needs dynamically created roles, the map can be replaced with entities such as Role, Permission, and RolePermission.
 
-### Por que BullMQ para envio de e-mails?
+### Why BullMQ for email delivery?
 
-SMTP é uma operação externa que pode falhar ou demorar. Colocar o envio em uma fila permite que a requisição respondadepois de enfileirar o trabalho, enquanto o MailProcessor realiza o envio e as tentativas posteriores.
+SMTP is an external operation that can fail or take time. Putting delivery in a queue allows the request to respond after the work is queued, while MailProcessor handles delivery and subsequent retries.
 
-### Por que armazenar o hash dos refresh tokens?
+### Why store refresh token hashes?
 
-Um JWT não pode ser revogado antes de expirar. O armazenamento do hash permite:
+A JWT cannot be revoked before it expires. Storing the hash enables:
 
   - logout;
-  - rotação do refresh token;
-  - invalidação após troca de senha;
-  - bloqueio da reutilização de tokens revogados.
+  - refresh token rotation;
+  - invalidation after a password change;
+  - prevention of revoked token reuse.
 
-O token original não é persistido.
+The original token is not persisted.
 
-### Por que UserEntity usa @Exclude()?
+### Why does UserEntity use @Exclude()?
 
-O repository precisa acessar passwordHash em operações como login, mas esse campo nunca deve aparecer na resposta HTTP.
+The repository needs to access passwordHash during operations such as login, but this field must never appear in an HTTP response.
 
-O @Exclude() combinado com ClassSerializerInterceptor cria uma barreira de serialização para impedir o vazamento do hash.
+@Exclude() combined with ClassSerializerInterceptor creates a serialization barrier that prevents the hash from leaking.
 
-### Por que Session/Cookies usa armazenamento persistente?
+### Why does Session/Cookies use persistent storage?
 
-A estratégia Session/Cookies usa express-session com connect-typeorm. As sessões ficam na tabela sessions, em vez da memória do processo.
+The Session/Cookies strategy uses express-session with connect-typeorm. Sessions are stored in the sessions table instead of process memory.
 
-Isso permite reiniciar ou escalar a aplicação sem perder todas as sessões ativas.
+This allows the application to restart or scale without losing all active sessions.
 
-### Como funciona a proteção CSRF?
+### How does CSRF protection work?
 
-Na estratégia Session/Cookies, a aplicação usa um token CSRF associado à sessão. Requisições que alteram estado precisam enviar esse token pelo header:
+With Session/Cookies, the application uses a CSRF token associated with the session. Requests that change state must send this token through the header:
 
 x-csrf-token
 
-O middleware compara o token recebido com o token armazenado na sessão.
+The middleware compares the received token with the token stored in the session.
 
-Na estratégia JWT com Bearer token, o navegador não envia automaticamente a credencial no cookie, então esse fluxo de CSRF não é necessário.
+With JWT and a Bearer token, the browser does not automatically send the credential in a cookie, so this CSRF flow is not required.
 
-## Estratégias de autenticação
+## Authentication strategies
 
 ### JWT
 
-1. Cadastro ou login valida o usuário.
-2. TokenService emite access e refresh tokens.
-3. O hash do refresh token é armazenado no banco.
-4. JwtAuthGuard valida o Bearer token.
-5. O refresh revoga o token anterior e emite um novo par.
-6. O logout revoga o refresh token.
+1. Registration or login validates the user.
+2. TokenService issues access and refresh tokens.
+3. The refresh token hash is stored in the database.
+4. JwtAuthGuard validates the Bearer token.
+5. Refresh revokes the previous token and issues a new pair.
+6. Logout revokes the refresh token.
 
 ### Session/Cookies
 
-1. Cadastro ou login valida o usuário.
-2. A sessão é regenerada para evitar session fixation.
-3. O usuário e o token CSRF são armazenados na sessão.
-4. O navegador recebe o cookie nestforge.sid.
-5. SessionAuthGuard protege as rotas.
-6. O logout destrói a sessão.
+1. Registration or login validates the user.
+2. The session is regenerated to prevent session fixation.
+3. The user and CSRF token are stored in the session.
+4. The browser receives the nestforge.sid cookie.
+5. SessionAuthGuard protects the routes.
+6. Logout destroys the session.
 
 ### OAuth
 
-Google e GitHub são vinculados por OAuthAccountEntity. Se o e-mail ainda não estiver cadastrado, um usuário é criado e associado ao provedor.
+Google and GitHub are linked through OAuthAccountEntity. If the email has not been registered yet, a user is created and associated with the provider.
 
-## Banco e entidades
+## Database and entities
 
-As principais entidades são:
+The main entities are:
 
 - UserEntity;
 - OAuthAccountEntity;
-- RefreshTokenEntity, quando tokens estiverem habilitados;
-- SessionEntity, quando Session/Cookies estiver habilitada;
-- entidades de recuperação e verificação de e-mail, quando aplicáveis.
+- RefreshTokenEntity, when tokens are enabled;
+- SessionEntity, when Session/Cookies is enabled;
+- password recovery and email verification entities, when applicable.
 
-Entidades condicionais usam os marcadores do gerador para que apenas os arquivos e relacionamentos necessários permaneçam no projeto final.
+Conditional entities use generator markers so that only the required files and relationships remain in the final project.
 
-## Onde adicionar um módulo
+## Where to add a module
 
-Para adicionar um novo domínio, consulte docs/adding-a-module.md (docs/adding-a-module.md).
+To add a new domain, see docs/adding-a-module.md (docs/adding-a-module.md).
+
+---
