@@ -5,7 +5,7 @@
 CLI interativa que gera projetos NestJS a partir dos templates `../../templates/prisma`, `../../templates/typeorm` e `../../templates/drizzle` do NestForge.
 
 ```bash
-npx nestforge
+npx nestforge-generator
 ```
 
 Para o guia de testes, perguntas da CLI e checklist completo, consulte [`TESTING.pt-BR.md`](TESTING.pt-BR.md).

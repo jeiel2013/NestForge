@@ -5,7 +5,7 @@
 NestForge monorepo: an interactive CLI that generates production-ready NestJS projects with authentication, authorization, databases, queues, observability, tests, and documentation.
 
 ```bash
-npx nestforge
+npx nestforge-generator
 ```
 
 ## Repository structure
@@ -29,7 +29,7 @@ During the build, the templates are copied into the CLI package so that they rem
 
 ## What the CLI does
 
-When you run `npx nestforge`, you answer the interactive prompts and receive a NestJS project configured according to your choices.
+When you run `npx nestforge-generator`, you answer the interactive prompts and receive a NestJS project configured according to your choices.
 
 ## What the CLI configures
 
