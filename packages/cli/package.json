@@ -33,7 +33,14 @@
     "prisma",
     "typeorm",
     "drizzle",
-    "authentication"
+    "authentication",
+    "postgresql",
+    "mysql",
+    "sqlite",
+    "docker",
+    "swagger",
+    "api",
+    "backend"
   ],
   "dependencies": {
     "@clack/prompts": "^0.9.0",
