@@ -1,37 +1,39 @@
-# Arquitetura
+# Architecture
 
-Este documento explica como o NestForge com Drizzle ORM está organizado e por que determinadas decisões de design foram tomadas.
+**English** | [Português](ARCHITECTURE.pt-BR.md)
 
-## Visão geral
+This document explains how NestForge with Drizzle ORM is organized and why certain design decisions were made.
+
+## Overview
 
 ```text
-Request → main.ts (pipes, filters e interceptors globais)
-  → Guards de autenticação e autorização
-  → Controller (recebe DTO e delega)
-  → Service (regra de negócio)
+Request → main.ts (global pipes, filters, and interceptors)
+  → Authentication and authorization guards
+  → Controller (receives a DTO and delegates)
+  → Service (business rules)
   → DrizzleDatabase
-  → PostgreSQL, MySQL ou SQLite
+  → PostgreSQL, MySQL, or SQLite
   → ClassSerializerInterceptor
   → Response
 ```
 
-Controllers não acessam o banco diretamente. Toda operação passa por um service, mantendo as regras de negócio centralizadas e testáveis.
+Controllers do not access the database directly. Every operation goes through a service, keeping business rules centralized and testable.
 
-## Estrutura dos módulos
+## Module structure
 
-Um módulo de domínio normalmente segue esta estrutura:
+A domain module normally follows this structure:
 
 ```text
-<modulo>/
-├── dto/                    # schemas Zod e DTOs
-├── entities/               # classes de resposta e serialização, quando necessárias
-├── <modulo>.controller.ts  # recebe a request e chama o service
-├── <modulo>.service.ts     # regras de negócio e consultas Drizzle
-├── <modulo>.service.spec.ts
-└── <modulo>.module.ts      # controllers, providers e exports
+<module>/
+├── dto/                    # Zod schemas and DTOs
+├── entities/               # response and serialization classes, when required
+├── <module>.controller.ts  # receives the request and calls the service
+├── <module>.service.ts     # business rules and Drizzle queries
+├── <module>.service.spec.ts
+└── <module>.module.ts      # controllers, providers, and exports
 ```
 
-As tabelas não ficam dentro de cada módulo. Elas são definidas em:
+Tables are not located inside each module. They are defined in:
 
 ```text
 src/database/schema/
@@ -41,18 +43,18 @@ src/database/schema/
 └── index.ts
 ```
 
-Durante a geração, a CLI mantém somente o schema correspondente ao banco escolhido.
+During generation, the CLI keeps only the schema for the selected database.
 
-## Conexão com o banco
+## Database connection
 
-A conexão global é criada pelo `DatabaseModule`.
+The global connection is created by `DatabaseModule`.
 
-Ele fornece dois tokens:
+It provides two tokens:
 
-* `DATABASE_CLIENT`: cliente nativo do banco;
-* `DRIZZLE_DATABASE`: instância tipada do Drizzle.
+* `DATABASE_CLIENT`: the native database client;
+* `DRIZZLE_DATABASE`: the typed Drizzle instance.
 
-Os services recebem o banco com:
+Services receive the database with:
 
 ```ts
 constructor(
@@ -61,163 +63,165 @@ constructor(
 ) {}
 ```
 
-O decorator `@InjectDatabase()` centraliza o token de injeção e evita que os módulos de domínio conheçam detalhes da criação da conexão.
+The `@InjectDatabase()` decorator centralizes the injection token and prevents domain modules from knowing details about how the connection is created.
 
-O cliente nativo é usado apenas quando a API específica do driver é necessária, como no health check e no encerramento da aplicação.
+The native client is used only when the driver-specific API is required, such as in the health check and application shutdown.
 
-## Schemas por dialect
+## Schemas by dialect
 
-PostgreSQL, MySQL e SQLite possuem diferenças em tipos, defaults, UUIDs, datas e comandos de upsert.
+PostgreSQL, MySQL, and SQLite differ in types, defaults, UUIDs, dates, and upsert commands.
 
-Por isso o template mantém três schemas:
+For this reason, the template keeps three schemas:
 
-* `postgres.schema.ts`, usando `drizzle-orm/pg-core`;
-* `mysql.schema.ts`, usando `drizzle-orm/mysql-core`;
-* `sqlite.schema.ts`, usando `drizzle-orm/sqlite-core`.
+* `postgres.schema.ts`, using `drizzle-orm/pg-core`;
+* `mysql.schema.ts`, using `drizzle-orm/mysql-core`;
+* `sqlite.schema.ts`, using `drizzle-orm/sqlite-core`.
 
-Os marcadores da CLI removem os schemas e imports dos bancos não selecionados. O projeto gerado termina com apenas um dialect e um driver.
+CLI markers remove schemas and imports for unselected databases. The generated project ends up with only one dialect and one driver.
 
-## Decisões de design
+## Design decisions
 
-### Por que Zod em vez de class-validator?
+### Why Zod instead of class-validator?
 
-Com Zod, o schema é a fonte principal para validação e documentação.
+With Zod, the schema is the primary source for validation and documentation.
 
-O `nestjs-zod` transforma schemas em DTOs, enquanto `patchNestJsSwagger()` permite que o Swagger interprete esses schemas.
+`nestjs-zod` transforms schemas into DTOs, while `patchNestJsSwagger()` allows Swagger to interpret these schemas.
 
-Isso reduz a duplicação entre decorators de validação e documentação.
+This reduces duplication between validation and documentation decorators.
 
-### Por que usar o Drizzle diretamente nos services?
+### Why use Drizzle directly in services?
 
-O query builder do Drizzle já oferece consultas tipadas e próximas do SQL.
+Drizzle's query builder already provides typed queries that remain close to SQL.
 
-Criar uma camada genérica adicional para todas as operações aumentaria a indireção sem trazer benefício imediato para o boilerplate.
+Creating an additional generic layer for every operation would add indirection without an immediate benefit for the starter.
 
-Uma camada de persistência própria ainda pode ser criada quando o domínio exigir múltiplas fontes de dados ou regras complexas de acesso.
+A custom persistence layer can still be created when the domain requires multiple data sources or complex access rules.
 
-Nos testes unitários, a instância do Drizzle é substituída por objetos com `vi.fn()`, sem inicializar um banco real.
+In unit tests, the Drizzle instance is replaced with objects containing `vi.fn()`, without initializing a real database.
 
-### Por que usar migrations versionadas?
+### Why use versioned migrations?
 
-Alterações no schema devem ser registradas em migrations SQL para que possam ser revisadas e aplicadas de maneira previsível.
+Schema changes must be recorded in SQL migrations so they can be reviewed and applied predictably.
 
-Os comandos principais são:
+The main commands are:
 
 ```bash
 npm run drizzle:generate
 npm run drizzle:migrate
 ```
 
-O primeiro compara os schemas com os snapshots existentes e gera arquivos em `drizzle/`. O segundo aplica as migrations pendentes no banco configurado.
+The first compares the schemas with existing snapshots and generates files in `drizzle/`. The second applies pending migrations to the configured database.
 
-Para desenvolvimento rápido também existe:
+For rapid development, the following is also available:
 
 ```bash
 npm run drizzle:push
 ```
 
-O uso de `push` é útil em protótipos, mas migrations versionadas são preferíveis em projetos compartilhados e produção.
+`push` is useful for prototypes, but versioned migrations are preferable in shared projects and production.
 
-### Por que as transações SQLite são diferentes?
+### Why are SQLite transactions different?
 
-PostgreSQL e MySQL usam drivers assíncronos. Suas transações recebem callbacks assíncronos e consultas executadas com `await`.
+PostgreSQL and MySQL use asynchronous drivers. Their transactions receive asynchronous callbacks and queries executed with `await`.
 
-O `better-sqlite3` é síncrono. Nesse driver, a callback da transação não pode retornar uma `Promise`, e as operações são executadas com métodos como `.run()`.
+`better-sqlite3` is synchronous. With this driver, the transaction callback cannot return a `Promise`, and operations are executed with methods such as `.run()`.
 
-O template usa marcadores de banco para gerar a implementação correta para cada driver.
+The template uses database markers to generate the correct implementation for each driver.
 
-### Por que permissions são um mapa em código?
+### Why are permissions a map in code?
 
-O mapa `ROLE_PERMISSIONS` atende projetos com poucas roles fixas e deixa as permissões fáceis de auditar.
+The `ROLE_PERMISSIONS` map is suitable for projects with a few fixed roles and makes permissions easy to audit.
 
-Se o projeto precisar de roles dinâmicas, o mapa pode ser substituído por tabelas como `roles`, `permissions` e `role_permissions`.
+If the project needs dynamic roles, the map can be replaced with tables such as `roles`, `permissions`, and `role_permissions`.
 
-### Por que BullMQ para envio de e-mails?
+### Why BullMQ for email delivery?
 
-SMTP é uma operação externa que pode falhar ou demorar.
+SMTP is an external operation that can fail or take time.
 
-Colocar o envio em uma fila permite responder à requisição depois de enfileirar o trabalho, enquanto o worker processa o envio e suas tentativas posteriores.
+Putting delivery in a queue allows the request to respond after the work is queued, while the worker processes delivery and subsequent retries.
 
-### Por que armazenar o hash dos refresh tokens?
+### Why store refresh token hashes?
 
-Um JWT não pode ser revogado antes de expirar. Armazenar seu hash permite:
+A JWT cannot be revoked before it expires. Storing its hash enables:
 
 * logout;
-* rotação do refresh token;
-* invalidação após troca de senha;
-* bloqueio da reutilização de tokens revogados.
+* refresh token rotation;
+* invalidation after a password change;
+* prevention of revoked token reuse.
 
-O token original não é persistido. Cada refresh token também recebe um `jti` único para impedir colisões quando duas emissões acontecem no mesmo segundo.
+The original token is not persisted. Each refresh token also receives a unique `jti` to prevent collisions when two tokens are issued in the same second.
 
-### Por que `UserEntity` ainda existe?
+### Why does `UserEntity` still exist?
 
-No template Drizzle, `UserEntity` não é uma entidade de banco.
+In the Drizzle template, `UserEntity` is not a database entity.
 
-Ela é uma classe de resposta usada pelo `ClassSerializerInterceptor`. O decorator `@Exclude()` impede que `passwordHash` seja enviado pela API.
+It is a response class used by `ClassSerializerInterceptor`. The `@Exclude()` decorator prevents `passwordHash` from being sent by the API.
 
-As tabelas e os tipos de persistência ficam nos schemas Drizzle.
+Tables and persistence types are located in the Drizzle schemas.
 
-### Por que Session/Cookies usa armazenamento persistente?
+### Why does Session/Cookies use persistent storage?
 
-A estratégia Session/Cookies usa `express-session` com o `DrizzleSessionStore`.
+The Session/Cookies strategy uses `express-session` with `DrizzleSessionStore`.
 
-As sessões ficam na tabela `sessions`, em vez da memória do processo. Isso permite reiniciar ou escalar a aplicação sem perder todas as sessões ativas.
+Sessions are stored in the `sessions` table instead of process memory. This allows the application to restart or scale without losing all active sessions.
 
-O store implementa leitura, escrita, atualização, remoção e expiração usando o banco escolhido.
+The store implements reading, writing, updating, removal, and expiration using the selected database.
 
-### Como funciona a proteção CSRF?
+### How does CSRF protection work?
 
-Na estratégia Session/Cookies, a aplicação usa um token CSRF associado à sessão.
+With Session/Cookies, the application uses a CSRF token associated with the session.
 
-Requisições que alteram estado precisam enviá-lo pelo header:
+Requests that change state must send it through the header:
 
 ```http
 x-csrf-token: <token>
 ```
 
-O middleware compara o valor recebido com o token armazenado na sessão.
+The middleware compares the received value with the token stored in the session.
 
-Na estratégia JWT com Bearer token, o navegador não envia automaticamente a credencial em um cookie. Por isso esse fluxo CSRF não é necessário.
+With JWT and a Bearer token, the browser does not automatically send the credential in a cookie. Therefore, this CSRF flow is not required.
 
-## Estratégias de autenticação
+## Authentication strategies
 
 ### JWT
 
-1. Cadastro ou login valida o usuário.
-2. `TokenService` emite access e refresh tokens.
-3. O hash do refresh token é armazenado no banco.
-4. `JwtAuthGuard` valida o Bearer token.
-5. O refresh revoga o token anterior e emite um novo par.
-6. O logout revoga o refresh token.
+1. Registration or login validates the user.
+2. `TokenService` issues access and refresh tokens.
+3. The refresh token hash is stored in the database.
+4. `JwtAuthGuard` validates the Bearer token.
+5. Refresh revokes the previous token and issues a new pair.
+6. Logout revokes the refresh token.
 
 ### Session/Cookies
 
-1. Cadastro ou login valida o usuário.
-2. A sessão é regenerada para evitar session fixation.
-3. O usuário e o token CSRF são armazenados na sessão.
-4. O navegador recebe o cookie `nestforge.sid`.
-5. `SessionAuthGuard` protege as rotas.
-6. O logout destrói a sessão.
+1. Registration or login validates the user.
+2. The session is regenerated to prevent session fixation.
+3. The user and CSRF token are stored in the session.
+4. The browser receives the `nestforge.sid` cookie.
+5. `SessionAuthGuard` protects the routes.
+6. Logout destroys the session.
 
 ### OAuth
 
-Google e GitHub são vinculados pela tabela `oauth_accounts`.
+Google and GitHub are linked through the `oauth_accounts` table.
 
-Se o e-mail ainda não estiver cadastrado, um usuário é criado e associado ao provedor. O resultado do callback segue a estratégia escolhida: tokens JWT ou sessão persistente.
+If the email has not been registered yet, a user is created and associated with the provider. The callback result follows the selected strategy: JWT tokens or a persistent session.
 
-## Principais tabelas
+## Main tables
 
-Os schemas podem incluir:
+The schemas may include:
 
 * `users`;
 * `oauth_accounts`;
-* `refresh_tokens`, quando autenticação por token estiver habilitada;
-* `sessions`, quando Session/Cookies estiver habilitada;
-* `password_reset_tokens`, quando recuperação de senha estiver habilitada;
-* `email_verification_tokens`, quando verificação de e-mail estiver habilitada.
+* `refresh_tokens`, when token authentication is enabled;
+* `sessions`, when Session/Cookies is enabled;
+* `password_reset_tokens`, when password recovery is enabled;
+* `email_verification_tokens`, when email verification is enabled.
 
-Tabelas condicionais usam marcadores para que apenas os recursos selecionados permaneçam no projeto gerado.
+Conditional tables use markers so that only the selected features remain in the generated project.
 
-## Onde adicionar um módulo
+## Where to add a module
 
-Para adicionar um novo domínio seguindo as convenções do template, consulte [Adding a Module](docs/adding-a-module.md).
+To add a new domain according to the template conventions, see [Adding a Module](docs/adding-a-module.md).
+
+---

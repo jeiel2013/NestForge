@@ -1,141 +1,143 @@
 # Roadmap
 
-Este roadmap apresenta o estado atual do template NestForge com Drizzle ORM e os pontos que ainda podem evoluir.
+**English** | [Português](ROADMAP.pt-BR.md)
 
-Para mudanças grandes, abra uma issue antes do pull request para alinhar a implementação.
+This roadmap presents the current state of the NestForge Drizzle ORM template and the areas that can still evolve.
 
-## CLI e geração
+For large changes, open an issue before the pull request to align the implementation.
 
-* [x] Geração de projetos com Drizzle ORM
+## CLI and generation
+
+* [x] Project generation with Drizzle ORM
 * [x] TypeScript
-* [x] JavaScript gerado a partir do template TypeScript
+* [x] JavaScript generated from the TypeScript template
 * [x] PostgreSQL
 * [x] MySQL
 * [x] SQLite
-* [x] Remoção de recursos opcionais por marcadores
-* [x] Remoção de dependências não utilizadas
-* [x] Comandos finais adaptados ao Drizzle
-* [x] Testes automatizados das combinações geradas
+* [x] Removal of optional features through markers
+* [x] Removal of unused dependencies
+* [x] Final commands adapted to Drizzle
+* [x] Automated tests for generated combinations
 
-## Banco de dados
+## Database
 
 * [x] Drizzle ORM
-* [x] Schema específico para PostgreSQL
-* [x] Schema específico para MySQL
-* [x] Schema específico para SQLite
-* [x] Configuração dinâmica do Drizzle Kit
-* [x] Geração de migrations
-* [x] Aplicação de migrations
-* [x] Seed com usuários para as roles padrão
-* [x] Health check usando o driver selecionado
-* [x] Transações adaptadas ao `better-sqlite3`
-* [x] Limpeza isolada do banco nos testes E2E
+* [x] PostgreSQL-specific schema
+* [x] MySQL-specific schema
+* [x] SQLite-specific schema
+* [x] Dynamic Drizzle Kit configuration
+* [x] Migration generation
+* [x] Migration execution
+* [x] Seed with users for the default roles
+* [x] Health check using the selected driver
+* [x] Transactions adapted to `better-sqlite3`
+* [x] Isolated database cleanup in E2E tests
 
-## Autenticação
+## Authentication
 
-* [x] Estratégia JWT
-* [x] Estratégia Session/Cookies
-* [x] Estratégia OAuth-only
-* [x] Projeto sem autenticação
+* [x] JWT strategy
+* [x] Session/Cookies strategy
+* [x] OAuth-only strategy
+* [x] Project without authentication
 * [x] Login
-* [x] Cadastro
+* [x] Registration
 * [x] Logout
 * [x] Access token
 * [x] Refresh token
-* [x] Revogação de refresh token
-* [x] Recuperação de senha
-* [x] Redefinição de senha
-* [x] Verificação de e-mail
-* [x] OAuth com Google
-* [x] OAuth com GitHub
-* [x] Sessões persistidas com `DrizzleSessionStore`
-* [x] Proteção CSRF para Session/Cookies
+* [x] Refresh token revocation
+* [x] Password recovery
+* [x] Password reset
+* [x] Email verification
+* [x] Google OAuth
+* [x] GitHub OAuth
+* [x] Sessions persisted with `DrizzleSessionStore`
+* [x] CSRF protection for Session/Cookies
 
-## Usuários e autorização
+## Users and authorization
 
-* [x] CRUD de usuários
-* [x] Paginação
-* [x] Busca e filtros
-* [x] Upload de avatar
-* [x] Roles `ADMIN`, `MANAGER` e `USER`
-* [x] Permissions granulares
-* [x] Guards de roles e permissions
-* [x] Remoção opcional de RBAC pela CLI
+* [x] User CRUD
+* [x] Pagination
+* [x] Search and filters
+* [x] Avatar upload
+* [x] `ADMIN`, `MANAGER`, and `USER` roles
+* [x] Granular permissions
+* [x] Role and permission guards
+* [x] Optional RBAC removal through the CLI
 
-## Segurança
+## Security
 
 * [x] Helmet
-* [x] CORS configurável
+* [x] Configurable CORS
 * [x] Rate limit
-* [x] Validação com Zod e `nestjs-zod`
-* [x] Serialização de respostas
-* [x] Proteção CSRF para autenticação por sessão
-* [x] Cookies `httpOnly`
-* [x] Cookies seguros em produção
-* [x] Validação das variáveis de ambiente
+* [x] Validation with Zod and `nestjs-zod`
+* [x] Response serialization
+* [x] CSRF protection for session authentication
+* [x] `httpOnly` cookies
+* [x] Secure cookies in production
+* [x] Environment variable validation
 
-## Recursos opcionais
+## Optional features
 
-* [x] Docker e Docker Compose
+* [x] Docker and Docker Compose
 * [x] Swagger/OpenAPI
-* [x] Validação global
+* [x] Global validation
 * [x] Redis
 * [x] BullMQ
-* [x] E-mail transacional
-* [x] Mailpit para desenvolvimento
-* [x] RBAC e Permissions
-* [x] Geração opcional do arquivo `.env`
+* [x] Transactional email
+* [x] Mailpit for development
+* [x] RBAC and Permissions
+* [x] Optional `.env` file generation
 
-## Observabilidade
+## Observability
 
-* [x] Logs estruturados com Pino
-* [x] Health check da aplicação
-* [x] Health check do Drizzle
-* [x] Health check do Redis
-* [x] Verificação de memória
-* [x] Verificação de espaço em disco
-* [x] Métricas no formato Prometheus
-* [x] Métricas HTTP
+* [x] Structured logging with Pino
+* [x] Application health check
+* [x] Drizzle health check
+* [x] Redis health check
+* [x] Memory check
+* [x] Disk space check
+* [x] Prometheus-format metrics
+* [x] HTTP metrics
 
-## Testes
+## Tests
 
-* [x] Testes unitários com Vitest
-* [x] Testes E2E com Supertest
-* [x] Testes de autenticação JWT
-* [x] Testes de Session/Cookies
-* [x] Testes de CSRF
-* [x] Testes de usuários
-* [x] Testes de RBAC
-* [x] Testes do health check Drizzle
-* [x] Banco separado para testes
-* [x] Limpeza das tabelas entre testes
-* [x] Smoke test com Drizzle, SQLite e JWT
-* [x] Smoke test com Drizzle, SQLite e Session/Cookies
+* [x] Unit tests with Vitest
+* [x] E2E tests with Supertest
+* [x] JWT authentication tests
+* [x] Session/Cookies tests
+* [x] CSRF tests
+* [x] User tests
+* [x] RBAC tests
+* [x] Drizzle health check tests
+* [x] Separate test database
+* [x] Table cleanup between tests
+* [x] Smoke test with Drizzle, SQLite, and JWT
+* [x] Smoke test with Drizzle, SQLite, and Session/Cookies
 
-## CI e infraestrutura
+## CI and infrastructure
 
 * [x] GitHub Actions
-* [x] Instalação reproduzível com `npm ci`
-* [x] Geração e aplicação de migrations no CI
+* [x] Reproducible installation with `npm ci`
+* [x] Migration generation and execution in CI
 * [x] Lint
 * [x] Build
-* [x] Testes unitários
-* [x] Testes E2E
-* [x] Serviços PostgreSQL, MySQL e Redis conforme a geração
-* [ ] Exemplo de deploy automatizado
-* [ ] Exemplo de configuração para ambiente de staging
+* [x] Unit tests
+* [x] E2E tests
+* [x] PostgreSQL, MySQL, and Redis services according to generation
+* [ ] Automated deployment example
+* [ ] Staging environment configuration example
 
-## Documentação
+## Documentation
 
-* [x] README do template
-* [x] Guia de arquitetura
-* [x] Guia para adicionar um módulo com Drizzle
-* [x] Guia de marcadores de funcionalidades
-* [x] Documentação de migrations
-* [x] Documentação de testes
-* [x] Documentação de autenticação
-* [x] Documentação de observabilidade
+* [x] Template README
+* [x] Architecture guide
+* [x] Guide for adding a module with Drizzle
+* [x] Feature marker guide
+* [x] Migration documentation
+* [x] Testing documentation
+* [x] Authentication documentation
+* [x] Observability documentation
 
-## Fora do escopo deste template
+## Outside this template's scope
 
-MongoDB não faz parte do template Drizzle atual. O suporte a MongoDB pertence ao roadmap geral da CLI e exigirá uma estratégia de persistência própria.
+MongoDB is not part of the current Drizzle template. MongoDB support belongs to the general CLI roadmap and will require its own persistence strategy.
