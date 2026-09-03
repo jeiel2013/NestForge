@@ -1,63 +1,75 @@
 # Roadmap
 
-Este roadmap existe para deixar claro o que já está pronto e onde dá pra contribuir. PRs para qualquer item em aberto são muito bem-vindos — abra uma issue antes se for algo grande, pra alinharmos a abordagem.
+**English** | [Português](ROADMAP.pt-BR.md)
 
-## Autenticação
+This roadmap makes it clear what is ready and where contributions are possible. PRs for any open item are very welcome — open an issue first for large changes so the approach can be aligned.
+
+## Authentication
+
 - [x] Login
-- [x] Cadastro
+- [x] Registration
 - [x] Logout
 - [x] Refresh Token
 - [x] Forgot Password
 - [x] Reset Password
 - [x] Email Verification
-- [x] OAuth Google
-- [x] OAuth GitHub
+- [x] Google OAuth
+- [x] GitHub OAuth
 
-## Usuários
-- [x] CRUD básico
-- [x] Paginação e filtros avançados
-- [x] Upload de avatar
+## Users
+
+- [x] Basic CRUD
+- [x] Pagination and advanced filters
+- [x] Avatar upload
 
 ## RBAC
-- [x] Roles (Admin, Manager, User)
-- [x] Permissions granulares (`user:create`, `report:read`, etc)
-- [x] Guard combinando roles + permissions
 
-## Segurança
+- [x] Roles (Admin, Manager, User)
+- [x] Granular permissions (`user:create`, `report:read`, etc.)
+- [x] Guard combining roles + permissions
+
+## Security
+
 - [x] Helmet
 - [x] CORS
 - [x] Rate Limit
-- [x] Validação (Zod + nestjs-zod, integrado ao Swagger via `createZodDto`)
-- [x] Serialização (interceptor de output)
-- [x] CSRF (quando necessário)
+- [x] Validation (Zod + nestjs-zod, integrated with Swagger through `createZodDto`)
+- [x] Serialization (output interceptor)
+- [x] CSRF (when required)
 
-## Banco de dados
+## Database
+
 - [x] Prisma
 - [x] PostgreSQL
 - [x] Migrations
-- [x] Seed completo (roles, permissions, usuário admin)
+- [x] Complete seed (roles, permissions, administrator user)
 
-## Infra
+## Infrastructure
+
 - [x] Docker / docker-compose (API, Postgres, Redis, Mailpit)
 - [x] GitHub Actions CI (build, lint, test)
-- [ ] Deploy automatizado (exemplo com Railway/Fly.io)
+- [ ] Automated deployment (Railway/Fly.io example)
 
-## Observabilidade
-- [x] Logs estruturados com Pino
+## Observability
+
+- [x] Structured logging with Pino
 - [x] Health checks (`/health`)
-- [x] Métricas (Prometheus opcional)
+- [x] Metrics (optional Prometheus)
 
-## Jobs & E-mail
-- [x] Fila com BullMQ
-- [x] Envio de e-mail transacional (Mailpit em dev)
-- [x] Templates de e-mail
+## Jobs & Email
 
-## Testes
-- [x] Estrutura de testes unitários (Vitest)
-- [x] Testes de integração (auth + users)
+- [x] BullMQ queue
+- [x] Transactional email delivery (Mailpit in development)
+- [x] Email templates
 
-## Documentação
-- [x] README inicial
-- [x] Swagger completo com exemplos de request/response
-- [x] Guia de arquitetura (ADR / decisões de design)
-- [x] Guia "como adicionar um novo módulo"
+## Tests
+
+- [x] Unit test structure (Vitest)
+- [x] Integration tests (auth + users)
+
+## Documentation
+
+- [x] Initial README
+- [x] Complete Swagger with request/response examples
+- [x] Architecture guide (ADR / design decisions)
+- [x] “How to add a new module” guide

@@ -1,61 +1,70 @@
-# Arquitetura
+# Architecture
 
-Este documento explica como o NestForge está organizado e por que certas decisões de design foram tomadas. O objetivo é que alguém novo no projeto consiga entender o "porquê", não só o "o quê".
+**English** | [Português](ARCHITECTURE.pt-BR.md)
 
-## Visão geral
+This document explains how NestForge is organized and why certain design decisions were made. The goal is for someone new to the project to understand the “why,” not only the “what.”
+
+## Overview
 
 ```
-Request → main.ts (pipes/filters/interceptors globais)
+Request → main.ts (global pipes/filters/interceptors)
         → Guards (JwtAuthGuard → RolesGuard → PermissionsGuard)
-        → Controller (valida via DTO Zod, delega pro service)
-        → Service (regra de negócio, chama o Prisma)
+        → Controller (validates through a Zod DTO, delegates to the service)
+        → Service (business rules, calls Prisma)
         → Prisma → PostgreSQL
-        → Response (passa pelo ClassSerializerInterceptor antes de virar JSON)
+        → Response (passes through ClassSerializerInterceptor before becoming JSON)
 ```
 
-Cada módulo de domínio (`auth`, `users`, `mail`, `health`, `metrics`) segue a mesma forma:
+Each domain module (`auth`, `users`, `mail`, `health`, `metrics`) follows the same structure:
 
 ```
-<modulo>/
-├── dto/              # entrada — um schema Zod + createZodDto por DTO
-├── entities/          # saída — classes com @Exclude() pra campos sensíveis
-├── <modulo>.controller.ts   # só orquestra: recebe request, chama o service, devolve
-├── <modulo>.service.ts      # regra de negócio de verdade
-└── <modulo>.module.ts       # amarra tudo e declara o que exporta
+<module>/
+├── dto/                     # input — one Zod schema + createZodDto per DTO
+├── entities/                # output — classes with @Exclude() for sensitive fields
+├── <module>.controller.ts   # orchestrates only: receives request, calls service, returns
+├── <module>.service.ts      # actual business rules
+└── <module>.module.ts       # wires everything together and declares exports
 ```
 
-Controllers nunca falam com o Prisma diretamente — sempre passam pelo service. Isso mantém a lógica de negócio testável sem precisar subir a aplicação inteira (é por isso que os testes unitários mockam só o Prisma, não o Nest todo).
+Controllers never communicate with Prisma directly — they always go through the service. This keeps business logic testable without starting the entire application (which is why unit tests mock only Prisma, not all of Nest).
 
-## Decisões de design (ADR curto)
+## Design decisions (short ADR)
 
-### Por que Zod (com `nestjs-zod`) em vez de `class-validator`?
-`class-validator` obriga a duplicar informação: os decorators de validação (`@IsEmail()`) e os decorators de documentação (`@ApiProperty()`) descrevem a mesma coisa de duas formas diferentes, e é fácil um ficar desatualizado em relação ao outro. Com Zod, o schema é a única fonte de verdade — `nestjs-zod` gera o DTO e o Swagger a partir dele. Ver `src/*/dto/*.dto.ts` e `patchNestJsSwagger()` em `src/main.ts`.
+### Why Zod (with `nestjs-zod`) instead of `class-validator`?
 
-### Por que Prisma sem uma camada de "repository" por cima?
-Prisma Client já é, na prática, um repository type-safe — adicionar uma camada de abstração em cima dele só pra "seguir o padrão" adicionaria indireção sem trazer benefício real neste projeto (não há plano de trocar de ORM). Os services chamam `this.prisma.<model>` diretamente.
+`class-validator` requires duplicated information: validation decorators (`@IsEmail()`) and documentation decorators (`@ApiProperty()`) describe the same thing in two different ways, and one can easily become outdated relative to the other. With Zod, the schema is the single source of truth — `nestjs-zod` generates the DTO and Swagger documentation from it. See `src/*/dto/*.dto.ts` and `patchNestJsSwagger()` in `src/main.ts`.
 
-### Por que permissions são um mapa fixo em código (`ROLE_PERMISSIONS`) e não uma tabela no banco?
-Um sistema de permissions 100% dinâmico (tabelas `roles`, `permissions`, `role_permissions`) é overkill pra um boilerplate — a maioria dos projetos que nascem daqui vai ter 3-5 roles fixas. Manter o mapeamento em `src/common/constants/role-permissions.ts` deixa auditável de forma explícita: dá pra ver o array inteiro de permissões de cada role em um arquivo só. Se o seu projeto crescer a ponto de precisar de permissions configuráveis em runtime (ex.: um admin criando roles customizadas pela UI), aí sim vale migrar pra tabela.
+### Why Prisma without a repository layer on top?
 
-### Por que BullMQ para e-mails, e não enviar direto na request?
-Enviar e-mail é uma chamada de rede (SMTP) que pode falhar ou demorar — se isso acontecesse dentro do `POST /auth/register`, uma instabilidade no provedor de e-mail deixaria o cadastro lento ou o usuário veria erro mesmo com a conta criada. A fila desacopla isso: a request responde assim que o job é enfileirado, e o `MailProcessor` cuida do envio (com retry) em segundo plano.
+Prisma Client is effectively already a type-safe repository. Adding an abstraction layer on top merely to “follow the pattern” would add indirection without a real benefit in this project (there is no plan to replace the ORM). Services call `this.prisma.<model>` directly.
 
-### Por que refresh tokens ficam no banco (hasheados) em vez de só confiar no JWT?
-Um JWT sozinho não pode ser revogado antes de expirar. Guardar o hash do refresh token no banco permite invalidar sessões de verdade (logout, troca de senha, refresh token roubado) — é por isso que `resetPassword` revoga todos os refresh tokens ativos do usuário.
+### Why are permissions a fixed map in code (`ROLE_PERMISSIONS`) instead of a database table?
 
-### Por que `UserEntity` + `ClassSerializerInterceptor` em vez de só um `select` no Prisma?
-As duas coisas coexistem de propósito. O `select` evita trazer o `passwordHash` do banco desnecessariamente; o `@Exclude()` na entidade é uma segunda barreira — mesmo que uma query futura esqueça o `select`, o campo não escapa pra resposta HTTP. Defesa em profundidade, não redundância.
+A fully dynamic permission system (`roles`, `permissions`, and `role_permissions` tables) is overkill for a starter — most projects created from it will have 3–5 fixed roles. Keeping the mapping in `src/common/constants/role-permissions.ts` makes it explicitly auditable: the entire permission array for every role is visible in one file. If the project grows enough to require permissions configurable at runtime (for example, an administrator creating custom roles through the UI), then migrating to database tables becomes worthwhile.
 
-### Por que CSRF vem desligado por padrão?
-A API usa Bearer token no header `Authorization`, não cookie de sessão. CSRF explora o fato do navegador enviar cookies automaticamente entre origens — isso não se aplica aqui. O middleware existe pronto (`src/common/middleware/csrf.middleware.ts`) pra quem adaptar o boilerplate pra guardar token em cookie.
+### Why BullMQ for email instead of sending it directly in the request?
 
-## Fluxo de autenticação, em detalhe
+Sending email is a network operation (SMTP) that can fail or take time. If it happened inside `POST /auth/register`, instability in the email provider would make registration slow or show an error even when the account had been created. The queue decouples these operations: the request responds as soon as the job is queued, and `MailProcessor` handles delivery (with retries) in the background.
 
-1. `POST /auth/register` ou `/login` → `AuthService` gera um par `accessToken` (15min) + `refreshToken` (7 dias), e guarda o hash do refresh no banco.
-2. Rotas protegidas passam pelo `JwtAuthGuard`, que valida o `accessToken` e popula `req.user` com `{ id, email, role }` (via `JwtStrategy`).
-3. `RolesGuard` e `PermissionsGuard` leem `req.user.role` e decidem se a rota é liberada, usando os decorators `@Roles()` / `@Permissions()` da rota.
-4. Quando o `accessToken` expira, o client chama `POST /auth/refresh` — o refresh token antigo é revogado e um novo par é emitido (rotação de token).
+### Why store hashed refresh tokens in the database instead of trusting only the JWT?
 
-## Onde adicionar coisa nova
+A JWT cannot be revoked before it expires. Storing the refresh token hash in the database makes it possible to invalidate sessions properly (logout, password change, stolen refresh token) — this is why `resetPassword` revokes all active refresh tokens for the user.
 
-Se você está adicionando um recurso novo (não só mexendo em auth/users), veja [`docs/adding-a-module.md`](docs/adding-a-module.md) — é um passo a passo praticando as convenções acima num módulo do zero.
+### Why use `UserEntity` + `ClassSerializerInterceptor` instead of only a Prisma `select`?
+
+Both intentionally coexist. The `select` avoids unnecessarily retrieving `passwordHash` from the database; `@Exclude()` on the entity is a second barrier — even if a future query forgets the `select`, the field does not escape into the HTTP response. This is defense in depth, not redundancy.
+
+### Why is CSRF disabled by default?
+
+The API uses a Bearer token in the `Authorization` header, not a session cookie. CSRF exploits the browser automatically sending cookies across origins, which does not apply here. The middleware is ready in `src/common/middleware/csrf.middleware.ts` for projects that adapt the starter to store the token in a cookie.
+
+## Authentication flow in detail
+
+1. `POST /auth/register` or `/login` → `AuthService` generates an `accessToken` (15 min) + `refreshToken` (7 days) pair and stores the refresh token hash in the database.
+2. Protected routes pass through `JwtAuthGuard`, which validates the `accessToken` and populates `req.user` with `{ id, email, role }` through `JwtStrategy`.
+3. `RolesGuard` and `PermissionsGuard` read `req.user.role` and decide whether to allow the route using its `@Roles()` / `@Permissions()` decorators.
+4. When the `accessToken` expires, the client calls `POST /auth/refresh` — the old refresh token is revoked and a new pair is issued (token rotation).
+
+## Where to add something new
+
+If you are adding a new feature (rather than only changing auth/users), see [`docs/adding-a-module.md`](docs/adding-a-module.md) — it is a step-by-step guide that applies the conventions above to a module built from scratch.
