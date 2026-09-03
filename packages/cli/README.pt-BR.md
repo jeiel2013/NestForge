@@ -8,7 +8,7 @@ CLI interativa que gera projetos NestJS a partir dos templates `../../templates/
 npx nestforge
 ```
 
-Para o guia de testes, perguntas da CLI e checklist completo, consulte `TESTING.md` (`TESTING.md`).
+Para o guia de testes, perguntas da CLI e checklist completo, consulte [`TESTING.pt-BR.md`](TESTING.pt-BR.md).
 
 ## O que já funciona
 

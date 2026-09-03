@@ -314,7 +314,7 @@ npm link
 nestforge
 ```
 
-O guia completo está em [TESTING](packages/cli/TESTING.md).
+O guia completo está em [TESTING](packages/cli/TESTING.pt-BR.md).
 
 ## Publicação
 
