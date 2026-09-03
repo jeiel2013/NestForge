@@ -1,5 +1,5 @@
 {
-  "name": "nestforge",
+  "name": "nestforge-generator",
   "version": "0.1.0",
   "description": "Interactive CLI for generating a NestJS project from a NestForge starter template",
   "license": "MIT",
@@ -17,8 +17,24 @@
     "copy:templates": "node scripts/copy-templates.mjs",
     "dev": "tsx src/index.ts",
     "test": "tsx --test test/generator.test.ts",
-    "lint": "eslint \"src/**/*.ts\" --fix"
+    "lint": "eslint \"src/**/*.ts\" --fix",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm test"
   },
+  "keywords": [
+    "nestjs",
+    "cli",
+    "generator",
+    "scaffolding",
+    "boilerplate",
+    "starter",
+    "typescript",
+    "javascript",
+    "prisma",
+    "typeorm",
+    "drizzle",
+    "authentication"
+  ],
   "dependencies": {
     "@clack/prompts": "^0.9.0",
     "picocolors": "^1.1.0",
@@ -42,5 +58,9 @@
     "type": "git",
     "url": "https://github.com/jeiel2013/nestforge.git",
     "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/jeiel2013/NestForge#readme",
+  "bugs": {
+    "url": "https://github.com/jeiel2013/NestForge/issues"
   }
 }
