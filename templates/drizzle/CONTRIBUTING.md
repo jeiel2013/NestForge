@@ -1,21 +1,23 @@
-# Contribuindo com o NestForge
+# Contributing to NestForge
 
-Obrigado por considerar contribuir! 🎉
+**English** | [Português](CONTRIBUTING.pt-BR.md)
 
-## Como começar
+Thank you for considering contributing! 🎉
 
-1. Faça um fork do repositório
-2. Clone o seu fork: `git clone https://github.com/SEU_USUARIO/nestforge.git`
-3. Crie uma branch: `git checkout -b feat/nome-da-feature`
-4. Suba o ambiente: `docker compose up` (ou `npm install` + `npm run start:dev`)
-5. Faça suas alterações
-6. Rode os testes e o lint antes de commitar: `npm run test && npm run lint`
-7. Commit seguindo o padrão abaixo
-8. Abra um Pull Request descrevendo o que foi feito e por quê
+## Getting started
 
-## Padrão de commits
+1. Fork the repository
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/nestforge.git`
+3. Create a branch: `git checkout -b feat/feature-name`
+4. Start the environment: `docker compose up` (or `npm install` + `npm run start:dev`)
+5. Make your changes
+6. Run tests and lint before committing: `npm run test && npm run lint`
+7. Commit according to the convention below
+8. Open a Pull Request describing what was changed and why
 
-Usamos commits em português, seguindo [Conventional Commits](https://www.conventionalcommits.org/):
+## Commit convention
+
+We use Portuguese commit messages following [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
 feat: adiciona autenticação via Google OAuth
@@ -26,27 +28,30 @@ refactor: extrai lógica de hash para utils
 chore: atualiza dependências
 ```
 
-## Padrões de código
+## Code standards
 
-- Se o seu código for ligado a um recurso opcional da CLI (Swagger, Redis, RBAC, etc.), marque ele seguindo [`docs/feature-markers.md`](docs/feature-markers.md) — sem isso, a CLI não consegue remover o trecho quando alguém desliga o recurso.
-- TypeScript estrito (sem `any` sem justificativa)
-- Validação de entrada sempre via Zod (DTOs)
-- Nada de lógica de negócio no controller — controller só orquestra, service resolve
-- Toda rota nova precisa de decorators de Swagger (`@ApiTags`, `@ApiOperation`, etc)
-- Toda feature nova precisa de teste (unitário no mínimo)
+- If your code is related to an optional CLI feature (Swagger, Redis, RBAC, etc.), mark it according to [`docs/feature-markers.md`](docs/feature-markers.md). Without this, the CLI cannot remove the code when someone disables the feature.
+- Strict TypeScript (no unjustified `any`)
+- Always validate input through Zod (DTOs)
+- No business logic in controllers — controllers only orchestrate, services handle the logic
+- Every new route requires Swagger decorators (`@ApiTags`, `@ApiOperation`, etc.)
+- Every new feature requires tests (at least unit tests)
 
-## Reportando bugs
+## Reporting bugs
 
-Abra uma issue com:
-- Descrição do problema
-- Passos para reproduzir
-- Comportamento esperado vs. atual
-- Versão do Node / ambiente (Docker ou local)
+Open an issue containing:
 
-## Sugerindo features
+- A description of the problem
+- Steps to reproduce it
+- Expected versus actual behavior
+- Node version / environment (Docker or local)
 
-Abra uma issue com a tag `enhancement` descrevendo o problema que a feature resolve antes de sair implementando — isso evita retrabalho caso a abordagem precise ser discutida.
+## Suggesting features
 
-## Código de conduta
+Before implementing, open an issue with the `enhancement` label describing the problem the feature solves. This avoids rework if the approach needs to be discussed.
 
-Ao contribuir, você concorda em seguir o [Código de Conduta](CODE_OF_CONDUCT.md) do projeto.
+## Code of Conduct
+
+By contributing, you agree to follow the project's [Code of Conduct](CODE_OF_CONDUCT.md).
+
+---

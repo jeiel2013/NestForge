@@ -108,7 +108,7 @@ A documentação Swagger fica disponível em `http://localhost:3000/docs`.
 - [x] Testes de integração completos
 - [x] Documentação completa (Swagger + guia de arquitetura)
 
-Veja o [ROADMAP.md](ROADMAP.md) detalhado.
+Veja o [ROADMAP.pt-BR.md](ROADMAP.pt-BR.md) detalhado.
 
 ### Configurando o login social (OAuth)
 
@@ -240,12 +240,13 @@ Os testes unitários (`src/**/*.spec.ts`) rodam isolados, com a instância do Dr
 
 ## 📚 Documentação adicional
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — como o projeto é organizado e por que certas decisões de design foram tomadas (Zod vs. class-validator, permissions em código vs. banco, BullMQ, etc.)
+- [ARCHITECTURE.pt-BR.md](ARCHITECTURE.pt-BR.md) — como o projeto é organizado e por que certas decisões de design foram tomadas (Zod vs. class-validator, permissions em código vs. banco, BullMQ, etc.)
+- [TESTING.pt-BR.md](TESTING.pt-BR.md) — como validar migrations, build, testes unitários e testes E2E
 - [docs/adding-a-module.md](docs/adding-a-module.md) — passo a passo pra adicionar um recurso novo seguindo as convenções do projeto
 
 ## 🤝 Contribuindo
 
-Contribuições são bem-vindas! Veja o [CONTRIBUTING.md](CONTRIBUTING.md) para o guia completo.
+Contribuições são bem-vindas! Veja o [CONTRIBUTING.pt-BR.md](CONTRIBUTING.pt-BR.md) para o guia completo.
 
 ## 📄 Licença
 
