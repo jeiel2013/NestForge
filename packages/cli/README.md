@@ -4,8 +4,16 @@
 
 Interactive CLI that generates NestJS projects from NestForge's [Prisma](../../templates/prisma), [TypeORM](../../templates/typeorm), and [Drizzle](../../templates/drizzle) templates.
 
+Install the package locally:
+
 ```bash
-npx nestforge-generator
+npm install nestforge-generator
+```
+
+Run the locally installed CLI:
+
+```bash
+npx nestforge
 ```
 
 For the testing guide, CLI prompts, and complete checklist, see [`TESTING.md`](TESTING.md).
