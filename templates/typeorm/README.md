@@ -250,6 +250,7 @@ Unit tests (`src/**/*.spec.ts`) run in isolation with the TypeORM repositories a
 ## 📚 Additional documentation
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) — how the project is organized and why certain design decisions were made (Zod vs. class-validator, code-based vs. database-based permissions, BullMQ, etc.)
+- [TESTING.md](TESTING.md) — how to validate migrations, build, unit tests, and E2E tests
 - [docs/adding-a-module.md](docs/adding-a-module.md) — step-by-step instructions for adding a new feature according to the project's conventions
 
 ## 🤝 Contributing
