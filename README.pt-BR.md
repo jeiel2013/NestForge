@@ -44,8 +44,8 @@ Depois de instalar `nestforge-generator`, execute `npx nestforge` para responder
 
 1. **Nome do projeto** — texto livre — ✅ Disponível
 2. **Linguagem** — TypeScript ou JavaScript — ✅ Ambas disponíveis
-3. **ORM / Query Builder** — Prisma, TypeORM ou Drizzle — ✅ Disponíveis
-4. **ORM / Query Builder** — Nenhum — ⏳ Ainda não implementado
+3. **ORM / Query Builder** — Prisma, TypeORM, Drizzle ou Nenhum — ✅ Disponíveis
+4. **Comportamento sem ORM** — sem integração com banco ou autenticação — ✅ Disponível
 5. **Banco de dados** — PostgreSQL, MySQL ou SQLite — ✅ Disponíveis
 6. **Banco de dados** — MongoDB — ⏳ Ainda não implementado
 7. **Docker** — sim ou não — ✅ Toggle real
@@ -109,6 +109,16 @@ O template Drizzle inclui:
 * transações adaptadas ao comportamento do SQLite.
 
 A CLI mantém somente o template, o schema e o driver necessários para o ORM e o banco selecionados.
+
+### Sem ORM
+
+A opção “Nenhum” gera um projeto NestJS sem banco de dados:
+
+* pula as perguntas de banco de dados e autenticação;
+* não inclui schema, migrations, seed, driver de banco ou dependência de ORM;
+* não inclui autenticação, usuários ou controle de acesso;
+* mantém recursos independentes como Docker, Swagger, validação com Zod, Redis, filas e e-mail;
+* funciona com TypeScript e JavaScript.
 
 ## Recursos dos templates
 
@@ -266,6 +276,7 @@ Os testes automatizados do gerador também cobrem:
 * Prisma;
 * TypeORM;
 * Drizzle;
+* projetos sem ORM;
 * TypeScript;
 * JavaScript;
 * JWT;
@@ -333,13 +344,12 @@ npm pack --dry-run
 npm publish
 ```
 
-O build compila a CLI e copia os templates Prisma, TypeORM e Drizzle para o pacote publicado.
+O build compila a CLI e copia os templates-fonte para o pacote publicado. Projetos sem ORM são derivados da base Prisma e limpos durante a geração.
 
 ## Roadmap
 
 Próximos itens planejados:
 
-* opção sem ORM;
 * MongoDB;
 * validação completa do nome do pacote;
 * ampliação da matriz de smoke tests com bancos executados em serviços reais;
