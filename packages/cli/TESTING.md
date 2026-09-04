@@ -65,12 +65,13 @@ The suite automatically validates:
 * selection of the correct driver;
 * migration script configuration;
 * marker processing;
-* rejection of MongoDB and the “None” ORM.
+* generation without an ORM in TypeScript and JavaScript;
+* rejection of MongoDB and invalid no-ORM combinations.
 
 Expected result:
 
 ```text
-pass 14
+pass 16
 fail 0
 ```
 
@@ -132,7 +133,7 @@ The CLI displays up to 11 questions. The RBAC question appears only when an auth
 | -: | ------------------------ | ------------------------------------------- | ---------------------- |
 | 1 | Project name | Free text | ✅ |
 | 2 | Language | TypeScript or JavaScript | ✅ Both |
-| 3 | ORM / Query Builder | Prisma, TypeORM, Drizzle, or None | ✅ Three ORMs · ⏳ None |
+| 3 | ORM / Query Builder | Prisma, TypeORM, Drizzle, or None | ✅ All options |
 | 4 | Database | PostgreSQL, MySQL, SQLite, or MongoDB | ✅ SQL · ⏳ MongoDB |
 | 5 | Docker | Yes or no | ✅ |
 | 6 | Swagger/OpenAPI | Yes or no | ✅ |
@@ -176,7 +177,7 @@ During JavaScript generation:
 | Prisma | ✅ Generates the Prisma template |
 | TypeORM | ✅ Generates the TypeORM template |
 | Drizzle ORM | ✅ Generates the Drizzle template |
-| None | ❌ Displays a friendly error |
+| None | ✅ Generates without database or authentication integration |
 
 ### Database
 
@@ -377,6 +378,16 @@ npm run start:dev
 
 The `npm run seed` command appears only for JWT and Session/Cookies.
 
+### No ORM
+
+```bash
+cd <project-name>
+npm install
+npm run start:dev
+```
+
+There are no database, migration, seed, or authentication commands.
+
 ## 8. General generation checklist
 
 * [ ] The default name creates `my-nest-api`
@@ -395,7 +406,7 @@ The `npm run seed` command appears only for JWT and Session/Cookies.
 * [ ] Session/Cookies removes JWT features
 * [ ] OAuth-only removes password flows
 * [ ] No authentication removes auth and users
-* [ ] The “None” ORM displays an error before creating the directory
+* [x] The “None” ORM removes database and authentication integration
 * [ ] MongoDB displays an error before creating the directory
 
 ## 9. Prisma checklist
@@ -435,6 +446,14 @@ The `npm run seed` command appears only for JWT and Session/Cookies.
 * [ ] Real smoke test with Drizzle + MySQL
 
 Real smoke tests with PostgreSQL and MySQL require the databases to be available locally or through Docker.
+
+### No ORM checklist
+
+* [x] TypeScript without ORM, database, or authentication
+* [x] JavaScript without ORM, with Docker and Redis
+* [x] Prisma dependencies and scripts are removed
+* [x] Database environment variables are removed
+* [x] Invalid no-ORM combinations are rejected before creating the directory
 
 ## 12. Prisma smoke test with SQLite
 
@@ -650,11 +669,10 @@ package.json
 
 ## 17. Scope not implemented yet
 
-* “None” ORM;
 * MongoDB;
 * complete package name validation;
 * real PostgreSQL smoke tests;
 * real MySQL smoke tests;
 * final publication to npm.
 
-The “None” ORM and MongoDB must continue to return a clear error before the project directory is created.
+MongoDB must continue to return a clear error before the project directory is created.
