@@ -6,6 +6,8 @@ const ORM_PATHS = [
     'src/database',
     'src/health/indicators/prisma-health.indicator.ts',
     'src/health/indicators/prisma-health.indicator.spec.ts',
+    'src/common/utils/avatar-storage.util.ts',
+    'src/common/utils/hash.util.ts',
     'test/utils/clean-database.ts',
     'docs',
     'ARCHITECTURE.md',
@@ -76,6 +78,8 @@ async function updatePackageJson(targetDir: string): Promise<void> {
         delete packageJson.dependencies?.[packageName];
         delete packageJson.devDependencies?.[packageName];
     }
+
+    packageJson.devDependencies['@types/express'] ??= '^5.0.0';
 
     await fs.writeJson(packagePath, packageJson, { spaces: 2 });
 }
