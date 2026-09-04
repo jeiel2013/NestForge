@@ -2094,6 +2094,14 @@ test('gera projeto JavaScript sem ORM com Docker e Redis', { concurrency: false 
                 path.join(targetDir, '.github', 'workflows', 'ci.yml'),
                 'utf8',
             );
+            const vitestConfig = await readFile(
+                path.join(targetDir, 'vitest.config.js'),
+                'utf8',
+            );
+            const vitestE2eConfig = await readFile(
+                path.join(targetDir, 'vitest.e2e.config.js'),
+                'utf8',
+            );
             const generatedFiles = await listFilesRecursively(targetDir);
 
             assert.equal(generatedFiles.some((file) => file.endsWith('.ts')), false);
@@ -2106,6 +2114,10 @@ test('gera projeto JavaScript sem ORM com Docker e Redis', { concurrency: false 
             assert.notEqual(packageJson.dependencies['@nestjs/bullmq'], undefined);
             assert.equal(packageJson.dependencies['@prisma/client'], undefined);
             assert.equal(packageJson.devDependencies.typescript, undefined);
+            assert.match(vitestConfig, /src\/\*\*\/\*\.spec\.js/);
+            assert.doesNotMatch(vitestConfig, /\.ts/);
+            assert.match(vitestE2eConfig, /test\/\*\*\/\*\.e2e-spec\.js/);
+            assert.doesNotMatch(vitestE2eConfig, /\.ts/);
             assert.equal(
                 packageJson.scripts['test:e2e'],
                 'dotenv -e .env.test -- vitest run --config ./vitest.e2e.config.js',
