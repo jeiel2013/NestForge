@@ -129,11 +129,16 @@ async function removeTypeDeclarationFiles(dir: string): Promise<void> {
 
 async function transpileFile(filePath: string): Promise<void> {
     const source = await fs.readFile(filePath, 'utf8');
+    const isTestFile =
+        filePath.split(path.sep).includes('test') ||
+        filePath.endsWith('.spec.ts');
 
     const result = ts.transpileModule(source, {
         compilerOptions: {
             target: ts.ScriptTarget.ES2022,
-            module: ts.ModuleKind.CommonJS,
+            module: isTestFile
+                ? ts.ModuleKind.ESNext
+                : ts.ModuleKind.CommonJS,
             experimentalDecorators: true,
             emitDecoratorMetadata: true,
             esModuleInterop: true,
