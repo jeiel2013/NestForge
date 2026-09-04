@@ -12,7 +12,9 @@ async function main() {
         const targetDir = await generateProject(options);
         const relativeDir = path.relative(process.cwd(), targetDir) || '.';
         const dockerServices = [
-            options.database !== 'sqlite' ? options.database : null,
+            !['sqlite', 'none'].includes(options.database)
+                ? options.database
+                : null,
             options.features.includes('redis') ? 'redis' : null,
         ]
             .filter(Boolean)
@@ -28,7 +30,9 @@ async function main() {
             : [];
 
         const databaseSteps =
-            options.orm === 'typeorm'
+            options.orm === 'none'
+                ? []
+                : options.orm === 'typeorm'
                 ? [
                     'npm run migration:generate -- src/database/migrations/InitialSchema',
                     'npm run migration:run',
