@@ -2102,6 +2102,14 @@ test('gera projeto JavaScript sem ORM com Docker e Redis', { concurrency: false 
                 path.join(targetDir, 'vitest.e2e.config.js'),
                 'utf8',
             );
+            const unitTest = await readFile(
+                path.join(targetDir, 'src', 'config', 'env.validation.spec.js'),
+                'utf8',
+            );
+            const e2eTest = await readFile(
+                path.join(targetDir, 'test', 'app.e2e-spec.js'),
+                'utf8',
+            );
             const generatedFiles = await listFilesRecursively(targetDir);
 
             assert.equal(generatedFiles.some((file) => file.endsWith('.ts')), false);
@@ -2118,6 +2126,10 @@ test('gera projeto JavaScript sem ORM com Docker e Redis', { concurrency: false 
             assert.doesNotMatch(vitestConfig, /\.ts/);
             assert.match(vitestE2eConfig, /test\/\*\*\/\*\.e2e-spec\.js/);
             assert.doesNotMatch(vitestE2eConfig, /\.ts/);
+            assert.match(unitTest, /import \{ describe, expect, it \} from 'vitest'/);
+            assert.doesNotMatch(unitTest, /require\(["']vitest["']\)/);
+            assert.match(e2eTest, /import \{ afterAll, beforeAll, describe, expect, it \} from 'vitest'/);
+            assert.doesNotMatch(e2eTest, /require\(["']vitest["']\)/);
             assert.equal(
                 packageJson.scripts['test:e2e'],
                 'dotenv -e .env.test -- vitest run --config ./vitest.e2e.config.js',
