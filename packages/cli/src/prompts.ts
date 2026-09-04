@@ -4,7 +4,7 @@ import pc from 'picocolors';
 
 export type OrmChoice = 'prisma' | 'typeorm' | 'drizzle' | 'none';
 export type LanguageChoice = 'typescript' | 'javascript';
-export type DatabaseChoice = 'postgres' | 'mysql' | 'sqlite' | 'mongodb';
+export type DatabaseChoice = 'postgres' | 'mysql' | 'sqlite' | 'mongodb' | 'none';
 export type AuthStrategyChoice = 'jwt' | 'session' | 'oauth' | 'none';
 
 export interface ProjectOptions {
@@ -80,16 +80,21 @@ export async function runPrompts(): Promise<ProjectOptions> {
     handleCancel(orm);
 
     // 4. Database
-    const database = await select({
-        message: 'Which database do you want to use?',
-        options: [
-            { value: 'postgres', label: 'PostgreSQL', hint: 'Recommended' },
-            { value: 'mysql', label: 'MySQL' },
-            { value: 'sqlite', label: 'SQLite' },
-            { value: 'mongodb', label: 'MongoDB', hint: 'coming soon' },
-        ],
-    });
-    handleCancel(database);
+    let database: DatabaseChoice = 'none';
+
+    if (orm !== 'none') {
+        const databaseSelection = await select({
+            message: 'Which database do you want to use?',
+            options: [
+                { value: 'postgres', label: 'PostgreSQL', hint: 'Recommended' },
+                { value: 'mysql', label: 'MySQL' },
+                { value: 'sqlite', label: 'SQLite' },
+                { value: 'mongodb', label: 'MongoDB', hint: 'coming soon' },
+            ],
+        });
+        handleCancel(databaseSelection);
+        database = databaseSelection as DatabaseChoice;
+    }
 
     // 5. Additional features (one yes/no prompt at a time)
     const features: string[] = [];
@@ -123,16 +128,21 @@ export async function runPrompts(): Promise<ProjectOptions> {
     if (wantsRedis) features.push('redis');
 
     // 6. Authentication strategy
-    const authStrategy = await select({
-        message: 'Which authentication strategy do you want to use?',
-        options: [
-            { value: 'jwt', label: 'JWT', hint: 'Recommended — includes Google/GitHub OAuth' },
-            { value: 'session', label: 'Session/Cookies', hint: 'persistent database-backed session' },
-            { value: 'oauth', label: 'OAuth (Google/GitHub) only', hint: 'no password login' },
-            { value: 'none', label: 'None' },
-        ],
-    });
-    handleCancel(authStrategy);
+    let authStrategy: AuthStrategyChoice = 'none';
+
+    if (orm !== 'none') {
+        const authStrategySelection = await select({
+            message: 'Which authentication strategy do you want to use?',
+            options: [
+                { value: 'jwt', label: 'JWT', hint: 'Recommended — includes Google/GitHub OAuth' },
+                { value: 'session', label: 'Session/Cookies', hint: 'persistent database-backed session' },
+                { value: 'oauth', label: 'OAuth (Google/GitHub) only', hint: 'no password login' },
+                { value: 'none', label: 'None' },
+            ],
+        });
+        handleCancel(authStrategySelection);
+        authStrategy = authStrategySelection as AuthStrategyChoice;
+    }
 
     // 7. Access control (only applicable when authentication is enabled)
     let accessControl = false;
@@ -158,9 +168,9 @@ export async function runPrompts(): Promise<ProjectOptions> {
         projectName: projectName as string,
         language: language as LanguageChoice,
         orm: orm as OrmChoice,
-        database: database as DatabaseChoice,
+        database,
         features,
-        authStrategy: authStrategy as AuthStrategyChoice,
+        authStrategy,
         accessControl,
         createEnv: createEnv as boolean,
     };
