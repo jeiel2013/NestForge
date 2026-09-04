@@ -65,12 +65,13 @@ A suíte valida automaticamente:
 * seleção do driver correto;
 * configuração dos scripts de migrations;
 * processamento dos marcadores;
-* recusa de MongoDB e ORM “Nenhum”.
+* geração sem ORM em TypeScript e JavaScript;
+* recusa de MongoDB e combinações inválidas sem ORM.
 
 Resultado esperado:
 
 ```text
-pass 14
+pass 16
 fail 0
 ```
 
@@ -132,7 +133,7 @@ A CLI apresenta até 11 perguntas. A pergunta de RBAC aparece somente quando alg
 | -: | ------------------------ | ------------------------------------------- | ---------------------- |
 |  1 | Nome do projeto          | Texto livre                                 | ✅                      |
 |  2 | Linguagem                | TypeScript ou JavaScript                    | ✅ Ambas                |
-|  3 | ORM / Query Builder      | Prisma, TypeORM, Drizzle ou Nenhum          | ✅ Três ORMs · ⏳ Nenhum |
+|  3 | ORM / Query Builder      | Prisma, TypeORM, Drizzle ou Nenhum          | ✅ Todas as opções      |
 |  4 | Banco de dados           | PostgreSQL, MySQL, SQLite ou MongoDB        | ✅ SQL · ⏳ MongoDB      |
 |  5 | Docker                   | Sim ou não                                  | ✅                      |
 |  6 | Swagger/OpenAPI          | Sim ou não                                  | ✅                      |
@@ -176,7 +177,7 @@ Na geração JavaScript:
 | Prisma      | ✅ Gera o template Prisma  |
 | TypeORM     | ✅ Gera o template TypeORM |
 | Drizzle ORM | ✅ Gera o template Drizzle |
-| Nenhum      | ❌ Exibe erro amigável     |
+| Nenhum      | ✅ Gera sem integração com banco ou autenticação |
 
 ### Banco de dados
 
@@ -377,6 +378,16 @@ npm run start:dev
 
 O comando `npm run seed` aparece somente para JWT e Session/Cookies.
 
+### Sem ORM
+
+```bash
+cd <nome-do-projeto>
+npm install
+npm run start:dev
+```
+
+Não existem comandos de banco, migration, seed ou autenticação.
+
 ## 8. Checklist geral de geração
 
 * [ ] Nome padrão cria `my-nest-api`
@@ -395,7 +406,7 @@ O comando `npm run seed` aparece somente para JWT e Session/Cookies.
 * [ ] Session/Cookies remove recursos de JWT
 * [ ] OAuth-only remove fluxos de senha
 * [ ] Nenhuma autenticação remove auth e users
-* [ ] ORM “Nenhum” exibe erro antes de criar a pasta
+* [x] ORM “Nenhum” remove as integrações de banco e autenticação
 * [ ] MongoDB exibe erro antes de criar a pasta
 
 ## 9. Checklist Prisma
@@ -435,6 +446,14 @@ O comando `npm run seed` aparece somente para JWT e Session/Cookies.
 * [ ] Smoke real Drizzle + MySQL
 
 Os smoke tests reais com PostgreSQL e MySQL exigem os bancos disponíveis localmente ou por Docker.
+
+### Checklist sem ORM
+
+* [x] TypeScript sem ORM, banco ou autenticação
+* [x] JavaScript sem ORM, com Docker e Redis
+* [x] Dependências e scripts do Prisma são removidos
+* [x] Variáveis de ambiente do banco são removidas
+* [x] Combinações inválidas sem ORM são recusadas antes da criação da pasta
 
 ## 12. Smoke test Prisma com SQLite
 
@@ -650,11 +669,10 @@ package.json
 
 ## 17. Escopo ainda não implementado
 
-* ORM “Nenhum”;
 * MongoDB;
 * validação completa do nome do pacote;
 * smoke tests reais de PostgreSQL;
 * smoke tests reais de MySQL;
 * publicação final no npm.
 
-ORM “Nenhum” e MongoDB devem continuar retornando um erro claro antes da criação da pasta do projeto.
+MongoDB deve continuar retornando um erro claro antes da criação da pasta do projeto.
