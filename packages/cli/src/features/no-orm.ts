@@ -448,14 +448,36 @@ async function writeReadmes(
     targetDir: string,
     enabledFeatures: Set<string>,
 ): Promise<void> {
-    const enabled = ['health checks', 'metrics', 'structured logging', 'rate limiting'];
-    if (enabledFeatures.has('docker')) enabled.push('Docker');
-    if (enabledFeatures.has('swagger')) enabled.push('Swagger/OpenAPI');
-    if (enabledFeatures.has('validation')) enabled.push('global Zod validation');
-    if (enabledFeatures.has('redis')) enabled.push('Redis, BullMQ, and email');
+    const english = ['health checks', 'metrics', 'structured logging', 'rate limiting'];
+    const portuguese = [
+        'verificações de saúde',
+        'métricas',
+        'logs estruturados',
+        'limitação de requisições',
+    ];
 
-    const englishFeatures = enabled.map((feature) => `- ${feature}`).join('\n');
-    const portugueseFeatures = enabled.map((feature) => `- ${feature}`).join('\n');
+    if (enabledFeatures.has('docker')) {
+        english.push('Docker');
+        portuguese.push('Docker');
+    }
+
+    if (enabledFeatures.has('swagger')) {
+        english.push('Swagger/OpenAPI');
+        portuguese.push('Swagger/OpenAPI');
+    }
+
+    if (enabledFeatures.has('validation')) {
+        english.push('global Zod validation');
+        portuguese.push('validação global com Zod');
+    }
+
+    if (enabledFeatures.has('redis')) {
+        english.push('Redis, BullMQ, and email');
+        portuguese.push('Redis, BullMQ e e-mail');
+    }
+
+    const englishFeatures = english.map((feature) => `- ${feature}`).join('\n');
+    const portugueseFeatures = portuguese.map((feature) => `- ${feature}`).join('\n');
 
     await writeText(
         targetDir,
