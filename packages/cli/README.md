@@ -2,7 +2,7 @@
 
 **English** | [Português](README.pt-BR.md)
 
-Interactive CLI that generates NestJS projects from NestForge's [Prisma](../../templates/prisma), [TypeORM](../../templates/typeorm), and [Drizzle](../../templates/drizzle) templates.
+Interactive CLI that generates NestJS projects from NestForge's [Prisma](../../templates/prisma), [TypeORM](../../templates/typeorm), and [Drizzle](../../templates/drizzle) templates, or without an ORM.
 
 Install the package locally:
 
@@ -22,7 +22,7 @@ For the testing guide, CLI prompts, and complete checklist, see [`TESTING.md`](T
 
 - Interactive prompts using `@clack/prompts`;
 - TypeScript or JavaScript generation;
-- Prisma, TypeORM, and Drizzle ORM;
+- Prisma, TypeORM, Drizzle ORM, or no ORM;
 - PostgreSQL, MySQL, and SQLite;
 - JWT, Session/Cookies, OAuth-only, or no authentication;
 - optional Docker;
@@ -104,6 +104,16 @@ The Drizzle template includes:
 - transactions adapted to SQLite.
 
 After generation, only the schema and driver for the selected database remain in the project.
+
+### No ORM
+
+The “None” option:
+
+- skips the database and authentication prompts;
+- generates no schema, migrations, seed, database driver, or ORM dependency;
+- removes authentication, users, and access control;
+- keeps independent optional features;
+- works with TypeScript and JavaScript.
 
 ## Authentication strategies
 
@@ -247,7 +257,7 @@ When requested, the CLI automatically creates `.env` from the already processed 
 | ORM: Prisma | ✅ Implemented |
 | ORM: TypeORM | ✅ Implemented |
 | ORM: Drizzle | ✅ Implemented |
-| ORM: None | ❌ Not implemented |
+| ORM: None | ✅ Implemented |
 | Database: PostgreSQL | ✅ Implemented |
 | Database: MySQL | ✅ Implemented |
 | Database: SQLite | ✅ Implemented |
@@ -282,6 +292,8 @@ Coverage includes:
 - Drizzle with PostgreSQL;
 - Drizzle with MySQL;
 - Drizzle with SQLite;
+- no ORM with TypeScript;
+- no ORM with JavaScript, Docker, and Redis;
 - JWT;
 - Session/Cookies;
 - OAuth-only;
@@ -367,12 +379,11 @@ npm publish
 The build:
 
 1. compiles the CLI;
-2. copies the Prisma, TypeORM, and Drizzle templates;
+2. copies the source templates;
 3. prepares the package published to npm.
 
 ## Next steps
 
-- an option without an ORM;
 - MongoDB;
 - more complete project and package name validation;
 - expand the smoke-test matrix with real PostgreSQL and MySQL services;
