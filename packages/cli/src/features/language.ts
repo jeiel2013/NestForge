@@ -46,9 +46,39 @@ export async function applyLanguageTransform(
     await fs.remove(path.join(targetDir, 'nest-cli.json'));
 
     await updatePackageJson(targetDir, orm);
+    await updateVitestConfigs(targetDir);
 
     if (orm === 'drizzle') {
         await updateDrizzleWorkflow(targetDir);
+    }
+}
+
+async function updateVitestConfigs(
+    targetDir: string,
+): Promise<void> {
+    for (const configName of [
+        'vitest.config.js',
+        'vitest.e2e.config.js',
+    ]) {
+        const configPath = path.join(
+            targetDir,
+            configName,
+        );
+
+        if (!(await fs.pathExists(configPath))) {
+            continue;
+        }
+
+        const config = await fs.readFile(
+            configPath,
+            'utf8',
+        );
+
+        await fs.writeFile(
+            configPath,
+            config.replaceAll('.ts', '.js'),
+            'utf8',
+        );
     }
 }
 
