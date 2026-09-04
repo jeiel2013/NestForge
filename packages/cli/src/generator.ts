@@ -7,6 +7,7 @@ import { removeDisabledDependencies } from './features/dependencies.js';
 import { applyDatabaseConfig } from './features/database.js';
 import { applyAuthStrategyRemoval } from './features/auth-strategy.js';
 import { applyLanguageTransform } from './features/language.js';
+import { applyNoOrmTransform } from './features/no-orm.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PACKAGE_TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
@@ -17,6 +18,7 @@ const IMPLEMENTED_ORMS = [
     'prisma',
     'typeorm',
     'drizzle',
+    'none',
 ];
 const IMPLEMENTED_LANGUAGES = ['typescript', 'javascript'];
 const IMPLEMENTED_DATABASES = ['postgres', 'mysql', 'sqlite'];
@@ -40,20 +42,28 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
         );
     }
 
-    if (orm === 'none') {
-        throw new Error('A template without an ORM is not available yet. Choose "prisma", "typeorm", or "drizzle".');
-    }
-
     if (!IMPLEMENTED_ORMS.includes(orm)) {
         throw new Error(
             `The template for "${orm}" is not ready yet — currently available: ${IMPLEMENTED_ORMS.join(', ',)}. Contributions are welcome!`,
         );
     }
 
-    if (!IMPLEMENTED_DATABASES.includes(database)) {
+    if (orm === 'none' && database !== 'none') {
+        throw new Error('Projects without an ORM must use "none" as their database option.');
+    }
+
+    if (orm !== 'none' && !IMPLEMENTED_DATABASES.includes(database)) {
         throw new Error(
             `The "${database}" database is not ready yet — currently implemented: ${IMPLEMENTED_DATABASES.join(', ')}. Contributions are welcome!`,
         );
+    }
+
+    if (orm === 'none' && authStrategy !== 'none') {
+        throw new Error('Projects without an ORM currently support only the "none" authentication strategy.');
+    }
+
+    if (orm === 'none' && accessControl) {
+        throw new Error('Access control requires authentication and is not available without an ORM.');
     }
 
     if (!IMPLEMENTED_AUTH_STRATEGIES.includes(authStrategy)) {
@@ -63,7 +73,8 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
     }
 
     const templatesRoot = await resolveTemplatesRoot();
-    const templateDir = path.join(templatesRoot, orm);
+    const templateName = orm === 'none' ? 'prisma' : orm;
+    const templateDir = path.join(templatesRoot, templateName);
     const targetDir = path.resolve(process.cwd(), projectName);
 
     if (await fs.pathExists(targetDir)) {
@@ -75,10 +86,17 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
     const enabledFeatures = buildEnabledFeatures(features, accessControl, database, authStrategy);
 
     await applyDockerToggle(targetDir, enabledFeatures);
-    await applyDatabaseConfig(targetDir, database);
+    if (orm !== 'none') {
+        await applyDatabaseConfig(targetDir, database);
+    }
     await applyAuthStrategyRemoval(targetDir, enabledFeatures);
     await applyFeatureMarkers(targetDir, enabledFeatures);
     await removeDisabledDependencies(targetDir, enabledFeatures);
+
+    if (orm === 'none') {
+        await applyNoOrmTransform(targetDir, enabledFeatures);
+    }
+
     await applyLanguageTransform(targetDir, language, orm);
     await renameProject(targetDir, projectName);
 
