@@ -72,6 +72,23 @@ async function withTempDirectory(
     }
 }
 
+async function listFilesRecursively(directory: string): Promise<string[]> {
+    const entries = await fs.readdir(directory, { withFileTypes: true });
+    const files: string[] = [];
+
+    for (const entry of entries) {
+        const entryPath = path.join(directory, entry.name);
+
+        if (entry.isDirectory()) {
+            files.push(...(await listFilesRecursively(entryPath)));
+        } else {
+            files.push(entryPath);
+        }
+    }
+
+    return files;
+}
+
 test('gera o projeto padrão com PostgreSQL e JWT', { concurrency: false }, async () => {
     await withGeneratedProject(makeOptions(), async (targetDir) => {
         const schema = await readFile(path.join(targetDir, 'prisma', 'schema.prisma'), 'utf8');
@@ -2007,6 +2024,96 @@ test(
     },
 );
 
+test('gera projeto TypeScript sem ORM, banco ou autenticação', { concurrency: false }, async () => {
+    await withGeneratedProject(
+        makeOptions({
+            projectName: 'no-orm-typescript',
+            orm: 'none',
+            database: 'none',
+            features: [],
+            authStrategy: 'none',
+            accessControl: false,
+            createEnv: true,
+        }),
+        async (targetDir) => {
+            const packageJson = await fs.readJson(path.join(targetDir, 'package.json'));
+            const appModule = await readFile(path.join(targetDir, 'src', 'app.module.ts'), 'utf8');
+            const healthController = await readFile(
+                path.join(targetDir, 'src', 'health', 'health.controller.ts'),
+                'utf8',
+            );
+            const envExample = await readFile(path.join(targetDir, '.env.example'), 'utf8');
+            const readme = await readFile(path.join(targetDir, 'README.md'), 'utf8');
+
+            assert.equal(await fs.pathExists(path.join(targetDir, 'prisma')), false);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'src', 'database')), false);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'src', 'auth')), false);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'src', 'users')), false);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'Dockerfile')), false);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'docker-compose.yml')), false);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'src', 'mail')), false);
+            assert.equal(await fs.pathExists(path.join(targetDir, '.env')), true);
+            assert.equal(
+                await fs.pathExists(path.join(targetDir, 'src', 'config', 'env.validation.spec.ts')),
+                true,
+            );
+            assert.equal(
+                await fs.pathExists(path.join(targetDir, 'test', 'app.e2e-spec.ts')),
+                true,
+            );
+
+            assert.equal(packageJson.dependencies['@prisma/client'], undefined);
+            assert.equal(packageJson.devDependencies.prisma, undefined);
+            assert.equal(packageJson.scripts['prisma:generate'], undefined);
+            assert.equal(packageJson.scripts['pretest:e2e'], undefined);
+            assert.doesNotMatch(appModule, /Prisma|database/i);
+            assert.doesNotMatch(healthController, /Prisma|database/i);
+            assert.doesNotMatch(envExample, /DATABASE_URL|JWT_|SESSION_|OAUTH/i);
+            assert.match(readme, /^# no-orm-typescript/m);
+            assert.doesNotMatch(readme, /Prisma|TypeORM|Drizzle/i);
+        },
+    );
+});
+
+test('gera projeto JavaScript sem ORM com Docker e Redis', { concurrency: false }, async () => {
+    await withGeneratedProject(
+        makeOptions({
+            projectName: 'no-orm-javascript',
+            language: 'javascript',
+            orm: 'none',
+            database: 'none',
+            features: ['docker', 'swagger', 'validation', 'redis'],
+            authStrategy: 'none',
+            accessControl: false,
+        }),
+        async (targetDir) => {
+            const packageJson = await fs.readJson(path.join(targetDir, 'package.json'));
+            const dockerfile = await readFile(path.join(targetDir, 'Dockerfile'), 'utf8');
+            const compose = await readFile(path.join(targetDir, 'docker-compose.yml'), 'utf8');
+            const workflow = await readFile(
+                path.join(targetDir, '.github', 'workflows', 'ci.yml'),
+                'utf8',
+            );
+            const generatedFiles = await listFilesRecursively(targetDir);
+
+            assert.equal(generatedFiles.some((file) => file.endsWith('.ts')), false);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'src', 'main.js')), true);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'test', 'app.e2e-spec.js')), true);
+            assert.match(compose, /^\s{2}redis:/m);
+            assert.doesNotMatch(compose, /^\s{2}(postgres|mysql):/m);
+            assert.doesNotMatch(dockerfile, /Prisma|prisma|database/);
+            assert.doesNotMatch(workflow, /Prisma|prisma|DATABASE_URL/);
+            assert.notEqual(packageJson.dependencies['@nestjs/bullmq'], undefined);
+            assert.equal(packageJson.dependencies['@prisma/client'], undefined);
+            assert.equal(packageJson.devDependencies.typescript, undefined);
+            assert.equal(
+                packageJson.scripts['test:e2e'],
+                'dotenv -e .env.test -- vitest run --config ./vitest.e2e.config.js',
+            );
+        },
+    );
+});
+
 test('recusa opções ainda não implementadas sem criar projeto', { concurrency: false }, async () => {
     const unsupportedOptions: Array<
         [string, Partial<ProjectOptions>]
@@ -2015,6 +2122,24 @@ test('recusa opções ainda não implementadas sem criar projeto', { concurrency
                 'MongoDB',
                 {
                     database: 'mongodb',
+                },
+            ],
+            [
+                'ORM-none-with-database',
+                {
+                    orm: 'none',
+                    database: 'postgres',
+                    authStrategy: 'none',
+                    accessControl: false,
+                },
+            ],
+            [
+                'ORM-none-with-auth',
+                {
+                    orm: 'none',
+                    database: 'none',
+                    authStrategy: 'jwt',
+                    accessControl: false,
                 },
             ],
         ];
