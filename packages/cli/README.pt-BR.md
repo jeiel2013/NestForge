@@ -2,7 +2,7 @@
 
 [English](README.md) | **Português**
 
-CLI interativa que gera projetos NestJS a partir dos templates `../../templates/prisma`, `../../templates/typeorm` e `../../templates/drizzle` do NestForge.
+CLI interativa que gera projetos NestJS a partir dos templates `../../templates/prisma`, `../../templates/typeorm` e `../../templates/drizzle` do NestForge, ou sem ORM.
 
 Instale o pacote localmente:
 
@@ -22,7 +22,7 @@ Para o guia de testes, perguntas da CLI e checklist completo, consulte [`TESTING
 
 * Prompts interativos usando @clack/prompts;
 * geração em TypeScript ou JavaScript;
-* Prisma, TypeORM e Drizzle ORM;
+* Prisma, TypeORM, Drizzle ORM ou nenhum ORM;
 * PostgreSQL, MySQL e SQLite;
 * autenticação JWT, Session/Cookies, OAuth-only ou nenhuma;
 * Docker opcional;
@@ -104,6 +104,16 @@ O template Drizzle inclui:
 * transações adaptadas ao SQLite.
 
 Depois da geração, somente o schema e o driver do banco selecionado permanecem no projeto.
+
+### Sem ORM
+
+A opção “Nenhum”:
+
+* pula as perguntas de banco de dados e autenticação;
+* não gera schema, migrations, seed, driver de banco ou dependência de ORM;
+* remove autenticação, usuários e controle de acesso;
+* mantém os recursos opcionais independentes;
+* funciona com TypeScript e JavaScript.
 
 ## Estratégias de autenticação
 
@@ -248,7 +258,7 @@ processado.
 | ORM: Prisma           | ✅ Implementado     |
 | ORM: TypeORM          | ✅ Implementado     |
 | ORM: Drizzle          | ✅ Implementado     |
-| ORM: Nenhum           | ❌ Não implementado |
+| ORM: Nenhum           | ✅ Implementado     |
 | Banco: PostgreSQL     | ✅ Implementado     |
 | Banco: MySQL          | ✅ Implementado     |
 | Banco: SQLite         | ✅ Implementado     |
@@ -281,6 +291,8 @@ A cobertura inclui:
 * Drizzle com PostgreSQL;
 * Drizzle com MySQL;
 * Drizzle com SQLite;
+* sem ORM com TypeScript;
+* sem ORM com JavaScript, Docker e Redis;
 * JWT;
 * Session/Cookies;
 * OAuth-only;
@@ -366,12 +378,11 @@ npm publish
 O build:
 
 1. compila a CLI;
-2. copia os templates Prisma, TypeORM e Drizzle;
+2. copia os templates-fonte;
 3. prepara o pacote publicado no npm.
 
 ## Próximos itens
 
-* opção sem ORM;
 * MongoDB;
 * validação mais completa do nome do projeto e do pacote;
 * ampliação da matriz de smoke tests com PostgreSQL e MySQL reais;
