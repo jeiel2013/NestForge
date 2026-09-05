@@ -14,7 +14,7 @@ vi.mock('ioredis', () => ({
     })),
 }));
 
-// precisa ser importado depois do vi.mock, senão pega o ioredis real
+// Must be imported after vi.mock; otherwise it loads the real ioredis package.
 const { RedisHealthIndicator } = await import('./redis-health.indicator');
 
 describe('RedisHealthIndicator', () => {
