@@ -64,6 +64,9 @@ jobs:
       # nestforge:feature:database:sqlite
       DATABASE_URL: file:./ci-dev.db
       # nestforge:feature:database:sqlite:end
+      # nestforge:feature:database:mongodb
+      DATABASE_URL: mongodb://localhost:27017/nestforge?replicaSet=rs0
+      # nestforge:feature:database:mongodb:end
       JWT_ACCESS_SECRET: ci-access-secret-0123456789
       JWT_REFRESH_SECRET: ci-refresh-secret-0123456789
 
@@ -77,14 +80,34 @@ jobs:
           node-version: 20
           cache: npm
 
+      # nestforge:feature:database:mongodb
+      - name: Start MongoDB replica set
+        run: |
+          docker run --detach --name nestforge-mongodb --publish 27017:27017 mongo:8 mongod --replSet rs0 --bind_ip_all
+          for attempt in {1..30}; do
+            if docker exec nestforge-mongodb mongosh --quiet --eval "try { rs.status().ok } catch (error) { rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]}).ok }" | grep -q 1; then
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+      # nestforge:feature:database:mongodb:end
+
       - name: Instalar dependências
         run: npm ci
 
       - name: Gerar Prisma Client
         run: npx prisma generate
 
+      # nestforge:feature:database:relational
       - name: Rodar migrations
         run: npx prisma migrate deploy
+      # nestforge:feature:database:relational:end
+
+      # nestforge:feature:database:mongodb
+      - name: Sincronizar schema do MongoDB
+        run: npx prisma db push
+      # nestforge:feature:database:mongodb:end
 
       - name: Lint
         run: npm run lint
