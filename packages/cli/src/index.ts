@@ -45,7 +45,14 @@ async function main() {
                         ...seedSteps,
                     ]
                     : [
-                        'npx prisma migrate dev',
+                        ...(options.database === 'mongodb'
+                            ? [
+                                'npm run prisma:push',
+                                ...(shouldRunSeed
+                                    ? ['npm run prisma:seed']
+                                    : []),
+                            ]
+                            : ['npx prisma migrate dev']),
                     ];
 
         const steps = [
