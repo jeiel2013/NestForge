@@ -6,6 +6,7 @@ import test from 'node:test';
 import fs from 'fs-extra';
 import { generateProject } from '../src/generator.js';
 import type { ProjectOptions } from '../src/prompts.js';
+import { validateProjectName } from '../src/project-name.js';
 
 function makeOptions(overrides: Partial<ProjectOptions> = {}): ProjectOptions {
     return {
@@ -2311,5 +2312,45 @@ test('recusa opções ainda não implementadas sem criar projeto', { concurrency
 
             assert.equal(await fs.pathExists(path.join(tempDir, projectName)), false);
         });
+    }
+});
+
+test('accepts valid project and npm package names', () => {
+    const validNames = [
+        'api',
+        'my-nest-api',
+        'api_v2',
+        'api.core',
+        '2026-api',
+    ];
+
+    for (const projectName of validNames) {
+        assert.equal(validateProjectName(projectName), undefined);
+    }
+});
+
+test('rejects invalid, unsafe, and reserved project names', () => {
+    const invalidNames: Array<[string, RegExp]> = [
+        ['', /required/],
+        [' my-api', /whitespace/],
+        ['my-api ', /whitespace/],
+        ['MyApi', /lowercase/],
+        ['../my-api', /path separators/],
+        ['my\\api', /path separators/],
+        ['@scope/my-api', /Scoped package names/],
+        ['my api', /contain only lowercase/],
+        ['.my-api', /start with a letter or number/],
+        ['my-api.', /end with a dot/],
+        ['node_modules', /reserved/],
+        ['favicon.ico', /reserved/],
+        ['con', /reserved name on Windows/],
+        ['con.txt', /reserved name on Windows/],
+        ['lpt9', /reserved name on Windows/],
+        ['a'.repeat(215), /214 characters/],
+        ['aplicação', /contain only lowercase/],
+    ];
+
+    for (const [projectName, expectedMessage] of invalidNames) {
+        assert.match(validateProjectName(projectName) ?? '', expectedMessage);
     }
 });
