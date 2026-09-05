@@ -8,7 +8,12 @@ export class PrismaHealthIndicator {
 
     async isHealthy(key: string): Promise<HealthIndicatorResult> {
         try {
+            // nestforge:feature:database:relational
             await this.prisma.$queryRaw`SELECT 1`;
+            // nestforge:feature:database:relational:end
+            // nestforge:feature:database:mongodb
+            await this.prisma.$runCommandRaw({ ping: 1 });
+            // nestforge:feature:database:mongodb:end
             return { [key]: { status: 'up' } };
         } catch (error) {
             throw new HealthCheckError('Banco de dados indisponível', {
