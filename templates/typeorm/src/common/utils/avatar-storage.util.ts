@@ -20,7 +20,7 @@ export function avatarFileFilter(
 ) {
     if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
         callback(
-            new BadRequestException('Formato de imagem não suportado (use PNG, JPEG ou WEBP)'),
+            new BadRequestException('Unsupported image format (use PNG, JPEG, or WEBP)'),
             false,
         );
         return;
