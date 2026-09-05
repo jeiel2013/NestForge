@@ -41,7 +41,11 @@ This roadmap makes it clear what is ready and where contributions are possible. 
 
 - [x] Prisma
 - [x] PostgreSQL
-- [x] Migrations
+- [x] MySQL
+- [x] SQLite
+- [x] MongoDB
+- [x] Migrations for relational databases
+- [x] Schema synchronization with `prisma db push` for MongoDB
 - [x] Complete seed (roles, permissions, administrator user)
 
 ## Infrastructure
