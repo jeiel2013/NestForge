@@ -63,6 +63,8 @@ Legenda:
 
 A opção JavaScript é gerada automaticamente a partir dos templates TypeScript durante a criação do projeto.
 
+> **Compatibilidade com MongoDB:** o MongoDB está implementado atualmente apenas com Prisma. O TypeORM oferece suporte básico a MongoDB, mas ele não é diretamente compatível com as entidades, repositories, migrations, armazenamento de sessão e testes relacionais usados pelo template TypeORM atual do NestForge. O Drizzle não oferece atualmente um dialeto oficial para MongoDB. Por esses motivos, o NestForge ainda não disponibiliza MongoDB com os templates TypeORM ou Drizzle.
+
 ## ORMs disponíveis
 
 ### Prisma
