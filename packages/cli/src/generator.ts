@@ -21,7 +21,7 @@ const IMPLEMENTED_ORMS = [
     'none',
 ];
 const IMPLEMENTED_LANGUAGES = ['typescript', 'javascript'];
-const IMPLEMENTED_DATABASES = ['postgres', 'mysql', 'sqlite'];
+const IMPLEMENTED_DATABASES = ['postgres', 'mysql', 'sqlite', 'mongodb'];
 const IMPLEMENTED_AUTH_STRATEGIES = ['jwt', 'session', 'oauth', 'none'];
 
 async function resolveTemplatesRoot(): Promise<string> {
@@ -56,6 +56,10 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
         throw new Error(
             `The "${database}" database is not ready yet — currently implemented: ${IMPLEMENTED_DATABASES.join(', ')}. Contributions are welcome!`,
         );
+    }
+
+    if (database === 'mongodb' && orm !== 'prisma') {
+        throw new Error('MongoDB is currently available only with Prisma.');
     }
 
     if (orm === 'none' && authStrategy !== 'none') {
