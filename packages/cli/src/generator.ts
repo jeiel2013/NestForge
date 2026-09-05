@@ -8,6 +8,7 @@ import { applyDatabaseConfig } from './features/database.js';
 import { applyAuthStrategyRemoval } from './features/auth-strategy.js';
 import { applyLanguageTransform } from './features/language.js';
 import { applyNoOrmTransform } from './features/no-orm.js';
+import { assertValidProjectName } from './project-name.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PACKAGE_TEMPLATES_ROOT = path.resolve(__dirname, '../templates');
@@ -35,6 +36,8 @@ async function resolveTemplatesRoot(): Promise<string> {
 export async function generateProject(options: ProjectOptions): Promise<string> {
     const { projectName, language, orm, database, features, authStrategy, accessControl, createEnv } =
         options;
+
+    assertValidProjectName(projectName);
 
     if (!IMPLEMENTED_LANGUAGES.includes(language)) {
         throw new Error(
@@ -79,7 +82,12 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
     const templatesRoot = await resolveTemplatesRoot();
     const templateName = orm === 'none' ? 'prisma' : orm;
     const templateDir = path.join(templatesRoot, templateName);
-    const targetDir = path.resolve(process.cwd(), projectName);
+    const currentDirectory = path.resolve(process.cwd());
+    const targetDir = path.resolve(currentDirectory, projectName);
+
+    if (path.dirname(targetDir) !== currentDirectory) {
+        throw new Error('Invalid project name: the project must be created inside the current directory.');
+    }
 
     if (await fs.pathExists(targetDir)) {
         throw new Error(`The "${projectName}" directory already exists. Choose another name or remove the directory.`);
