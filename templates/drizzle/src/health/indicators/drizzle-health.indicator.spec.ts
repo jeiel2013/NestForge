@@ -9,7 +9,7 @@ import type { DatabaseClient } from '../../database/database.types';
 import { DrizzleHealthIndicator } from './drizzle-health.indicator';
 
 describe('DrizzleHealthIndicator', () => {
-    it('retorna status up quando a consulta executa com sucesso', async () => {
+    it('returns an up status when the database query succeeds', async () => {
         const get = vi.fn().mockReturnValue({
             result: 1,
         });
@@ -41,16 +41,16 @@ describe('DrizzleHealthIndicator', () => {
         });
     });
 
-    it('lança HealthCheckError quando a consulta falha', async () => {
+    it('throws HealthCheckError when the database query fails', async () => {
         const get = vi.fn(() => {
-            throw new Error('conexão recusada');
+            throw new Error('connection refused');
         });
 
         const databaseClient = {
             query: vi
                 .fn()
                 .mockRejectedValue(
-                    new Error('conexão recusada'),
+                    new Error('connection refused'),
                 ),
             prepare: vi.fn(() => ({
                 get,
