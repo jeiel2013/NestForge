@@ -2047,6 +2047,7 @@ test('gera Prisma com MongoDB e autenticação JWT', { concurrency: false }, asy
                 path.join(targetDir, '.github', 'workflows', 'ci.yml'),
                 'utf8',
             );
+            const readme = await readFile(path.join(targetDir, 'README.md'), 'utf8');
 
             assert.match(schema, /provider\s*=\s*"mongodb"/);
             assert.equal(
@@ -2071,6 +2072,8 @@ test('gera Prisma com MongoDB e autenticação JWT', { concurrency: false }, asy
             assert.match(workflow, /Start MongoDB replica set/);
             assert.match(workflow, /npx prisma db push/);
             assert.doesNotMatch(workflow, /prisma migrate deploy/);
+            assert.match(readme, /npm run prisma:push/);
+            assert.doesNotMatch(readme, /npx prisma migrate dev/);
         },
     );
 });
