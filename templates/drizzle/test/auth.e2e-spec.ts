@@ -25,7 +25,7 @@ describe('Auth (e2e)', () => {
         await app.close();
     });
 
-    it('deve registrar, logar, renovar e revogar o token', async () => {
+    it('registers, logs in, refreshes, and revokes the token', async () => {
         const server = app.getHttpServer();
 
         const registerResponse = await request(server)
@@ -33,7 +33,7 @@ describe('Auth (e2e)', () => {
             .send({
                 name: 'Jeiel',
                 email: 'jeiel.e2e@example.com',
-                password: 'senhaForte123',
+                password: 'strongPassword123',
             })
             .expect(201);
 
@@ -49,7 +49,7 @@ describe('Auth (e2e)', () => {
             .post('/auth/login')
             .send({
                 email: 'jeiel.e2e@example.com',
-                password: 'senhaForte123',
+                password: 'strongPassword123',
             })
             .expect(200);
 
@@ -82,13 +82,13 @@ describe('Auth (e2e)', () => {
             .expect(401);
     });
 
-    it('não deve permitir cadastro com e-mail duplicado', async () => {
+    it('rejects registration with a duplicate email', async () => {
         const server = app.getHttpServer();
 
         const payload = {
             name: 'Jeiel',
-            email: 'duplicado.e2e@example.com',
-            password: 'senhaForte123',
+            email: 'duplicate.e2e@example.com',
+            password: 'strongPassword123',
         };
 
         await request(server)
@@ -102,7 +102,7 @@ describe('Auth (e2e)', () => {
             .expect(409);
     });
 
-    it('deve rejeitar login com credenciais inválidas', async () => {
+    it('rejects login with invalid credentials', async () => {
         await request(app.getHttpServer())
             .post('/auth/login')
             .send({
