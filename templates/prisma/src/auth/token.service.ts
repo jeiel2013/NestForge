@@ -1,6 +1,7 @@
 // nestforge:feature-file:auth:token
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import type { JwtSignOptions } from '@nestjs/jwt';
 import { createHash } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 
@@ -14,14 +15,22 @@ export class TokenService {
     async issueTokens(userId: string, email: string, role: string) {
         const payload = { sub: userId, email, role };
 
+        const accessTokenExpiresIn = (
+            process.env.JWT_ACCESS_EXPIRES_IN ?? '15m'
+        ) as JwtSignOptions['expiresIn'];
+
+        const refreshTokenExpiresIn = (
+            process.env.JWT_REFRESH_EXPIRES_IN ?? '7d'
+        ) as JwtSignOptions['expiresIn'];
+
         const accessToken = this.jwtService.sign(payload, {
             secret: process.env.JWT_ACCESS_SECRET,
-            expiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
+            expiresIn: accessTokenExpiresIn,
         });
 
         const refreshToken = this.jwtService.sign(payload, {
             secret: process.env.JWT_REFRESH_SECRET,
-            expiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
+            expiresIn: refreshTokenExpiresIn,
         });
 
         const expiresAt = new Date();
