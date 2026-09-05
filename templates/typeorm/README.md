@@ -25,6 +25,8 @@ NestForge is a NestJS starter designed to accelerate the beginning of serious ba
 - 🐳 **Docker** — complete environment with a single command
 - ⚙️ **CI/CD** — GitHub Actions (build, lint, test)
 
+> **MongoDB compatibility:** MongoDB is not available in this NestForge template. Although TypeORM provides basic MongoDB support, adopting it would require a separate document-oriented architecture for entities, repositories, relations, migrations, session persistence, and tests; it is not a direct database-driver substitution. MongoDB generation is currently available through the Prisma template.
+
 ## 🧱 Stack
 
 | Layer | Technology |
