@@ -21,6 +21,16 @@ export class UsersController {
 
 O nome depois de `nestforge:feature:` tem que ser exatamente o mesmo nas duas linhas (abertura e `:end`), e bater com o nome usado no array `features` da CLI (`docker`, `swagger`, `validation`, `redis`, `rbac`).
 
+Marcadores de banco são adicionados automaticamente pelo gerador:
+
+* `database:postgres`;
+* `database:mysql`;
+* `database:sqlite`;
+* `database:mongodb`;
+* `database:relational`, habilitado em PostgreSQL, MySQL e SQLite.
+
+Use `database:relational` quando o mesmo trecho SQL serve para todos os bancos relacionais, como a etapa `prisma migrate deploy`. Use o marcador específico quando provider, URL, health check ou infraestrutura dependem do banco selecionado.
+
 Funciona em qualquer arquivo cuja linguagem use `//` para comentário (`.ts`, `.js`). **Não funciona em JSON** (`package.json`) — pra dependências, ver a seção final deste documento.
 
 ## Marcador de arquivo inteiro
