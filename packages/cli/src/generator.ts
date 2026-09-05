@@ -126,6 +126,10 @@ function buildEnabledFeatures(
     enabled.add(`database:${database}`);
     enabled.add(`auth:${authStrategy}`);
 
+    if (['postgres', 'mysql', 'sqlite'].includes(database)) {
+        enabled.add('database:relational');
+    }
+
     if (authStrategy !== 'none') {
         enabled.add('auth:enabled');
     }
