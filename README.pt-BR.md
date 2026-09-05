@@ -46,8 +46,8 @@ Depois de instalar `nestforge-generator`, execute `npx nestforge` para responder
 2. **Linguagem** — TypeScript ou JavaScript — ✅ Ambas disponíveis
 3. **ORM / Query Builder** — Prisma, TypeORM, Drizzle ou Nenhum — ✅ Disponíveis
 4. **Comportamento sem ORM** — sem integração com banco ou autenticação — ✅ Disponível
-5. **Banco de dados** — PostgreSQL, MySQL ou SQLite — ✅ Disponíveis
-6. **Banco de dados** — MongoDB — ⏳ Ainda não implementado
+5. **Banco de dados** — PostgreSQL, MySQL ou SQLite — ✅ Disponíveis com Prisma, TypeORM e Drizzle
+6. **Banco de dados** — MongoDB — ✅ Disponível com Prisma
 7. **Docker** — sim ou não — ✅ Toggle real
 8. **Swagger/OpenAPI** — sim ou não — ✅ Toggle real
 9. **Validação global com Zod** — sim ou não — ✅ Toggle real
@@ -286,7 +286,7 @@ Os testes automatizados do gerador também cobrem:
 * remoção de recursos opcionais;
 * recusa de opções ainda não implementadas.
 
-PostgreSQL e MySQL possuem cobertura automatizada de geração, configuração de schema e remoção dos drivers não utilizados. Smoke tests reais desses bancos ainda exigem os serviços locais ou Docker.
+PostgreSQL, MySQL e MongoDB possuem cobertura automatizada de geração, configuração de schema e remoção dos drivers não utilizados. Smoke tests que dependem de bancos reais ainda exigem serviços locais ou Docker.
 
 ## Documentação dos templates
 
@@ -350,7 +350,7 @@ O build compila a CLI e copia os templates-fonte para o pacote publicado. Projet
 
 Próximos itens planejados:
 
-* MongoDB;
+* ampliar o suporte a MongoDB além do Prisma quando o ORM selecionado oferecer uma integração compatível;
 * validação completa do nome do pacote;
 * ampliação da matriz de smoke tests com bancos executados em serviços reais;
 * exemplos de deploy automatizado.
