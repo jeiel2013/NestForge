@@ -60,7 +60,7 @@ export class AuthService {
 
     if (existing) {
       throw new ConflictException(
-        'E-mail já cadastrado',
+        'Email already registered',
       );
     }
 
@@ -103,7 +103,7 @@ export class AuthService {
 
     if (!user || !user.passwordHash) {
       throw new UnauthorizedException(
-        'Credenciais inválidas',
+        'Invalid credentials',
       );
     }
 
@@ -114,7 +114,7 @@ export class AuthService {
 
     if (!passwordMatches) {
       throw new UnauthorizedException(
-        'Credenciais inválidas',
+        'Invalid credentials',
       );
     }
 
@@ -206,7 +206,7 @@ export class AuthService {
 
     const genericResponse = {
       message:
-        'Se o e-mail existir, enviaremos instruções de redefinição de senha',
+        'If the email exists, password reset instructions will be sent',
     };
 
     if (!user) {
@@ -264,7 +264,7 @@ export class AuthService {
       stored.expiresAt < new Date()
     ) {
       throw new UnauthorizedException(
-        'Token de redefinição inválido ou expirado',
+        'Invalid or expired password reset token',
       );
     }
 
@@ -433,7 +433,7 @@ export class AuthService {
     // nestforge:feature:database:sqlite:end
 
     return {
-      message: 'Senha redefinida com sucesso',
+      message: 'Password reset successfully',
     };
   }
 
@@ -457,7 +457,7 @@ export class AuthService {
       stored.expiresAt < new Date()
     ) {
       throw new UnauthorizedException(
-        'Token de verificação inválido ou expirado',
+        'Invalid or expired verification token',
       );
     }
 
@@ -563,7 +563,7 @@ export class AuthService {
     // nestforge:feature:database:sqlite:end
 
     return {
-      message: 'E-mail verificado com sucesso',
+      message: 'Email verified successfully',
     };
   }
 
