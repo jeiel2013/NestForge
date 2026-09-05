@@ -31,7 +31,7 @@ export class AuthService {
     });
 
     if (existing) {
-      throw new ConflictException('E-mail já cadastrado');
+      throw new ConflictException('Email already registered');
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
@@ -53,11 +53,11 @@ export class AuthService {
     });
 
     if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     if (!(await bcrypt.compare(dto.password, user.passwordHash))) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     return this.toAuthenticatedUser(user);
@@ -106,9 +106,9 @@ export class AuthService {
   async forgotPassword(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
-    // resposta genérica sempre, pra não revelar se o e-mail existe na base
+    // Always return a generic response to avoid revealing whether the email exists.
     const genericResponse = {
-      message: 'Se o e-mail existir, enviaremos instruções de redefinição de senha',
+      message: 'If the email exists, password reset instructions will be sent',
     };
 
     if (!user) {
@@ -140,7 +140,7 @@ export class AuthService {
     });
 
     if (!stored || stored.usedAt || stored.expiresAt < new Date()) {
-      throw new UnauthorizedException('Token de redefinição inválido ou expirado');
+      throw new UnauthorizedException('Invalid or expired password reset token');
     }
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
@@ -154,14 +154,14 @@ export class AuthService {
         where: { id: stored.id },
         data: { usedAt: new Date() },
       }),
-      // por segurança, revoga todas as sessões ativas ao trocar a senha
+      // Revoke every active session after a password change for security.
       this.prisma.refreshToken.updateMany({
         where: { userId: stored.userId, revokedAt: null },
         data: { revokedAt: new Date() },
       }),
     ]);
 
-    return { message: 'Senha redefinida com sucesso' };
+    return { message: 'Password reset successfully' };
   }
 
   async verifyEmail(rawToken: string) {
@@ -172,7 +172,7 @@ export class AuthService {
     });
 
     if (!stored || stored.usedAt || stored.expiresAt < new Date()) {
-      throw new UnauthorizedException('Token de verificação inválido ou expirado');
+      throw new UnauthorizedException('Invalid or expired verification token');
     }
 
     await this.prisma.$transaction([
@@ -186,7 +186,7 @@ export class AuthService {
       }),
     ]);
 
-    return { message: 'E-mail verificado com sucesso' };
+    return { message: 'Email verified successfully' };
   }
 
   private async sendEmailVerification(userId: string, email: string, name: string) {
