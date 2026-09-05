@@ -25,7 +25,7 @@ const SEED_USERS: SeedUser[] = [
         role: Role.MANAGER,
     },
     {
-        name: 'Usuário',
+        name: 'User',
         email: 'user@nestforge.dev',
         password: 'user1234',
         role: Role.USER,
@@ -76,6 +76,6 @@ async function seed() {
 }
 
 seed().catch((error: unknown) => {
-    console.error('Erro ao executar o seed:', error);
+    console.error('Error while running the seed:', error);
     process.exitCode = 1;
 });
