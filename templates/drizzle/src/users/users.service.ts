@@ -44,7 +44,7 @@ export class UsersService {
 
     if (existing) {
       throw new ConflictException(
-        'E-mail já cadastrado',
+        'Email already registered',
       );
     }
 
@@ -144,7 +144,7 @@ export class UsersService {
 
     if (!user) {
       throw new NotFoundException(
-        'Usuário não encontrado',
+        'User not found',
       );
     }
 
@@ -190,7 +190,7 @@ export class UsersService {
       .where(eq(users.id, id));
 
     return {
-      message: 'Usuário removido com sucesso',
+      message: 'User deleted successfully',
     };
   }
 
