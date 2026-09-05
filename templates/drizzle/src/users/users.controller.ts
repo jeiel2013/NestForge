@@ -57,9 +57,9 @@ export class UsersController {
   @Permissions(Permission.UserCreate)
   // nestforge:feature:rbac:end
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Cria um usuário (requer permissão user:create)' })
-  @ApiResponse({ status: 201, description: 'Usuário criado', schema: { example: USER_EXAMPLE } })
-  @ApiResponse({ status: 403, description: 'Sem a permissão user:create', schema: { example: FORBIDDEN_EXAMPLE } })
+  @ApiOperation({ summary: 'Creates a user (requires the user:create permission)' })
+  @ApiResponse({ status: 201, description: 'User created', schema: { example: USER_EXAMPLE } })
+  @ApiResponse({ status: 403, description: 'Missing the user:create permission', schema: { example: FORBIDDEN_EXAMPLE } })
   // nestforge:feature:swagger:end
   create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
@@ -70,10 +70,10 @@ export class UsersController {
   @Permissions(Permission.UserRead)
   // nestforge:feature:rbac:end
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Lista usuários com paginação e filtros (requer permissão user:read)' })
+  @ApiOperation({ summary: 'Lists users with pagination and filters (requires the user:read permission)' })
   @ApiResponse({
     status: 200,
-    description: 'Lista paginada',
+    description: 'Paginated list',
     schema: {
       example: {
         data: [USER_EXAMPLE],
@@ -88,8 +88,8 @@ export class UsersController {
 
   @Get('me')
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Retorna o usuário autenticado' })
-  @ApiResponse({ status: 200, description: 'Usuário autenticado', schema: { example: USER_EXAMPLE } })
+  @ApiOperation({ summary: 'Returns the authenticated user' })
+  @ApiResponse({ status: 200, description: 'Authenticated user', schema: { example: USER_EXAMPLE } })
   // nestforge:feature:swagger:end
   findMe(@CurrentUser() user: { id: string }) {
     return this.usersService.findOne(user.id);
@@ -97,17 +97,17 @@ export class UsersController {
 
   @Post('me/avatar')
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Faz upload do avatar do usuário autenticado' })
+  @ApiOperation({ summary: 'Uploads an avatar for the authenticated user' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({
     status: 201,
-    description: 'Avatar atualizado',
+    description: 'Avatar updated',
     schema: { example: { ...USER_EXAMPLE, avatarUrl: '/uploads/avatars/f47ac10b.png' } },
   })
   @ApiResponse({
     status: 400,
-    description: 'Formato de imagem não suportado ou arquivo maior que 2MB',
-    schema: { example: { statusCode: 400, message: 'Formato de imagem não suportado (use PNG, JPEG ou WEBP)' } },
+    description: 'Unsupported image format or file larger than 2 MB',
+    schema: { example: { statusCode: 400, message: 'Unsupported image format (use PNG, JPEG, or WEBP)' } },
   })
   // nestforge:feature:swagger:end
   @UseInterceptors(
@@ -129,9 +129,9 @@ export class UsersController {
   @Permissions(Permission.UserRead)
   // nestforge:feature:rbac:end
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Busca um usuário por id (requer permissão user:read)' })
-  @ApiResponse({ status: 200, description: 'Usuário encontrado', schema: { example: USER_EXAMPLE } })
-  @ApiResponse({ status: 404, description: 'Usuário não encontrado', schema: { example: { statusCode: 404, message: 'Usuário não encontrado' } } })
+  @ApiOperation({ summary: 'Finds a user by ID (requires the user:read permission)' })
+  @ApiResponse({ status: 200, description: 'User found', schema: { example: USER_EXAMPLE } })
+  @ApiResponse({ status: 404, description: 'User not found', schema: { example: { statusCode: 404, message: 'User not found' } } })
   // nestforge:feature:swagger:end
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
@@ -142,9 +142,9 @@ export class UsersController {
   @Permissions(Permission.UserUpdate)
   // nestforge:feature:rbac:end
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Atualiza um usuário (requer permissão user:update)' })
-  @ApiResponse({ status: 200, description: 'Usuário atualizado', schema: { example: USER_EXAMPLE } })
-  @ApiResponse({ status: 403, description: 'Sem a permissão user:update', schema: { example: FORBIDDEN_EXAMPLE } })
+  @ApiOperation({ summary: 'Updates a user (requires the user:update permission)' })
+  @ApiResponse({ status: 200, description: 'User updated', schema: { example: USER_EXAMPLE } })
+  @ApiResponse({ status: 403, description: 'Missing the user:update permission', schema: { example: FORBIDDEN_EXAMPLE } })
   // nestforge:feature:swagger:end
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.usersService.update(id, dto);
@@ -155,9 +155,9 @@ export class UsersController {
   @Permissions(Permission.UserDelete)
   // nestforge:feature:rbac:end
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Remove um usuário (requer permissão user:delete)' })
-  @ApiResponse({ status: 200, description: 'Usuário removido', schema: { example: { message: 'Usuário removido com sucesso' } } })
-  @ApiResponse({ status: 403, description: 'Sem a permissão user:delete', schema: { example: FORBIDDEN_EXAMPLE } })
+  @ApiOperation({ summary: 'Deletes a user (requires the user:delete permission)' })
+  @ApiResponse({ status: 200, description: 'User deleted', schema: { example: { message: 'User deleted successfully' } } })
+  @ApiResponse({ status: 403, description: 'Missing the user:delete permission', schema: { example: FORBIDDEN_EXAMPLE } })
   // nestforge:feature:swagger:end
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
