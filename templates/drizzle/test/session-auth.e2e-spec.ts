@@ -28,7 +28,7 @@ describe('Session auth (e2e)', () => {
         }
     });
 
-    it('registra, autentica e encerra uma sessão protegida por CSRF', async () => {
+    it('registers, authenticates, and closes a CSRF-protected session', async () => {
         const agent = request.agent(app.getHttpServer());
 
         await agent
@@ -43,13 +43,13 @@ describe('Session auth (e2e)', () => {
 
         expect(csrfToken).toMatch(/^[a-f0-9]{64}$/);
 
-        // Requisições que alteram estado devem ser rejeitadas sem o token.
+        // State-changing requests must be rejected without the token.
         await agent
             .post('/auth/register')
             .send({
                 name: 'Jeiel',
                 email: 'jeiel.session@example.com',
-                password: 'senhaForte123',
+                password: 'strongPassword123',
             })
             .expect(403);
 
@@ -59,7 +59,7 @@ describe('Session auth (e2e)', () => {
             .send({
                 name: 'Jeiel',
                 email: 'jeiel.session@example.com',
-                password: 'senhaForte123',
+                password: 'strongPassword123',
             })
             .expect(201);
 
@@ -97,7 +97,7 @@ describe('Session auth (e2e)', () => {
             .expect(401);
     });
 
-    it('realiza login e renova o token CSRF da sessão', async () => {
+    it('logs in and refreshes the session CSRF token', async () => {
         const registrationAgent = request.agent(
             app.getHttpServer(),
         );
@@ -113,9 +113,9 @@ describe('Session auth (e2e)', () => {
             .post('/auth/register')
             .set('x-csrf-token', registrationCsrfToken)
             .send({
-                name: 'Usuário de sessão',
+                name: 'Session User',
                 email: 'login.session@example.com',
-                password: 'senhaForte123',
+                password: 'strongPassword123',
             })
             .expect(201);
 
@@ -141,7 +141,7 @@ describe('Session auth (e2e)', () => {
             .set('x-csrf-token', loginCsrfToken)
             .send({
                 email: 'login.session@example.com',
-                password: 'senhaForte123',
+                password: 'strongPassword123',
             })
             .expect(200);
 
