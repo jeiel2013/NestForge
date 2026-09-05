@@ -27,7 +27,7 @@ export class SessionAuthGuard implements CanActivate {
         const user = request.session?.user;
 
         if (!user) {
-            throw new UnauthorizedException('Sessão inválida ou expirada');
+            throw new UnauthorizedException('Invalid or expired session');
         }
 
         request.user = user;
