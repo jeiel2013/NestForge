@@ -66,6 +66,7 @@ export async function applyDatabaseConfig(
 
     if (databaseChoice === 'mongodb') {
         await updateMongoSchema(targetDir);
+        await updateMongoScripts(targetDir);
     }
 
     await updateDatabaseType(
@@ -183,6 +184,37 @@ async function updateDatabaseUrl(
         filePath,
         updated,
         'utf-8',
+    );
+}
+
+async function updateMongoScripts(
+    targetDir: string,
+): Promise<void> {
+    const packageJsonPath = path.join(
+        targetDir,
+        'package.json',
+    );
+
+    if (!(await fs.pathExists(packageJsonPath))) {
+        return;
+    }
+
+    const packageJson = await fs.readJson(
+        packageJsonPath,
+    );
+
+    packageJson.scripts['prisma:push'] =
+        'prisma db push';
+    packageJson.scripts['pretest:e2e'] =
+        'dotenv -e .env.test -- npx prisma db push --skip-generate';
+
+    delete packageJson.scripts['prisma:migrate'];
+    delete packageJson.scripts['prisma:deploy'];
+
+    await fs.writeJson(
+        packageJsonPath,
+        packageJson,
+        { spaces: 2 },
     );
 }
 
