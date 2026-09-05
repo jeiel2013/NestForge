@@ -11,7 +11,7 @@ Request → main.ts (pipes/filters/interceptors globais)
         → Guards (JwtAuthGuard → RolesGuard → PermissionsGuard)
         → Controller (valida via DTO Zod, delega pro service)
         → Service (regra de negócio, chama o Prisma)
-        → Prisma → PostgreSQL
+        → Prisma → banco selecionado
         → Response (passa pelo ClassSerializerInterceptor antes de virar JSON)
 ```
 
@@ -35,6 +35,12 @@ Controllers nunca falam com o Prisma diretamente — sempre passam pelo service.
 
 ### Por que Prisma sem uma camada de "repository" por cima?
 Prisma Client já é, na prática, um repository type-safe — adicionar uma camada de abstração em cima dele só pra "seguir o padrão" adicionaria indireção sem trazer benefício real neste projeto (não há plano de trocar de ORM). Os services chamam `this.prisma.<model>` diretamente.
+
+### Como o MongoDB difere dos bancos relacionais?
+
+Documentos MongoDB usam `_id`. O schema Prisma gerado mapeia os IDs dos models para `_id`, usa valores nativos `ObjectId` quando os IDs são gerados pelo MongoDB e marca os campos escalares de relação com `@db.ObjectId`. O armazenamento de sessão mantém seu ID textual fornecido externamente mapeado diretamente para `_id`.
+
+MongoDB usa `prisma db push` no lugar do Prisma Migrate. Um replica set é necessário para transações e escritas aninhadas, então o Docker Compose gerado inicia um replica set de nó único. O indicador de saúde usa o comando `ping` do MongoDB em vez de executar `SELECT 1`.
 
 ### Por que permissions são um mapa fixo em código (`ROLE_PERMISSIONS`) e não uma tabela no banco?
 Um sistema de permissions 100% dinâmico (tabelas `roles`, `permissions`, `role_permissions`) é overkill pra um boilerplate — a maioria dos projetos que nascem daqui vai ter 3-5 roles fixas. Manter o mapeamento em `src/common/constants/role-permissions.ts` deixa auditável de forma explícita: dá pra ver o array inteiro de permissões de cada role em um arquivo só. Se o seu projeto crescer a ponto de precisar de permissions configuráveis em runtime (ex.: um admin criando roles customizadas pela UI), aí sim vale migrar pra tabela.
