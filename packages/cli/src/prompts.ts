@@ -89,7 +89,9 @@ export async function runPrompts(): Promise<ProjectOptions> {
                 { value: 'postgres', label: 'PostgreSQL', hint: 'Recommended' },
                 { value: 'mysql', label: 'MySQL' },
                 { value: 'sqlite', label: 'SQLite' },
-                { value: 'mongodb', label: 'MongoDB', hint: 'coming soon' },
+                ...(orm === 'prisma'
+                    ? [{ value: 'mongodb', label: 'MongoDB' }]
+                    : []),
             ],
         });
         handleCancel(databaseSelection);
