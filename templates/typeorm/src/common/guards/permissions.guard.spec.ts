@@ -15,14 +15,14 @@ function createContext(user?: { role: Role }): ExecutionContext {
 }
 
 describe('PermissionsGuard', () => {
-    it('libera acesso quando a rota não exige nenhuma permissão', () => {
+    it('allows access when the route requires no permission', () => {
         const reflector = { getAllAndOverride: vi.fn().mockReturnValue(undefined) } as unknown as Reflector;
         const guard = new PermissionsGuard(reflector);
 
         expect(guard.canActivate(createContext({ role: Role.USER }))).toBe(true);
     });
 
-    it('libera acesso quando a role do usuário tem a permissão exigida', () => {
+    it('allows access when the user role has the required permission', () => {
         const reflector = {
             getAllAndOverride: vi.fn().mockReturnValue([Permission.UserRead]),
         } as unknown as Reflector;
@@ -31,7 +31,7 @@ describe('PermissionsGuard', () => {
         expect(guard.canActivate(createContext({ role: Role.USER }))).toBe(true);
     });
 
-    it('bloqueia acesso quando a role do usuário não tem a permissão exigida', () => {
+    it('blocks access when the user role lacks the required permission', () => {
         const reflector = {
             getAllAndOverride: vi.fn().mockReturnValue([Permission.UserDelete]),
         } as unknown as Reflector;
@@ -40,15 +40,15 @@ describe('PermissionsGuard', () => {
         expect(guard.canActivate(createContext({ role: Role.USER }))).toBe(false);
     });
 
-    it('exige todas as permissões quando mais de uma é requisitada', () => {
+    it('requires all permissions when more than one is requested', () => {
         const reflector = {
             getAllAndOverride: vi.fn().mockReturnValue([Permission.UserRead, Permission.UserUpdate]),
         } as unknown as Reflector;
         const guard = new PermissionsGuard(reflector);
 
-        // MANAGER tem user:read e user:update
+        // MANAGER has user:read and user:update
         expect(guard.canActivate(createContext({ role: Role.MANAGER }))).toBe(true);
-        // USER só tem user:read
+        // USER only has user:read
         expect(guard.canActivate(createContext({ role: Role.USER }))).toBe(false);
     });
 });
