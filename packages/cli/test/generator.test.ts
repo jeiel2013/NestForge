@@ -90,7 +90,7 @@ async function listFilesRecursively(directory: string): Promise<string[]> {
     return files;
 }
 
-test('gera o projeto padrão com PostgreSQL e JWT', { concurrency: false }, async () => {
+test('generates the default project with PostgreSQL and JWT', { concurrency: false }, async () => {
     await withGeneratedProject(makeOptions(), async (targetDir) => {
         const schema = await readFile(path.join(targetDir, 'prisma', 'schema.prisma'), 'utf8');
 
@@ -120,7 +120,7 @@ test('gera o projeto padrão com PostgreSQL e JWT', { concurrency: false }, asyn
     });
 });
 
-test('gera MySQL sem recursos Redis', { concurrency: false }, async () => {
+test('generates MySQL without Redis features', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
             projectName: 'mysql-project',
@@ -146,7 +146,7 @@ test('gera MySQL sem recursos Redis', { concurrency: false }, async () => {
     );
 });
 
-test('gera SQLite sem recursos opcionais e sem autenticação', { concurrency: false }, async () => {
+test('generates SQLite without optional features or authentication', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
             projectName: 'sqlite-project',
@@ -180,7 +180,7 @@ test('gera SQLite sem recursos opcionais e sem autenticação', { concurrency: f
     );
 });
 
-test('gera OAuth-only sem fluxos e testes baseados em senha', { concurrency: false }, async () => {
+test('generates OAuth-only without password-based flows and tests', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
             projectName: 'oauth-project',
@@ -216,7 +216,7 @@ test('gera OAuth-only sem fluxos e testes baseados em senha', { concurrency: fal
     );
 });
 
-test('gera autenticação por Session/Cookies sem recursos JWT', { concurrency: false }, async () => {
+test('generates Session/Cookies authentication without JWT features', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
             projectName: 'session-project',
@@ -404,7 +404,7 @@ test('gera autenticação por Session/Cookies sem recursos JWT', { concurrency: 
 });
 
 test(
-    'gera TypeORM com SQLite e Session/Cookies',
+    'generates TypeORM with SQLite and Session/Cookies',
     { concurrency: false },
     async () => {
         await withGeneratedProject(
@@ -610,7 +610,7 @@ test(
 );
 
 test(
-    'configura PostgreSQL e MySQL no template TypeORM',
+    'configures PostgreSQL and MySQL in the TypeORM template',
     { concurrency: false },
     async () => {
         const cases = [
@@ -728,7 +728,7 @@ test(
 );
 
 test(
-    'gera Drizzle com SQLite e JWT',
+    'generates Drizzle with SQLite and JWT',
     { concurrency: false },
     async () => {
         await withGeneratedProject(
@@ -1071,7 +1071,7 @@ test(
 );
 
 test(
-    'gera Drizzle com SQLite e Session/Cookies',
+    'generates Drizzle with SQLite and Session/Cookies',
     { concurrency: false },
     async () => {
         await withGeneratedProject(
@@ -1364,7 +1364,7 @@ test(
 );
 
 test(
-    'configura PostgreSQL e MySQL no template Drizzle',
+    'configures PostgreSQL and MySQL in the Drizzle template',
     { concurrency: false },
     async () => {
         const cases = [
@@ -1616,7 +1616,7 @@ test(
     },
 );
 
-test('gera projeto em JavaScript', { concurrency: false }, async () => {
+test('generates a JavaScript project', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
             projectName: 'javascript-project',
@@ -1656,7 +1656,7 @@ test('gera projeto em JavaScript', { concurrency: false }, async () => {
 });
 
 test(
-    'gera projeto TypeORM em JavaScript',
+    'generates a TypeORM project in JavaScript',
     { concurrency: false },
     async () => {
         await withGeneratedProject(
@@ -1807,7 +1807,7 @@ test(
 );
 
 test(
-    'gera projeto Drizzle em JavaScript',
+    'generates a Drizzle project in JavaScript',
     { concurrency: false },
     async () => {
         await withGeneratedProject(
@@ -2025,7 +2025,7 @@ test(
     },
 );
 
-test('gera Prisma com MongoDB e autenticação JWT', { concurrency: false }, async () => {
+test('generates Prisma with MongoDB and JWT authentication', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
             projectName: 'prisma-mongodb',
@@ -2088,7 +2088,7 @@ test('gera Prisma com MongoDB e autenticação JWT', { concurrency: false }, asy
     );
 });
 
-test('gera Prisma com MongoDB e Session/Cookies', { concurrency: false }, async () => {
+test('generates Prisma with MongoDB and Session/Cookies', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
             projectName: 'prisma-mongodb-session',
@@ -2117,7 +2117,7 @@ test('gera Prisma com MongoDB e Session/Cookies', { concurrency: false }, async 
     );
 });
 
-test('gera Prisma com MongoDB em JavaScript', { concurrency: false }, async () => {
+test('generates Prisma with MongoDB in JavaScript', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
             projectName: 'prisma-mongodb-javascript',
@@ -2149,7 +2149,7 @@ test('gera Prisma com MongoDB em JavaScript', { concurrency: false }, async () =
     );
 });
 
-test('gera projeto TypeScript sem ORM, banco ou autenticação', { concurrency: false }, async () => {
+test('generates a TypeScript project without ORM, database, or authentication', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
             projectName: 'no-orm-typescript',
@@ -2200,7 +2200,7 @@ test('gera projeto TypeScript sem ORM, banco ou autenticação', { concurrency: 
     );
 });
 
-test('gera projeto JavaScript sem ORM com Docker e Redis', { concurrency: false }, async () => {
+test('generates a JavaScript project without ORM and with Docker and Redis', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
             projectName: 'no-orm-javascript',
@@ -2263,7 +2263,7 @@ test('gera projeto JavaScript sem ORM com Docker e Redis', { concurrency: false 
     );
 });
 
-test('recusa opções ainda não implementadas sem criar projeto', { concurrency: false }, async () => {
+test('rejects unsupported options without creating a project', { concurrency: false }, async () => {
     const unsupportedOptions: Array<
         [string, Partial<ProjectOptions>]
     > = [
