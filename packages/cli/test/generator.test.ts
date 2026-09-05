@@ -2048,6 +2048,10 @@ test('gera Prisma com MongoDB e autenticação JWT', { concurrency: false }, asy
                 'utf8',
             );
             const readme = await readFile(path.join(targetDir, 'README.md'), 'utf8');
+            const addingModuleGuide = await readFile(
+                path.join(targetDir, 'docs', 'adding-a-module.md'),
+                'utf8',
+            );
 
             assert.match(schema, /provider\s*=\s*"mongodb"/);
             assert.equal(
@@ -2074,6 +2078,11 @@ test('gera Prisma com MongoDB e autenticação JWT', { concurrency: false }, asy
             assert.doesNotMatch(workflow, /prisma migrate deploy/);
             assert.match(readme, /npm run prisma:push/);
             assert.doesNotMatch(readme, /npx prisma migrate dev/);
+            assert.match(
+                addingModuleGuide,
+                /@default\(auto\(\)\) @map\("_id"\) @db\.ObjectId/,
+            );
+            assert.doesNotMatch(addingModuleGuide, /@default\(uuid\(\)\)|nestforge:feature/);
         },
     );
 });
