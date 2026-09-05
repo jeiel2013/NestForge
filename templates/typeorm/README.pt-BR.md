@@ -25,6 +25,8 @@ NestForge é um boilerplate de NestJS pensado para acelerar o início de projeto
 - 🐳 **Docker** — ambiente completo com um comando
 - ⚙️ **CI/CD** — GitHub Actions (build, lint, test)
 
+> **Compatibilidade com MongoDB:** o MongoDB não está disponível neste template do NestForge. Embora o TypeORM ofereça suporte básico a MongoDB, adotá-lo exigiria uma arquitetura separada e orientada a documentos para entidades, repositories, relações, migrations, persistência de sessões e testes; não se trata de uma troca direta do driver de banco. Atualmente, a geração com MongoDB está disponível por meio do template Prisma.
+
 ## 🧱 Stack
 
 | Camada | Tecnologia |
