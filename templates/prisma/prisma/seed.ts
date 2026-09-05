@@ -13,7 +13,7 @@ interface SeedUser {
 const SEED_USERS: SeedUser[] = [
   { name: 'Admin', email: 'admin@nestforge.dev', password: 'admin123', role: Role.ADMIN },
   { name: 'Manager', email: 'manager@nestforge.dev', password: 'manager123', role: Role.MANAGER },
-  { name: 'Usuário', email: 'user@nestforge.dev', password: 'user1234', role: Role.USER },
+  { name: 'User', email: 'user@nestforge.dev', password: 'user1234', role: Role.USER },
 ];
 
 async function main() {

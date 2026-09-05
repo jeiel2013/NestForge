@@ -154,8 +154,12 @@ A CLI apresenta até 11 perguntas. A pergunta de RBAC aparece somente quando alg
 | Enter sem informar nome | Usa `my-nest-api`            |
 | Ctrl+C                  | Cancela sem criar projeto    |
 | Pasta já existente      | Exibe erro e não sobrescreve |
+| Letras maiúsculas, espaços ou caracteres incompatíveis | Recusa o nome |
+| Separador de caminho, caminho absoluto ou escopo npm | Recusa o nome antes de gravar arquivos |
+| Mais de 214 caracteres | Recusa o nome |
+| Nome reservado do npm ou do Windows | Recusa o nome |
 
-Ainda não existe validação completa para todos os nomes inválidos de pacotes npm.
+A mesma validação é executada no prompt interativo e na API do gerador.
 
 ### Linguagem
 
@@ -686,7 +690,6 @@ package.json
 ## 17. Escopo ainda não implementado
 
 * suporte a MongoDB além do Prisma;
-* validação completa do nome do pacote;
 * smoke tests reais de PostgreSQL;
 * smoke tests reais de MySQL;
 * publicação final no npm.

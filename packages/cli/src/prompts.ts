@@ -1,6 +1,7 @@
 import { intro, outro, text, select, confirm, isCancel, cancel } from '@clack/prompts';
 import gradient from 'gradient-string';
 import pc from 'picocolors';
+import { validateProjectName } from './project-name.js';
 
 export type OrmChoice = 'prisma' | 'typeorm' | 'drizzle' | 'none';
 export type LanguageChoice = 'typescript' | 'javascript';
@@ -21,16 +22,16 @@ export interface ProjectOptions {
 // red -> orange, the NestJS colors
 const nestforgeGradient = gradient(['#e0234e', '#ff8a65']);
 
-const logo = `
- _   _           _   ______                     
-| \ | |         | | |  ____|                    
-|  \| | ___  ___| |_| |__ ___  _ __ __ _  ___  
-| . \` |/ _ \/ __| __|  __/ _ \| '__/ _\` |/ _ \\
-| |\  |  __/\__ \ |_| | | (_) | | | (_| |  __/
-|_| \_|\___||___/\__|_|  \___/|_|  \__, |\___|
-                                     __/ |
-                                    |___/
-`;
+const logo = [
+    '   _   _           _   ______',
+    '  | \\ | |         | | |  ____|',
+    '  |  \\| | ___  ___| |_| |__ ___  _ __ __ _  ___',
+    "  | . ` |/ _ \\/ __| __|  __/ _ \\| '__/ _` |/ _ \\",
+    '  | |\\  |  __/\\__ \\ |_| | | (_) | | | (_| |  __/',
+    '  |_| \\_|\\___||___/\\__|_|  \\___/|_|  \\__, |\\___|',
+    '                                       __/ |',
+    '                                      |___/',
+].join('\n');
 
 function showBanner(): void {
     console.log();
@@ -54,6 +55,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
         message: 'What is your project name?',
         placeholder: 'my-nest-api',
         defaultValue: 'my-nest-api',
+        validate: (value) => validateProjectName(value ?? ''),
     });
     handleCancel(projectName);
 

@@ -36,7 +36,7 @@ describe('CsrfMiddleware', () => {
     }
 
     it.each(['GET', 'HEAD', 'OPTIONS'])(
-        'permite o método seguro %s sem token',
+        'allows the safe %s method without a token',
         (method) => {
             const request = createRequest(method);
 
@@ -50,7 +50,7 @@ describe('CsrfMiddleware', () => {
         },
     );
 
-    it('rejeita uma requisição sem token CSRF', () => {
+    it('rejects a request without a CSRF token', () => {
         const request = createRequest('POST');
 
         expect(() =>
@@ -64,7 +64,7 @@ describe('CsrfMiddleware', () => {
         expect(next).not.toHaveBeenCalled();
     });
 
-    it('rejeita quando o token do header é diferente da sessão', () => {
+    it('rejects when the header token differs from the session token', () => {
         const request = createRequest(
             'PATCH',
             'session-token',
@@ -82,7 +82,7 @@ describe('CsrfMiddleware', () => {
         expect(next).not.toHaveBeenCalled();
     });
 
-    it('permite quando o token corresponde ao valor da sessão', () => {
+    it('allows the request when the token matches the session value', () => {
         const token = 'a'.repeat(64);
         const request = createRequest('DELETE', token, token);
 

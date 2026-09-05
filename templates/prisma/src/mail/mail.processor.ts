@@ -27,13 +27,13 @@ export class MailProcessor extends WorkerHost {
 
         switch (job.name) {
             case MailJob.VerifyEmail:
-                await this.send(to, 'Confirme seu e-mail', verifyEmailTemplate(name, token));
+                await this.send(to, 'Confirm your email', verifyEmailTemplate(name, token));
                 break;
             case MailJob.ResetPassword:
-                await this.send(to, 'Redefinição de senha', resetPasswordTemplate(name, token));
+                await this.send(to, 'Password reset', resetPasswordTemplate(name, token));
                 break;
             default:
-                this.logger.warn(`Job de e-mail desconhecido: ${job.name}`);
+                this.logger.warn(`Unknown email job: ${job.name}`);
         }
     }
 

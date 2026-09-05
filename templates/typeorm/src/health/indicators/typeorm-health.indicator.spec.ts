@@ -9,7 +9,7 @@ import { DataSource } from 'typeorm';
 import { TypeOrmHealthIndicator } from './typeorm-health.indicator';
 
 describe('TypeOrmHealthIndicator', () => {
-    it('retorna status up quando a query executa com sucesso', async () => {
+    it('returns an up status when the query succeeds', async () => {
         const dataSource = {
             query: vi.fn().mockResolvedValue([{ result: 1 }]),
         };
@@ -29,12 +29,12 @@ describe('TypeOrmHealthIndicator', () => {
         });
     });
 
-    it('lança HealthCheckError quando a query falha', async () => {
+    it('throws HealthCheckError when the query fails', async () => {
         const dataSource = {
             query: vi
                 .fn()
                 .mockRejectedValue(
-                    new Error('conexão recusada'),
+                    new Error('connection refused'),
                 ),
         };
 

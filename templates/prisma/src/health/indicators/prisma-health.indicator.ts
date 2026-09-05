@@ -16,7 +16,7 @@ export class PrismaHealthIndicator {
             // nestforge:feature:database:mongodb:end
             return { [key]: { status: 'up' } };
         } catch (error) {
-            throw new HealthCheckError('Banco de dados indisponível', {
+            throw new HealthCheckError('Database unavailable', {
                 [key]: { status: 'down', message: (error as Error).message },
             });
         }

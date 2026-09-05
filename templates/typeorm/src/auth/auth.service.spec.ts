@@ -81,7 +81,7 @@ describe('AuthService', () => {
     );
   });
 
-  it('deve lançar ConflictException se o e-mail já existir', async () => {
+  it('throws ConflictException when the email already exists', async () => {
     usersRepository.findOne.mockResolvedValue({
       id: 'user-1',
       email: 'jeiel@example.com',
@@ -91,12 +91,12 @@ describe('AuthService', () => {
       authService.register({
         name: 'Jeiel',
         email: 'jeiel@example.com',
-        password: 'senhaForte123',
+        password: 'strongPassword123',
       }),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
-  it('deve lançar UnauthorizedException com credenciais inválidas', async () => {
+  it('throws UnauthorizedException for invalid credentials', async () => {
     usersRepository.findOne.mockResolvedValue(null);
 
     await expect(

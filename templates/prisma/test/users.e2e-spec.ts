@@ -13,7 +13,7 @@ describe('Users (e2e)', () => {
     async function createUserWithRole(email: string, password: string, role: Role) {
         const passwordHash = await bcrypt.hash(password, 10);
         await prisma.user.create({
-            data: { name: 'Usuário de teste', email, passwordHash, role, emailVerifiedAt: new Date() },
+            data: { name: 'Test User', email, passwordHash, role, emailVerifiedAt: new Date() },
         });
     }
 
@@ -39,19 +39,19 @@ describe('Users (e2e)', () => {
         await app.close();
     });
 
-    it('rejeita acesso sem token', async () => {
+    it('rejects access without a token', async () => {
         await request(app.getHttpServer()).get('/users').expect(401);
     });
 
-    it('ADMIN consegue criar, listar, atualizar e remover um usuário', async () => {
-        await createUserWithRole('admin.e2e@example.com', 'senhaForte123', Role.ADMIN);
-        const token = await loginAndGetToken('admin.e2e@example.com', 'senhaForte123');
+    it('allows ADMIN to create, list, update, and delete a user', async () => {
+        await createUserWithRole('admin.e2e@example.com', 'strongPassword123', Role.ADMIN);
+        const token = await loginAndGetToken('admin.e2e@example.com', 'strongPassword123');
         const server = app.getHttpServer();
 
         const createResponse = await request(server)
             .post('/users')
             .set('Authorization', `Bearer ${token}`)
-            .send({ name: 'Novo Usuário', email: 'novo.e2e@example.com', password: 'senhaForte123' })
+            .send({ name: 'New User', email: 'new.e2e@example.com', password: 'strongPassword123' })
             .expect(201);
 
         expect(createResponse.body).not.toHaveProperty('passwordHash');
@@ -77,9 +77,9 @@ describe('Users (e2e)', () => {
     });
 
     // nestforge:feature:rbac
-    it('USER consegue ler mas não consegue criar usuário', async () => {
-        await createUserWithRole('user.e2e@example.com', 'senhaForte123', Role.USER);
-        const token = await loginAndGetToken('user.e2e@example.com', 'senhaForte123');
+    it('allows USER to read but not create users', async () => {
+        await createUserWithRole('user.e2e@example.com', 'strongPassword123', Role.USER);
+        const token = await loginAndGetToken('user.e2e@example.com', 'strongPassword123');
         const server = app.getHttpServer();
 
         await request(server).get('/users').set('Authorization', `Bearer ${token}`).expect(200);
@@ -87,14 +87,14 @@ describe('Users (e2e)', () => {
         await request(server)
             .post('/users')
             .set('Authorization', `Bearer ${token}`)
-            .send({ name: 'Não deveria criar', email: 'bloqueado.e2e@example.com', password: 'senhaForte123' })
+            .send({ name: 'Should Not Be Created', email: 'blocked.e2e@example.com', password: 'strongPassword123' })
             .expect(403);
     });
     // nestforge:feature:rbac:end
 
-    it('GET /users/me retorna o usuário autenticado', async () => {
-        await createUserWithRole('me.e2e@example.com', 'senhaForte123', Role.USER);
-        const token = await loginAndGetToken('me.e2e@example.com', 'senhaForte123');
+    it('returns the authenticated user from GET /users/me', async () => {
+        await createUserWithRole('me.e2e@example.com', 'strongPassword123', Role.USER);
+        const token = await loginAndGetToken('me.e2e@example.com', 'strongPassword123');
 
         const response = await request(app.getHttpServer())
             .get('/users/me')

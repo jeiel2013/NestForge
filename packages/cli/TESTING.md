@@ -154,8 +154,12 @@ The CLI displays up to 11 questions. The RBAC question appears only when an auth
 | Enter is pressed without a name | Uses `my-nest-api` |
 | Ctrl+C | Cancels without creating a project |
 | Directory already exists | Displays an error and does not overwrite it |
+| Uppercase letters, whitespace, or unsupported characters | Rejects the name |
+| Path separator, absolute path, or npm scope | Rejects the name before writing files |
+| More than 214 characters | Rejects the name |
+| npm or Windows reserved name | Rejects the name |
 
-Complete validation for all invalid npm package names is not available yet.
+The same validation runs in both the interactive prompt and the generator API.
 
 ### Language
 
@@ -686,7 +690,6 @@ package.json
 ## 17. Scope not implemented yet
 
 * MongoDB support beyond Prisma;
-* complete package name validation;
 * real PostgreSQL smoke tests;
 * real MySQL smoke tests;
 * final publication to npm.

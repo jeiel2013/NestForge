@@ -35,6 +35,19 @@ For the testing guide, CLI prompts, and complete checklist, see [`TESTING.md`](T
 
 Generated projects include features such as avatar upload, pagination, filters, health checks, metrics, unit tests, and E2E tests.
 
+## Project names
+
+The CLI validates the name before creating the project directory. A valid name:
+
+- uses only lowercase letters, numbers, dots, hyphens, or underscores;
+- starts with a letter or number;
+- has no leading or trailing whitespace;
+- contains no path separators or npm scope;
+- has no more than 214 characters;
+- is not an npm or Windows reserved name.
+
+The generator rejects invalid names and existing target directories without writing project files.
+
 ## Languages
 
 The CLI generates projects in:
@@ -390,6 +403,5 @@ The build:
 ## Next steps
 
 - expand MongoDB support beyond Prisma when a compatible ORM integration is available;
-- more complete project and package name validation;
 - expand the smoke-test matrix with real PostgreSQL and MySQL services;
 - reduce the known limitations in the earlier templates.

@@ -56,7 +56,7 @@ export class TokenService {
         });
 
         if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
-            throw new UnauthorizedException('Refresh token inválido ou expirado');
+            throw new UnauthorizedException('Invalid or expired refresh token');
         }
 
         await this.prisma.refreshToken.update({
@@ -84,7 +84,7 @@ export class TokenService {
             },
         });
 
-        return { message: 'Logout realizado com sucesso' };
+        return { message: 'Logout completed successfully' };
     }
 
     private hashToken(token: string): string {

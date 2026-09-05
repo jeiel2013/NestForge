@@ -39,7 +39,7 @@ export class DrizzleHealthIndicator {
             };
         } catch (error) {
             throw new HealthCheckError(
-                'Banco de dados indisponível',
+                'Database unavailable',
                 {
                     [key]: {
                         status: 'down',

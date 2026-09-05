@@ -47,7 +47,7 @@ export class SessionService {
                 if (error) {
                     reject(
                         new InternalServerErrorException(
-                            'Não foi possível encerrar a sessão',
+                            'Unable to end the session',
                         ),
                     );
                     return;
@@ -57,7 +57,7 @@ export class SessionService {
             });
         });
 
-        return { message: 'Logout realizado com sucesso' };
+        return { message: 'Logout completed successfully' };
     }
 
     private async regenerate(request: Request): Promise<void> {
@@ -66,7 +66,7 @@ export class SessionService {
                 if (error) {
                     reject(
                         new InternalServerErrorException(
-                            'Não foi possível iniciar a sessão',
+                            'Unable to start the session',
                         ),
                     );
                     return;
@@ -83,7 +83,7 @@ export class SessionService {
                 if (error) {
                     reject(
                         new InternalServerErrorException(
-                            'Não foi possível salvar a sessão',
+                            'Unable to save the session',
                         ),
                     );
                     return;

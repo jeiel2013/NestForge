@@ -120,7 +120,7 @@ export class TokenService {
             stored.expiresAt < new Date()
         ) {
             throw new UnauthorizedException(
-                'Refresh token inválido ou expirado',
+                'Invalid or expired refresh token',
             );
         }
 
@@ -163,7 +163,7 @@ export class TokenService {
             );
 
         return {
-            message: 'Logout realizado com sucesso',
+            message: 'Logout completed successfully',
         };
     }
 

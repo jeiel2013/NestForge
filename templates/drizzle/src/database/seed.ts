@@ -46,7 +46,7 @@ const SEED_USERS: SeedUser[] = [
         role: Role.MANAGER,
     },
     {
-        name: 'Usuário',
+        name: 'User',
         email: 'user@nestforge.dev',
         password: 'user1234',
         role: Role.USER,
@@ -57,7 +57,7 @@ const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
     throw new Error(
-        'DATABASE_URL não foi definida',
+        'DATABASE_URL is not defined',
     );
 }
 
@@ -144,7 +144,7 @@ async function seed(): Promise<void> {
 
 seed().catch((error: unknown) => {
     console.error(
-        'Erro ao executar o seed:',
+        'Error while running the seed:',
         error,
     );
 

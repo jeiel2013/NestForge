@@ -39,6 +39,8 @@ During the build, the templates are copied into the CLI package so that they rem
 
 After installing `nestforge-generator`, run `npx nestforge` to answer the interactive prompts and receive a NestJS project configured according to your choices.
 
+Project names are validated before any directory is created. They must use lowercase letters, numbers, dots, hyphens, or underscores; start with a letter or number; contain no path separators; stay within 214 characters; and avoid npm and Windows reserved names. Existing directories are never overwritten.
+
 ## What the CLI configures
 
 1. **Project name** — free text — ✅ Available
@@ -352,7 +354,6 @@ The build compiles the CLI and copies the source templates into the published pa
 Planned next steps:
 
 - expand MongoDB support beyond Prisma when the selected ORM provides a compatible integration;
-- complete package name validation;
 - expand the smoke-test matrix with databases running as real services;
 - automated deployment examples.
 

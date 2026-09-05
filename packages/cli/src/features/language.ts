@@ -157,7 +157,7 @@ async function transpileFile(filePath: string): Promise<void> {
             .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
             .join('\n');
 
-        throw new Error(`Falha ao converter "${filePath}" para JavaScript:\n${details}`);
+        throw new Error(`Failed to convert "${filePath}" to JavaScript:\n${details}`);
     }
 
     const javascriptPath = filePath.replace(/\.ts$/, '.js');

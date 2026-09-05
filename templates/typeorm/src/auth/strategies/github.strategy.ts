@@ -25,7 +25,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
         profile: Profile,
         done: (error: unknown, user?: OAuthProfile) => void,
     ) {
-        // o e-mail pode vir vazio se o usuário deixou o e-mail privado no GitHub
+        // The email may be missing when the user keeps it private on GitHub.
         const email =
             profile.emails?.[0]?.value ?? `${profile.username}@users.noreply.github.com`;
 
@@ -33,7 +33,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
             provider: 'github',
             providerUserId: profile.id,
             email,
-            name: profile.displayName || profile.username || 'Usuário GitHub',
+            name: profile.displayName || profile.username || 'GitHub User',
         };
 
         done(null, oauthProfile);

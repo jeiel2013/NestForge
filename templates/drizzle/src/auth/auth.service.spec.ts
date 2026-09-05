@@ -64,7 +64,7 @@ describe('AuthService', () => {
     );
   });
 
-  it('deve lançar ConflictException se o e-mail já existir', async () => {
+  it('throws ConflictException when the email already exists', async () => {
     database.select.mockReturnValueOnce(
       createSelectBuilder([
         {
@@ -85,7 +85,7 @@ describe('AuthService', () => {
       authService.register({
         name: 'Jeiel',
         email: 'jeiel@example.com',
-        password: 'senhaForte123',
+        password: 'strongPassword123',
       }),
     ).rejects.toBeInstanceOf(
       ConflictException,
@@ -94,7 +94,7 @@ describe('AuthService', () => {
     expect(database.insert).not.toHaveBeenCalled();
   });
 
-  it('deve lançar UnauthorizedException com credenciais inválidas', async () => {
+  it('throws UnauthorizedException for invalid credentials', async () => {
     database.select.mockReturnValueOnce(
       createSelectBuilder([]),
     );

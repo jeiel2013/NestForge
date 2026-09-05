@@ -24,7 +24,7 @@ export class UsersService {
     });
 
     if (existing) {
-      throw new ConflictException('E-mail já cadastrado');
+      throw new ConflictException('Email already registered');
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
@@ -83,7 +83,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException('User not found');
     }
 
     return new UserEntity(user);
@@ -109,7 +109,7 @@ export class UsersService {
 
     await this.usersRepository.remove(user);
 
-    return { message: 'Usuário removido com sucesso' };
+    return { message: 'User deleted successfully' };
   }
 
   async updateAvatar(id: string, avatarUrl: string) {

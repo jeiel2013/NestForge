@@ -40,6 +40,8 @@ Durante o build, os templates são copiados para dentro do pacote da CLI para qu
 
 Depois de instalar `nestforge-generator`, execute `npx nestforge` para responder às perguntas do fluxo interativo e receber um projeto NestJS configurado conforme suas escolhas.
 
+Os nomes de projeto são validados antes da criação de qualquer diretório. Eles devem usar letras minúsculas, números, pontos, hífens ou underscores; começar com uma letra ou número; não conter separadores de caminho; ter no máximo 214 caracteres; e não usar nomes reservados do npm ou do Windows. Diretórios existentes nunca são sobrescritos.
+
 ## O que a CLI configura
 
 1. **Nome do projeto** — texto livre — ✅ Disponível
@@ -353,7 +355,6 @@ O build compila a CLI e copia os templates-fonte para o pacote publicado. Projet
 Próximos itens planejados:
 
 * ampliar o suporte a MongoDB além do Prisma quando o ORM selecionado oferecer uma integração compatível;
-* validação completa do nome do pacote;
 * ampliação da matriz de smoke tests com bancos executados em serviços reais;
 * exemplos de deploy automatizado.
 

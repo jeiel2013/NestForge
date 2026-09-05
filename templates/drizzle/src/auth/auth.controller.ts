@@ -52,10 +52,10 @@ export class AuthController {
   @Public()
   @Get('csrf-token')
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Emite um token CSRF vinculado à sessão' })
+  @ApiOperation({ summary: 'Issues a CSRF token bound to the session' })
   @ApiResponse({
     status: 200,
-    description: 'Token CSRF emitido',
+    description: 'CSRF token issued',
     schema: {
       example: {
         csrfToken: 'a1b2c3d4e5f6...',
@@ -72,9 +72,9 @@ export class AuthController {
   @Public()
   @Post('register')
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Cria uma nova conta' })
-  @ApiResponse({ status: 201, description: 'Conta criada com sucesso', schema: { example: TOKENS_EXAMPLE } })
-  @ApiResponse({ status: 409, description: 'E-mail já cadastrado', schema: { example: { statusCode: 409, message: 'E-mail já cadastrado' } } })
+  @ApiOperation({ summary: 'Creates a new account' })
+  @ApiResponse({ status: 201, description: 'Account created successfully', schema: { example: TOKENS_EXAMPLE } })
+  @ApiResponse({ status: 409, description: 'Email already registered', schema: { example: { statusCode: 409, message: 'Email already registered' } } })
   // nestforge:feature:swagger:end
   async register(@Body() dto: RegisterDto) {
     const user = await this.authService.register(dto);
@@ -85,9 +85,9 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Autentica e retorna access/refresh token' })
-  @ApiResponse({ status: 200, description: 'Login realizado com sucesso', schema: { example: TOKENS_EXAMPLE } })
-  @ApiResponse({ status: 401, description: 'Credenciais inválidas', schema: { example: { statusCode: 401, message: 'Credenciais inválidas' } } })
+  @ApiOperation({ summary: 'Authenticates and returns access and refresh tokens' })
+  @ApiResponse({ status: 200, description: 'Login completed successfully', schema: { example: TOKENS_EXAMPLE } })
+  @ApiResponse({ status: 401, description: 'Invalid credentials', schema: { example: { statusCode: 401, message: 'Invalid credentials' } } })
   // nestforge:feature:swagger:end
   async login(@Body() dto: LoginDto) {
     const user = await this.authService.login(dto);
@@ -99,9 +99,9 @@ export class AuthController {
   @Public()
   @Post('register')
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Cria uma conta e inicia uma sessão' })
-  @ApiResponse({ status: 201, description: 'Conta criada e sessão iniciada' })
-  @ApiResponse({ status: 409, description: 'E-mail já cadastrado' })
+  @ApiOperation({ summary: 'Creates an account and starts a session' })
+  @ApiResponse({ status: 201, description: 'Account created and session started' })
+  @ApiResponse({ status: 409, description: 'Email already registered' })
   // nestforge:feature:swagger:end
   async registerWithSession(
     @Body() dto: RegisterDto,
@@ -115,9 +115,9 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Autentica e inicia uma sessão por cookie' })
-  @ApiResponse({ status: 200, description: 'Sessão iniciada com sucesso' })
-  @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
+  @ApiOperation({ summary: 'Authenticates and starts a cookie-based session' })
+  @ApiResponse({ status: 200, description: 'Session started successfully' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   // nestforge:feature:swagger:end
   async loginWithSession(
     @Body() dto: LoginDto,
@@ -130,8 +130,8 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Encerra a sessão atual' })
-  @ApiResponse({ status: 200, description: 'Sessão encerrada com sucesso' })
+  @ApiOperation({ summary: 'Ends the current session' })
+  @ApiResponse({ status: 200, description: 'Session ended successfully' })
   // nestforge:feature:swagger:end
   logoutSession(@Req() request: Request) {
     return this.sessionService.destroy(request);
@@ -143,9 +143,9 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Renova o access token usando o refresh token' })
-  @ApiResponse({ status: 200, description: 'Novo par de tokens emitido', schema: { example: TOKENS_EXAMPLE } })
-  @ApiResponse({ status: 401, description: 'Refresh token inválido, expirado ou já usado', schema: { example: { statusCode: 401, message: 'Refresh token inválido ou expirado' } } })
+  @ApiOperation({ summary: 'Renews the access token using the refresh token' })
+  @ApiResponse({ status: 200, description: 'New token pair issued', schema: { example: TOKENS_EXAMPLE } })
+  @ApiResponse({ status: 401, description: 'Invalid, expired, or already used refresh token', schema: { example: { statusCode: 401, message: 'Invalid or expired refresh token' } } })
   // nestforge:feature:swagger:end
   refresh(@Body() dto: RefreshTokenDto) {
     return this.tokenService.refresh(dto.refreshToken);
@@ -155,8 +155,8 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Revoga o refresh token informado' })
-  @ApiResponse({ status: 200, description: 'Logout realizado', schema: { example: { message: 'Logout realizado com sucesso' } } })
+  @ApiOperation({ summary: 'Revokes the provided refresh token' })
+  @ApiResponse({ status: 200, description: 'Logout completed', schema: { example: { message: 'Logout completed successfully' } } })
   // nestforge:feature:swagger:end
   logout(@Body() dto: RefreshTokenDto) {
     return this.tokenService.logout(dto.refreshToken);
@@ -168,11 +168,11 @@ export class AuthController {
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Envia um e-mail com instruções para redefinir a senha' })
+  @ApiOperation({ summary: 'Sends an email with password reset instructions' })
   @ApiResponse({
     status: 200,
-    description: 'Resposta genérica — sempre a mesma, exista ou não o e-mail (evita enumeração de contas)',
-    schema: { example: { message: 'Se o e-mail existir, enviaremos instruções de redefinição de senha' } },
+    description: 'Generic response — always the same whether the email exists or not (prevents account enumeration)',
+    schema: { example: { message: 'If the email exists, password reset instructions will be sent' } },
   })
   // nestforge:feature:swagger:end
   forgotPassword(@Body() dto: ForgotPasswordDto) {
@@ -183,9 +183,9 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Redefine a senha usando o token recebido por e-mail' })
-  @ApiResponse({ status: 200, description: 'Senha redefinida', schema: { example: { message: 'Senha redefinida com sucesso' } } })
-  @ApiResponse({ status: 401, description: 'Token inválido, expirado ou já usado', schema: { example: { statusCode: 401, message: 'Token de redefinição inválido ou expirado' } } })
+  @ApiOperation({ summary: 'Resets the password using the token received by email' })
+  @ApiResponse({ status: 200, description: 'Password reset', schema: { example: { message: 'Password reset successfully' } } })
+  @ApiResponse({ status: 401, description: 'Invalid, expired, or already used token', schema: { example: { statusCode: 401, message: 'Invalid or expired password reset token' } } })
   // nestforge:feature:swagger:end
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto.token, dto.password);
@@ -194,9 +194,9 @@ export class AuthController {
   @Public()
   @Get('verify-email')
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Confirma o e-mail usando o token recebido' })
-  @ApiResponse({ status: 200, description: 'E-mail verificado', schema: { example: { message: 'E-mail verificado com sucesso' } } })
-  @ApiResponse({ status: 401, description: 'Token inválido, expirado ou já usado', schema: { example: { statusCode: 401, message: 'Token de verificação inválido ou expirado' } } })
+  @ApiOperation({ summary: 'Verifies the email using the received token' })
+  @ApiResponse({ status: 200, description: 'Email verified', schema: { example: { message: 'Email verified successfully' } } })
+  @ApiResponse({ status: 401, description: 'Invalid, expired, or already used token', schema: { example: { statusCode: 401, message: 'Invalid or expired verification token' } } })
   // nestforge:feature:swagger:end
   verifyEmail(@Query('token') token: string) {
     return this.authService.verifyEmail(token);
@@ -207,10 +207,10 @@ export class AuthController {
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Inicia o login via Google (redireciona)' })
+  @ApiOperation({ summary: 'Starts Google login (redirects)' })
   // nestforge:feature:swagger:end
   googleLogin() {
-    // o guard redireciona para o consentimento do Google; nada a fazer aqui
+    // The guard redirects to Google's consent screen; nothing to do here.
   }
 
   // nestforge:feature:auth:token
@@ -246,10 +246,10 @@ export class AuthController {
   @Get('github')
   @UseGuards(GithubAuthGuard)
   // nestforge:feature:swagger
-  @ApiOperation({ summary: 'Inicia o login via GitHub (redireciona)' })
+  @ApiOperation({ summary: 'Starts GitHub login (redirects)' })
   // nestforge:feature:swagger:end
   githubLogin() {
-    // o guard redireciona para o consentimento do GitHub; nada a fazer aqui
+    // The guard redirects to GitHub's consent screen; nothing to do here.
   }
 
   // nestforge:feature:auth:token

@@ -44,14 +44,14 @@ describe('SessionAuthGuard', () => {
         return { context, request };
     }
 
-    it('permite acesso a rotas públicas sem sessão', () => {
+    it('allows access to public routes without a session', () => {
         reflector.getAllAndOverride.mockReturnValue(true);
         const { context } = createContext();
 
         expect(guard.canActivate(context)).toBe(true);
     });
 
-    it('rejeita acesso quando não existe usuário na sessão', () => {
+    it('rejects access when the session has no user', () => {
         reflector.getAllAndOverride.mockReturnValue(false);
         const { context } = createContext();
 
@@ -60,7 +60,7 @@ describe('SessionAuthGuard', () => {
         );
     });
 
-    it('permite acesso e disponibiliza o usuário autenticado', () => {
+    it('allows access and exposes the authenticated user', () => {
         reflector.getAllAndOverride.mockReturnValue(false);
 
         const user = {

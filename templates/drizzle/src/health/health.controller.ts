@@ -33,7 +33,7 @@ export class HealthController {
     @Get()
     @HealthCheck()
     // nestforge:feature:swagger
-    @ApiOperation({ summary: 'Verifica a saúde da API (banco, memória, disco e demais dependências configuradas)' })
+    @ApiOperation({ summary: 'Checks API health (database, memory, disk, and other configured dependencies)' })
     // nestforge:feature:swagger:end
     check() {
         return this.health.check([

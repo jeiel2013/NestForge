@@ -4,7 +4,7 @@ import { PrismaHealthIndicator } from './prisma-health.indicator';
 import { PrismaService } from '../../database/prisma.service';
 
 describe('PrismaHealthIndicator', () => {
-    it('retorna status up quando a query executa com sucesso', async () => {
+    it('returns an up status when the query succeeds', async () => {
         const prisma = {
             // nestforge:feature:database:relational
             $queryRaw: vi.fn().mockResolvedValue([{ '?column?': 1 }]),
@@ -23,13 +23,13 @@ describe('PrismaHealthIndicator', () => {
         // nestforge:feature:database:mongodb:end
     });
 
-    it('lança HealthCheckError quando a query falha', async () => {
+    it('throws HealthCheckError when the query fails', async () => {
         const prisma = {
             // nestforge:feature:database:relational
-            $queryRaw: vi.fn().mockRejectedValue(new Error('conexão recusada')),
+            $queryRaw: vi.fn().mockRejectedValue(new Error('connection refused')),
             // nestforge:feature:database:relational:end
             // nestforge:feature:database:mongodb
-            $runCommandRaw: vi.fn().mockRejectedValue(new Error('conexão recusada')),
+            $runCommandRaw: vi.fn().mockRejectedValue(new Error('connection refused')),
             // nestforge:feature:database:mongodb:end
         };
         const indicator = new PrismaHealthIndicator(prisma as unknown as PrismaService);

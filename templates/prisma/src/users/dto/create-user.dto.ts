@@ -3,10 +3,10 @@ import { createZodDto } from 'nestjs-zod';
 import { Role } from '@prisma/client';
 
 export const createUserSchema = z.object({
-  name: z.string().min(2).describe('Nome completo'),
-  email: z.string().email().describe('E-mail do usuário'),
-  password: z.string().min(8).describe('Senha (mínimo 8 caracteres)'),
-  role: z.nativeEnum(Role).optional().describe('Role do usuário (padrão: USER)'),
+  name: z.string().min(2).describe('Full name'),
+  email: z.string().email().describe('User email'),
+  password: z.string().min(8).describe('Password (minimum 8 characters)'),
+  role: z.nativeEnum(Role).optional().describe('User role (default: USER)'),
 });
 
 export class CreateUserDto extends createZodDto(createUserSchema) { }

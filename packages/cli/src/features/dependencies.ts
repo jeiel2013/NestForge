@@ -2,9 +2,9 @@ import fs from 'fs-extra';
 import path from 'node:path';
 
 /**
- * Pacotes (dependencies ou devDependencies) que só fazem sentido se a feature
- * correspondente estiver habilitada. Mantido separado dos marcadores de código
- * porque package.json é JSON puro — não aceita comentário.
+ * Packages (dependencies or devDependencies) that are only needed when the corresponding
+ * feature is enabled. This remains separate from code markers because package.json is
+ * plain JSON and does not support comments.
  */
 const FEATURE_DEPENDENCIES: Record<
     string,

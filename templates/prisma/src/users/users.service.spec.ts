@@ -37,35 +37,35 @@ describe('UsersService', () => {
         usersService = new UsersService(prisma as PrismaService);
     });
 
-    it('deve lançar ConflictException se o e-mail já existir ao criar', async () => {
+    it('throws ConflictException when the email already exists during creation', async () => {
         prisma.user.findUnique.mockResolvedValue(mockUser);
 
         await expect(
-            usersService.create({ name: 'Jeiel', email: 'jeiel@example.com', password: 'senhaForte123' }),
+            usersService.create({ name: 'Jeiel', email: 'jeiel@example.com', password: 'strongPassword123' }),
         ).rejects.toBeInstanceOf(ConflictException);
     });
 
-    it('deve criar um usuário e esconder o passwordHash na serialização', async () => {
+    it('creates a user and hides passwordHash during serialization', async () => {
         prisma.user.findUnique.mockResolvedValue(null);
         prisma.user.create.mockResolvedValue(mockUser);
 
         const result = await usersService.create({
             name: 'Jeiel',
             email: 'jeiel@example.com',
-            password: 'senhaForte123',
+            password: 'strongPassword123',
         });
 
         expect(result.email).toBe('jeiel@example.com');
         expect(instanceToPlain(result)).not.toHaveProperty('passwordHash');
     });
 
-    it('deve lançar NotFoundException se o usuário não existir', async () => {
+    it('throws NotFoundException when the user does not exist', async () => {
         prisma.user.findUnique.mockResolvedValue(null);
 
         await expect(usersService.findOne('id-invalido')).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('deve retornar dados paginados em findAll', async () => {
+    it('returns paginated data from findAll', async () => {
         prisma.user.findMany.mockResolvedValue([mockUser]);
         prisma.user.count.mockResolvedValue(1);
 
@@ -75,7 +75,7 @@ describe('UsersService', () => {
         expect(result.data).toHaveLength(1);
     });
 
-    it('deve atualizar um usuário existente', async () => {
+    it('updates an existing user', async () => {
         prisma.user.findUnique.mockResolvedValue(mockUser);
         prisma.user.update.mockResolvedValue({ ...mockUser, name: 'Novo Nome' });
 
@@ -84,16 +84,16 @@ describe('UsersService', () => {
         expect(result.name).toBe('Novo Nome');
     });
 
-    it('deve remover um usuário existente', async () => {
+    it('deletes an existing user', async () => {
         prisma.user.findUnique.mockResolvedValue(mockUser);
         prisma.user.delete.mockResolvedValue(mockUser);
 
         const result = await usersService.remove('user-1');
 
-        expect(result).toEqual({ message: 'Usuário removido com sucesso' });
+        expect(result).toEqual({ message: 'User deleted successfully' });
     });
 
-    it('deve atualizar o avatar de um usuário', async () => {
+    it('updates a user avatar', async () => {
         prisma.user.findUnique.mockResolvedValue(mockUser);
         prisma.user.update.mockResolvedValue({ ...mockUser, avatarUrl: '/uploads/avatars/x.png' });
 

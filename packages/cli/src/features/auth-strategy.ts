@@ -2,14 +2,14 @@ import fs from 'fs-extra';
 import path from 'node:path';
 
 /**
- * Remove src/auth/ e src/users/ inteiros quando a estratégia de autenticação é "none".
- * Pra "jwt" e "oauth" os dois módulos continuam (o OAuth também mora dentro de src/auth/).
+ * Removes the entire src/auth/ and src/users/ directories when authentication is "none".
+ * Both modules remain for "jwt" and "oauth" because OAuth also lives in src/auth/.
  *
- * Por que remoção de diretório em vez de marcador por arquivo: esses dois módulos têm
- * ~23 arquivos ao todo, e alguns já carregam um marcador de outra feature (ex:
- * forgot-password.dto.ts depende de "redis,auth:password"). Continuar tudo via
- * marcador por arquivo individual multiplicaria o número de combinações — remover a
- * pasta toda de uma vez pro caso "sem autenticação nenhuma" é mais simples de auditar.
+ * Directory removal is used instead of per-file markers because these two modules contain
+ * about 23 files, some of which already depend on another feature marker (for example,
+ * forgot-password.dto.ts requires "redis,auth:password"). Adding markers to every file
+ * would multiply the number of combinations, while removing both directories for the
+ * no-authentication case is easier to audit.
  */
 export async function applyAuthStrategyRemoval(
     targetDir: string,

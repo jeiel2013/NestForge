@@ -14,7 +14,7 @@ export class UsersService {
   async create(dto: CreateUserDto) {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) {
-      throw new ConflictException('E-mail já cadastrado');
+      throw new ConflictException('Email already registered');
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
@@ -79,7 +79,7 @@ export class UsersService {
   async findOne(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException('User not found');
     }
     return new UserEntity(user);
   }
@@ -100,7 +100,7 @@ export class UsersService {
   async remove(id: string) {
     await this.findOne(id);
     await this.prisma.user.delete({ where: { id } });
-    return { message: 'Usuário removido com sucesso' };
+    return { message: 'User deleted successfully' };
   }
 
   async updateAvatar(id: string, avatarUrl: string) {

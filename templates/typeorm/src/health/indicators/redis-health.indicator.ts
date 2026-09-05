@@ -18,12 +18,12 @@ export class RedisHealthIndicator {
             const response = await client.ping();
 
             if (response !== 'PONG') {
-                throw new Error('Resposta inesperada do Redis');
+                throw new Error('Unexpected Redis response');
             }
 
             return { [key]: { status: 'up' } };
         } catch (error) {
-            throw new HealthCheckError('Redis indisponível', {
+            throw new HealthCheckError('Redis unavailable', {
                 [key]: { status: 'down', message: (error as Error).message },
             });
         } finally {

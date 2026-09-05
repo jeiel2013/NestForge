@@ -3,18 +3,18 @@ import path from 'node:path';
 
 const IGNORED_DIRS = new Set(['node_modules', '.git', 'dist', 'coverage']);
 
-// primeira linha não-vazia do arquivo: se bater, o arquivo inteiro pertence a uma feature
-// aceita "//" (TS/JS) e "#" (YAML/.env) como prefixo de comentário
+// If the first non-empty line matches, the entire file belongs to a feature.
+// Accepts "//" (TS/JS) and "#" (YAML/.env) as comment prefixes.
 const FILE_MARKER = /^(?:\/\/|#) nestforge:feature-file:(\S+)\s*$/;
 
-// marca o início/fim de um bloco dentro de um arquivo (várias linhas ou só uma)
+// Marks the start/end of a block inside a file (one or multiple lines).
 const BLOCK_START = /^(\s*)(?:\/\/|#) nestforge:feature:(\S+)\s*$/;
 const BLOCK_END = /^(\s*)(?:\/\/|#) nestforge:feature:(\S+):end\s*$/;
 
 /**
- * Aplica os marcadores de features em todos os arquivos de texto do projeto gerado.
- * Recursos habilitados: mantém o conteúdo, remove só as linhas de marcador.
- * Recursos desabilitados: remove o bloco inteiro (ou o arquivo inteiro, no caso do marcador de arquivo).
+ * Applies feature markers to every text file in the generated project.
+ * Enabled features keep their content and remove only the marker lines.
+ * Disabled features remove the entire block, or the entire file for file markers.
  */
 export async function applyFeatureMarkers(
     targetDir: string,
@@ -49,10 +49,10 @@ async function collectFiles(dir: string): Promise<string[]> {
 }
 
 /**
- * O nome depois de "feature:" pode ser uma lista separada por vírgula
- * (ex: "redis,auth:password") — nesse caso, TODAS precisam estar habilitadas
- * pro conteúdo ser mantido. Uma feature só (o caso mais comum) continua
- * funcionando igual, já que é só uma lista de um item.
+ * The name after "feature:" can be a comma-separated list
+ * (for example, "redis,auth:password"). In that case, every requirement must be
+ * enabled for the content to remain. A single feature, the most common case,
+ * continues to work as a one-item list.
  */
 function isRequirementMet(rawName: string, enabledFeatures: Set<string>): boolean {
     return rawName
@@ -124,7 +124,7 @@ function stripBlockMarkers(lines: string[], enabledFeatures: Set<string>): strin
             if (endMatch && endMatch[2] === skippingFeature) {
                 skippingFeature = null;
             }
-            continue; // pula todo o conteúdo do bloco (e a linha de :end que o fecha)
+            continue; // Skip the entire block, including its closing :end line.
         }
 
         const endMatch = line.match(BLOCK_END);

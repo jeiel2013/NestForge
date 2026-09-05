@@ -14,21 +14,21 @@ function createContext(user?: { role: Role }): ExecutionContext {
 }
 
 describe('RolesGuard', () => {
-    it('libera acesso quando a rota não exige nenhuma role', () => {
+    it('allows access when the route requires no role', () => {
         const reflector = { getAllAndOverride: vi.fn().mockReturnValue(undefined) } as unknown as Reflector;
         const guard = new RolesGuard(reflector);
 
         expect(guard.canActivate(createContext({ role: Role.USER }))).toBe(true);
     });
 
-    it('libera acesso quando o usuário tem a role exigida', () => {
+    it('allows access when the user has the required role', () => {
         const reflector = { getAllAndOverride: vi.fn().mockReturnValue([Role.ADMIN]) } as unknown as Reflector;
         const guard = new RolesGuard(reflector);
 
         expect(guard.canActivate(createContext({ role: Role.ADMIN }))).toBe(true);
     });
 
-    it('bloqueia acesso quando o usuário não tem a role exigida', () => {
+    it('blocks access when the user does not have the required role', () => {
         const reflector = { getAllAndOverride: vi.fn().mockReturnValue([Role.ADMIN]) } as unknown as Reflector;
         const guard = new RolesGuard(reflector);
 

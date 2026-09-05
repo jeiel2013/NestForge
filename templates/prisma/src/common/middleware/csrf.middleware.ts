@@ -27,7 +27,7 @@ export class CsrfMiddleware implements NestMiddleware {
             !this.tokensMatch(sessionToken, headerToken)
         ) {
             throw new ForbiddenException(
-                'Token CSRF inválido ou ausente',
+                'Invalid or missing CSRF token',
             );
         }
 

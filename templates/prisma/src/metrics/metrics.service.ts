@@ -7,7 +7,7 @@ export class MetricsService {
 
     readonly httpRequestDuration = new client.Histogram({
         name: 'http_request_duration_seconds',
-        help: 'Duração das requisições HTTP em segundos',
+        help: 'HTTP request duration in seconds',
         labelNames: ['method', 'route', 'status_code'],
         buckets: [0.05, 0.1, 0.3, 0.5, 1, 2, 5],
         registers: [this.registry],
@@ -15,7 +15,7 @@ export class MetricsService {
 
     readonly httpRequestsTotal = new client.Counter({
         name: 'http_requests_total',
-        help: 'Total de requisições HTTP recebidas',
+        help: 'Total number of HTTP requests received',
         labelNames: ['method', 'route', 'status_code'],
         registers: [this.registry],
     });

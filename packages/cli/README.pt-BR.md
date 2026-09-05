@@ -35,6 +35,19 @@ Para o guia de testes, perguntas da CLI e checklist completo, consulte [`TESTING
 
 Os projetos incluem recursos como upload de avatar, paginação, filtros, health checks, métricas, testes unitários e testes E2E.
 
+## Nomes de projeto
+
+A CLI valida o nome antes de criar o diretório do projeto. Um nome válido:
+
+* usa apenas letras minúsculas, números, pontos, hífens ou underscores;
+* começa com uma letra ou número;
+* não possui espaços no início ou no fim;
+* não contém separadores de caminho nem escopo npm;
+* possui no máximo 214 caracteres;
+* não é um nome reservado do npm ou do Windows.
+
+O gerador recusa nomes inválidos e diretórios de destino existentes sem gravar arquivos do projeto.
+
 ## Linguagens
 
 A CLI gera projetos em:
@@ -389,6 +402,5 @@ O build:
 ## Próximos itens
 
 * ampliar o suporte a MongoDB além do Prisma quando houver uma integração compatível com o ORM;
-* validação mais completa do nome do projeto e do pacote;
 * ampliação da matriz de smoke tests com PostgreSQL e MySQL reais;
 * redução das limitações conhecidas dos templates anteriores.
