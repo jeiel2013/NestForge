@@ -43,7 +43,7 @@ export function createTypeOrmOptions(
 
         default:
             throw new Error(
-                `Banco "${databaseType}" não suportado pelo template TypeORM`,
+                `Database "${databaseType}" is not supported by the TypeORM template`,
             );
     }
 }
