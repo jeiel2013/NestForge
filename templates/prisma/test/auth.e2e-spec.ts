@@ -23,12 +23,12 @@ describe('Auth (e2e)', () => {
         await app.close();
     });
 
-    it('deve registrar, logar, renovar e revogar o token', async () => {
+    it('registers, logs in, refreshes, and revokes the token', async () => {
         const server = app.getHttpServer();
 
         const registerResponse = await request(server)
             .post('/auth/register')
-            .send({ name: 'Jeiel', email: 'jeiel.e2e@example.com', password: 'senhaForte123' })
+            .send({ name: 'Jeiel', email: 'jeiel.e2e@example.com', password: 'strongPassword123' })
             .expect(201);
 
         expect(registerResponse.body).toHaveProperty('accessToken');
@@ -36,7 +36,7 @@ describe('Auth (e2e)', () => {
 
         const loginResponse = await request(server)
             .post('/auth/login')
-            .send({ email: 'jeiel.e2e@example.com', password: 'senhaForte123' })
+            .send({ email: 'jeiel.e2e@example.com', password: 'strongPassword123' })
             .expect(200);
 
         const refreshResponse = await request(server)
@@ -51,22 +51,22 @@ describe('Auth (e2e)', () => {
             .send({ refreshToken: refreshResponse.body.refreshToken })
             .expect(200);
 
-        // o refresh token já foi revogado no logout, então não pode ser reutilizado
+        // The refresh token was revoked during logout and cannot be reused.
         await request(server)
             .post('/auth/refresh')
             .send({ refreshToken: refreshResponse.body.refreshToken })
             .expect(401);
     });
 
-    it('não deve permitir cadastro com e-mail duplicado', async () => {
+    it('rejects registration with a duplicate email', async () => {
         const server = app.getHttpServer();
-        const payload = { name: 'Jeiel', email: 'duplicado.e2e@example.com', password: 'senhaForte123' };
+        const payload = { name: 'Jeiel', email: 'duplicate.e2e@example.com', password: 'strongPassword123' };
 
         await request(server).post('/auth/register').send(payload).expect(201);
         await request(server).post('/auth/register').send(payload).expect(409);
     });
 
-    it('deve rejeitar login com credenciais inválidas', async () => {
+    it('rejects login with invalid credentials', async () => {
         await request(app.getHttpServer())
             .post('/auth/login')
             .send({ email: 'naoexiste.e2e@example.com', password: 'qualquerSenha123' })
