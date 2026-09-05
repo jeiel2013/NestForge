@@ -42,7 +42,7 @@ export function validateEnv(config: Record<string, unknown>): EnvConfig {
     const issues = parsed.error.issues
       .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
       .join('\n');
-    throw new Error(`Variáveis de ambiente inválidas:\n${issues}`);
+    throw new Error(`Invalid environment variables:\n${issues}`);
   }
 
   return parsed.data;
