@@ -8,7 +8,7 @@ Este guia valida um projeto gerado a partir do template Prisma do NestForge.
 
 * Node.js 20 ou superior
 * npm 10 ou superior
-* Docker para testar PostgreSQL, MySQL, Redis ou Mailpit
+* Docker para testar PostgreSQL, MySQL, MongoDB, Redis ou Mailpit
 
 SQLite pode ser testado sem Docker.
 
@@ -30,8 +30,16 @@ npm run prisma:generate
 
 ## Aplicar o schema de desenvolvimento
 
+Para PostgreSQL, MySQL ou SQLite:
+
 ```bash
 npm run prisma:migrate -- --name init
+```
+
+Para MongoDB:
+
+```bash
+npm run prisma:push
 ```
 
 Execute o seed quando o projeto gerado incluir autenticação por senha:
@@ -67,7 +75,7 @@ Os testes unitários simulam Prisma e Redis, portanto não exigem serviços reai
 npm run test:e2e
 ```
 
-O script `pretest:e2e` executa `prisma migrate deploy` com `.env.test` antes do início da suíte.
+O script `pretest:e2e` executa `prisma migrate deploy` nos bancos relacionais ou `prisma db push` no MongoDB com `.env.test` antes do início da suíte.
 
 Dependendo da estratégia de autenticação gerada, a suíte pode cobrir:
 
@@ -110,11 +118,25 @@ npm test
 npm run test:e2e
 ```
 
+### MongoDB
+
+O MongoDB deve funcionar como replica set porque o Prisma usa transações em escritas aninhadas. O Docker Compose gerado configura um replica set de nó único:
+
+```bash
+docker compose up -d mongodb
+npm run prisma:push
+npm run build
+npm test
+npm run test:e2e
+```
+
+Use nomes de banco diferentes em `.env` e `.env.test`, como `nestforge` e `nestforge_test`.
+
 ## Checklist final
 
 * [ ] As dependências são instaladas corretamente
 * [ ] O Prisma Client é gerado
-* [ ] As migrations são aplicadas
+* [ ] As migrations são aplicadas ou o schema MongoDB é enviado
 * [ ] O seed executa quando aplicável
 * [ ] O build passa
 * [ ] O lint passa
