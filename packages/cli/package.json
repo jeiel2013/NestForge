@@ -1,6 +1,6 @@
 {
   "name": "nestforge-generator",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Interactive CLI for generating a NestJS project from a NestForge starter template",
   "license": "MIT",
   "author": {
