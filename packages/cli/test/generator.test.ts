@@ -2075,6 +2075,35 @@ test('gera Prisma com MongoDB e autenticação JWT', { concurrency: false }, asy
     );
 });
 
+test('gera Prisma com MongoDB e Session/Cookies', { concurrency: false }, async () => {
+    await withGeneratedProject(
+        makeOptions({
+            projectName: 'prisma-mongodb-session',
+            orm: 'prisma',
+            database: 'mongodb',
+            features: ['validation'],
+            authStrategy: 'session',
+            accessControl: true,
+        }),
+        async (targetDir) => {
+            const packageJson = await fs.readJson(path.join(targetDir, 'package.json'));
+            const schema = await readFile(
+                path.join(targetDir, 'prisma', 'schema.prisma'),
+                'utf8',
+            );
+
+            assert.match(schema, /model Session \{/);
+            assert.match(schema, /id\s+String @id @map\("_id"\)/);
+            assert.match(schema, /sid String @unique/);
+            assert.match(schema, /data String/);
+            assert.doesNotMatch(schema, /id\s+String @id @map\("_id"\) @db\.ObjectId\s+sid/);
+            assert.notEqual(packageJson.dependencies['@quixo3/prisma-session-store'], undefined);
+            assert.notEqual(packageJson.dependencies['express-session'], undefined);
+            assert.equal(packageJson.dependencies['@nestjs/jwt'], undefined);
+        },
+    );
+});
+
 test('gera projeto TypeScript sem ORM, banco ou autenticação', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
