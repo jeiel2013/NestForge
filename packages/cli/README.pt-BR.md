@@ -106,6 +106,8 @@ O template Drizzle inclui:
 
 Depois da geração, somente o schema e o driver do banco selecionado permanecem no projeto.
 
+> **Compatibilidade com MongoDB:** a geração com MongoDB está disponível atualmente apenas com Prisma. O TypeORM oferece suporte básico a MongoDB, mas ele não é diretamente compatível com a arquitetura relacional do template TypeORM do NestForge. O Drizzle não oferece atualmente um dialeto oficial para MongoDB. Portanto, a CLI não disponibiliza MongoDB quando TypeORM ou Drizzle é selecionado.
+
 ### Sem ORM
 
 A opção “Nenhum”:
