@@ -97,6 +97,10 @@ model Session {
   data String
   // nestforge:feature:database:sqlite:end
 
+  // nestforge:feature:database:mongodb
+  data String
+  // nestforge:feature:database:mongodb:end
+
   expiresAt DateTime
 
   @@map("sessions")
