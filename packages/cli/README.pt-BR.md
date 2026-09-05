@@ -23,7 +23,7 @@ Para o guia de testes, perguntas da CLI e checklist completo, consulte [`TESTING
 * Prompts interativos usando @clack/prompts;
 * geração em TypeScript ou JavaScript;
 * Prisma, TypeORM, Drizzle ORM ou nenhum ORM;
-* PostgreSQL, MySQL e SQLite;
+* PostgreSQL, MySQL, SQLite e MongoDB com Prisma;
 * autenticação JWT, Session/Cookies, OAuth-only ou nenhuma;
 * Docker opcional;
 * Swagger/OpenAPI opcional;
@@ -61,9 +61,10 @@ Disponível com:
 
 * PostgreSQL;
 * MySQL;
-* SQLite.
+* SQLite;
+* MongoDB.
 
-A CLI ajusta o provider do schema.prisma, a URL do banco e os recursos específicos do provider.
+A CLI ajusta o provider do schema.prisma, a URL do banco e os recursos específicos do provider. Projetos MongoDB usam campos `ObjectId` mapeados e `prisma db push` no lugar do Prisma Migrate.
 
 ### TypeORM
 
@@ -262,7 +263,7 @@ processado.
 | Banco: PostgreSQL     | ✅ Implementado     |
 | Banco: MySQL          | ✅ Implementado     |
 | Banco: SQLite         | ✅ Implementado     |
-| Banco: MongoDB        | ❌ Não implementado |
+| Banco: MongoDB        | ✅ Com Prisma       |
 | Auth: JWT             | ✅ Implementada     |
 | Auth: Session/Cookies | ✅ Implementada     |
 | Auth: OAuth-only      | ✅ Implementada     |
@@ -287,6 +288,8 @@ A cobertura inclui:
 * Prisma com PostgreSQL;
 * Prisma com MySQL;
 * Prisma com SQLite;
+* Prisma com MongoDB e JWT;
+* Prisma com MongoDB e Session/Cookies;
 * TypeORM com SQLite;
 * Drizzle com PostgreSQL;
 * Drizzle com MySQL;
@@ -315,7 +318,7 @@ Foram validadas com instalação, build, testes unitários, migrations, seed e t
 * TypeScript + Drizzle + SQLite + JWT;
 * TypeScript + Drizzle + SQLite + Session/Cookies.
 
-PostgreSQL e MySQL possuem testes automatizados de geração, configuração e remoção dos drivers não utilizados. Smoke tests completos desses bancos ainda exigem serviços locais ou Docker.
+PostgreSQL, MySQL e MongoDB possuem testes automatizados de geração e configuração. Smoke tests que conectam a esses bancos ainda exigem serviços locais ou Docker; o MongoDB deve funcionar como replica set.
 
 ## Limitações conhecidas
 
@@ -383,7 +386,7 @@ O build:
 
 ## Próximos itens
 
-* MongoDB;
+* ampliar o suporte a MongoDB além do Prisma quando houver uma integração compatível com o ORM;
 * validação mais completa do nome do projeto e do pacote;
 * ampliação da matriz de smoke tests com PostgreSQL e MySQL reais;
 * redução das limitações conhecidas dos templates anteriores.
