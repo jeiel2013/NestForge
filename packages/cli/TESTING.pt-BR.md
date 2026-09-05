@@ -8,7 +8,7 @@ Guia para validar a CLI, as combinações geradas e os projetos Prisma, TypeORM 
 
 * Node.js 20 ou superior;
 * npm 10 ou superior;
-* Docker apenas para testes reais com PostgreSQL, MySQL ou Redis.
+* Docker apenas para testes reais com PostgreSQL, MySQL, MongoDB ou Redis.
 
 SQLite pode ser testado sem Docker.
 
@@ -48,6 +48,9 @@ A suíte valida automaticamente:
 * Prisma com PostgreSQL e JWT;
 * Prisma com MySQL;
 * Prisma com SQLite;
+* Prisma com MongoDB e JWT;
+* Prisma com MongoDB e Session/Cookies;
+* Prisma com MongoDB em JavaScript;
 * OAuth-only;
 * autenticação sem senha;
 * autenticação por Session/Cookies;
@@ -66,12 +69,12 @@ A suíte valida automaticamente:
 * configuração dos scripts de migrations;
 * processamento dos marcadores;
 * geração sem ORM em TypeScript e JavaScript;
-* recusa de MongoDB e combinações inválidas sem ORM.
+* recusa de MongoDB com ORMs incompatíveis e combinações inválidas sem ORM.
 
 Resultado esperado:
 
 ```text
-pass 16
+pass 19
 fail 0
 ```
 
@@ -134,7 +137,7 @@ A CLI apresenta até 11 perguntas. A pergunta de RBAC aparece somente quando alg
 |  1 | Nome do projeto          | Texto livre                                 | ✅                      |
 |  2 | Linguagem                | TypeScript ou JavaScript                    | ✅ Ambas                |
 |  3 | ORM / Query Builder      | Prisma, TypeORM, Drizzle ou Nenhum          | ✅ Todas as opções      |
-|  4 | Banco de dados           | PostgreSQL, MySQL, SQLite ou MongoDB        | ✅ SQL · ⏳ MongoDB      |
+|  4 | Banco de dados           | PostgreSQL, MySQL, SQLite ou MongoDB        | ✅ MongoDB com Prisma; SQL com todos os ORMs |
 |  5 | Docker                   | Sim ou não                                  | ✅                      |
 |  6 | Swagger/OpenAPI          | Sim ou não                                  | ✅                      |
 |  7 | Validação global com Zod | Sim ou não                                  | ✅                      |
@@ -186,7 +189,7 @@ Na geração JavaScript:
 | PostgreSQL | ✅ Funciona com Prisma, TypeORM e Drizzle |
 | MySQL      | ✅ Funciona com Prisma, TypeORM e Drizzle |
 | SQLite     | ✅ Funciona com Prisma, TypeORM e Drizzle |
-| MongoDB    | ❌ Exibe erro amigável                    |
+| MongoDB    | ✅ Funciona com Prisma; recusado com TypeORM e Drizzle |
 
 A CLI deve remover os drivers dos bancos que não foram selecionados.
 
@@ -352,6 +355,15 @@ npm run start:dev
 
 A linha do Docker aparece somente quando Docker está habilitado e existe algum serviço para iniciar.
 
+Para Prisma com MongoDB, a etapa de banco é:
+
+```bash
+npm run prisma:push
+npm run prisma:seed
+```
+
+MongoDB usa `db push` no lugar do Prisma Migrate e deve funcionar como replica set para operações transacionais.
+
 ### TypeORM
 
 ```bash
@@ -407,13 +419,17 @@ Não existem comandos de banco, migration, seed ou autenticação.
 * [ ] OAuth-only remove fluxos de senha
 * [ ] Nenhuma autenticação remove auth e users
 * [x] ORM “Nenhum” remove as integrações de banco e autenticação
-* [ ] MongoDB exibe erro antes de criar a pasta
+* [x] MongoDB é aceito com Prisma
+* [x] MongoDB é recusado com TypeORM e Drizzle antes de criar a pasta
 
 ## 9. Checklist Prisma
 
 * [ ] TypeScript + Prisma + PostgreSQL + JWT
 * [ ] TypeScript + Prisma + MySQL + JWT
 * [ ] TypeScript + Prisma + SQLite + JWT
+* [x] TypeScript + Prisma + MongoDB + JWT
+* [x] TypeScript + Prisma + MongoDB + Session/Cookies
+* [x] JavaScript + Prisma + MongoDB
 * [ ] JavaScript + Prisma
 * [ ] Prisma + Session/Cookies
 * [ ] Prisma + OAuth-only
@@ -669,10 +685,10 @@ package.json
 
 ## 17. Escopo ainda não implementado
 
-* MongoDB;
+* suporte a MongoDB além do Prisma;
 * validação completa do nome do pacote;
 * smoke tests reais de PostgreSQL;
 * smoke tests reais de MySQL;
 * publicação final no npm.
 
-MongoDB deve continuar retornando um erro claro antes da criação da pasta do projeto.
+Combinações MongoDB com TypeORM ou Drizzle devem retornar um erro claro antes da criação da pasta do projeto.
