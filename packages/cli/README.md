@@ -23,7 +23,7 @@ For the testing guide, CLI prompts, and complete checklist, see [`TESTING.md`](T
 - Interactive prompts using `@clack/prompts`;
 - TypeScript or JavaScript generation;
 - Prisma, TypeORM, Drizzle ORM, or no ORM;
-- PostgreSQL, MySQL, and SQLite;
+- PostgreSQL, MySQL, SQLite, and MongoDB with Prisma;
 - JWT, Session/Cookies, OAuth-only, or no authentication;
 - optional Docker;
 - optional Swagger/OpenAPI;
@@ -61,9 +61,10 @@ Available with:
 
 - PostgreSQL;
 - MySQL;
-- SQLite.
+- SQLite;
+- MongoDB.
 
-The CLI adjusts the `schema.prisma` provider, database URL, and provider-specific resources.
+The CLI adjusts the `schema.prisma` provider, database URL, and provider-specific resources. MongoDB projects use mapped `ObjectId` fields and `prisma db push` instead of Prisma Migrate.
 
 ### TypeORM
 
@@ -261,7 +262,7 @@ When requested, the CLI automatically creates `.env` from the already processed 
 | Database: PostgreSQL | ✅ Implemented |
 | Database: MySQL | ✅ Implemented |
 | Database: SQLite | ✅ Implemented |
-| Database: MongoDB | ❌ Not implemented |
+| Database: MongoDB | ✅ Implemented with Prisma |
 | Auth: JWT | ✅ Implemented |
 | Auth: Session/Cookies | ✅ Implemented |
 | Auth: OAuth-only | ✅ Implemented |
@@ -288,6 +289,8 @@ Coverage includes:
 - Prisma with PostgreSQL;
 - Prisma with MySQL;
 - Prisma with SQLite;
+- Prisma with MongoDB and JWT;
+- Prisma with MongoDB and Session/Cookies;
 - TypeORM with SQLite;
 - Drizzle with PostgreSQL;
 - Drizzle with MySQL;
@@ -316,7 +319,7 @@ The following combinations were validated with installation, build, unit tests, 
 - TypeScript + Drizzle + SQLite + JWT;
 - TypeScript + Drizzle + SQLite + Session/Cookies.
 
-PostgreSQL and MySQL have automated generation, configuration, and unused-driver removal tests. Complete smoke tests for these databases still require local services or Docker.
+PostgreSQL, MySQL, and MongoDB have automated generation and configuration tests. Complete smoke tests that connect to these databases still require local services or Docker; MongoDB must run as a replica set.
 
 ## Known limitations
 
@@ -384,7 +387,7 @@ The build:
 
 ## Next steps
 
-- MongoDB;
+- expand MongoDB support beyond Prisma when a compatible ORM integration is available;
 - more complete project and package name validation;
 - expand the smoke-test matrix with real PostgreSQL and MySQL services;
 - reduce the known limitations in the earlier templates.
