@@ -81,7 +81,7 @@ describe('UsersService', () => {
         );
     });
 
-    it('deve lançar ConflictException se o e-mail já existir ao criar', async () => {
+    it('throws ConflictException when the email already exists during creation', async () => {
         database.select.mockReturnValueOnce(
             createSelectBuilder([
                 {
@@ -94,14 +94,14 @@ describe('UsersService', () => {
             usersService.create({
                 name: 'Jeiel',
                 email: 'jeiel@example.com',
-                password: 'senhaForte123',
+                password: 'strongPassword123',
             }),
         ).rejects.toBeInstanceOf(ConflictException);
 
         expect(database.insert).not.toHaveBeenCalled();
     });
 
-    it('deve criar um usuário e esconder o passwordHash na serialização', async () => {
+    it('creates a user and hides passwordHash during serialization', async () => {
         database.select
             .mockReturnValueOnce(createSelectBuilder([]))
             .mockReturnValueOnce(
@@ -111,7 +111,7 @@ describe('UsersService', () => {
         const result = await usersService.create({
             name: 'Jeiel',
             email: 'jeiel@example.com',
-            password: 'senhaForte123',
+            password: 'strongPassword123',
         });
 
         expect(result.email).toBe(
@@ -133,7 +133,7 @@ describe('UsersService', () => {
         );
     });
 
-    it('deve lançar NotFoundException se o usuário não existir', async () => {
+    it('throws NotFoundException when the user does not exist', async () => {
         database.select.mockReturnValueOnce(
             createSelectBuilder([]),
         );
@@ -143,7 +143,7 @@ describe('UsersService', () => {
         ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('deve retornar dados paginados em findAll', async () => {
+    it('returns paginated data from findAll', async () => {
         const usersBuilder = createSelectBuilder([
             mockUser,
         ]);
@@ -179,7 +179,7 @@ describe('UsersService', () => {
         );
     });
 
-    it('deve aplicar busca e filtro por role em findAll', async () => {
+    it('applies search and role filters in findAll', async () => {
         const usersBuilder = createSelectBuilder([
             mockUser,
         ]);
@@ -214,7 +214,7 @@ describe('UsersService', () => {
         );
     });
 
-    it('deve atualizar um usuário existente', async () => {
+    it('updates an existing user', async () => {
         const updatedUser = new UserEntity({
             ...mockUser,
             name: 'Novo Nome',
@@ -248,7 +248,7 @@ describe('UsersService', () => {
         expect(updateWhere).toHaveBeenCalled();
     });
 
-    it('deve remover um usuário existente', async () => {
+    it('deletes an existing user', async () => {
         database.select.mockReturnValueOnce(
             createSelectBuilder([mockUser]),
         );
@@ -261,11 +261,11 @@ describe('UsersService', () => {
         expect(deleteWhere).toHaveBeenCalled();
 
         expect(result).toEqual({
-            message: 'Usuário removido com sucesso',
+            message: 'User deleted successfully',
         });
     });
 
-    it('deve atualizar o avatar de um usuário', async () => {
+    it('updates a user avatar', async () => {
         const updatedUser = new UserEntity({
             ...mockUser,
             avatarUrl: '/uploads/avatars/x.png',
