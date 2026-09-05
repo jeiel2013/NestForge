@@ -8,10 +8,20 @@ Em `prisma/schema.prisma`:
 
 ```prisma
 model Post {
+  // nestforge:feature:database:relational
   id        String   @id @default(uuid())
+  // nestforge:feature:database:relational:end
+  // nestforge:feature:database:mongodb
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  // nestforge:feature:database:mongodb:end
   title     String
   content   String
+  // nestforge:feature:database:relational
   authorId  String
+  // nestforge:feature:database:relational:end
+  // nestforge:feature:database:mongodb
+  authorId  String   @db.ObjectId
+  // nestforge:feature:database:mongodb:end
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -26,10 +36,16 @@ Não esqueça de adicionar a relação inversa no `model User`:
 posts Post[]
 ```
 
-Gere a migration:
+Em PostgreSQL, MySQL ou SQLite, gere a migration:
 
 ```bash
 npx prisma migrate dev --name add_posts
+```
+
+Em MongoDB, envie o schema diretamente:
+
+```bash
+npm run prisma:push
 ```
 
 ## 2. Crie a estrutura de pastas
@@ -219,7 +235,7 @@ PostsModule,
 
 ## Checklist rápido
 
-- [ ] Model no `schema.prisma` + migration
+- [ ] Model no `schema.prisma` + migration ou `prisma:push`
 - [ ] DTOs com Zod (`createZodDto`)
 - [ ] Entity (mesmo sem campo sensível ainda)
 - [ ] Service sem lógica no controller
