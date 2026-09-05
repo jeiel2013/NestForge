@@ -25,6 +25,8 @@ NestForge é um boilerplate de NestJS pensado para acelerar o início de projeto
 - 🐳 **Docker** — ambiente completo com um comando
 - ⚙️ **CI/CD** — GitHub Actions (build, lint, test)
 
+> **Compatibilidade com MongoDB:** o MongoDB não está disponível neste template porque o Drizzle não oferece atualmente um dialeto oficial para MongoDB. A geração com MongoDB está disponível atualmente por meio do template Prisma.
+
 ## 🧱 Stack
 
 | Camada | Tecnologia |
