@@ -6,10 +6,10 @@ export function verifyEmailTemplate(name: string, token: string): string {
 
     return `
     <div style="font-family: sans-serif; line-height: 1.5;">
-      <h2>Olá, ${name}!</h2>
-      <p>Confirme seu e-mail clicando no link abaixo:</p>
+      <h2>Hello, ${name}!</h2>
+      <p>Confirm your email by clicking the link below:</p>
       <p><a href="${link}">${link}</a></p>
-      <p>Esse link expira em 24 horas.</p>
+      <p>This link expires in 24 hours.</p>
     </div>
   `;
 }
@@ -19,10 +19,10 @@ export function resetPasswordTemplate(name: string, token: string): string {
 
     return `
     <div style="font-family: sans-serif; line-height: 1.5;">
-      <h2>Olá, ${name}!</h2>
-      <p>Recebemos um pedido para redefinir sua senha. Clique no link abaixo para continuar:</p>
+      <h2>Hello, ${name}!</h2>
+      <p>We received a request to reset your password. Click the link below to continue:</p>
       <p><a href="${link}">${link}</a></p>
-      <p>Se você não pediu isso, pode ignorar este e-mail. O link expira em 1 hora.</p>
+      <p>If you did not request this, you can ignore this email. The link expires in 1 hour.</p>
     </div>
   `;
 }
