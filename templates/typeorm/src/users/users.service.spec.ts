@@ -49,19 +49,19 @@ describe('UsersService', () => {
         );
     });
 
-    it('deve lançar ConflictException se o e-mail já existir ao criar', async () => {
+    it('throws ConflictException when the email already exists during creation', async () => {
         usersRepository.findOne.mockResolvedValue(mockUser);
 
         await expect(
             usersService.create({
                 name: 'Jeiel',
                 email: 'jeiel@example.com',
-                password: 'senhaForte123',
+                password: 'strongPassword123',
             }),
         ).rejects.toBeInstanceOf(ConflictException);
     });
 
-    it('deve criar um usuário e esconder o passwordHash na serialização', async () => {
+    it('creates a user and hides passwordHash during serialization', async () => {
         usersRepository.findOne.mockResolvedValue(null);
         usersRepository.create.mockReturnValue(mockUser);
         usersRepository.save.mockResolvedValue(mockUser);
@@ -69,7 +69,7 @@ describe('UsersService', () => {
         const result = await usersService.create({
             name: 'Jeiel',
             email: 'jeiel@example.com',
-            password: 'senhaForte123',
+            password: 'strongPassword123',
         });
 
         expect(result.email).toBe('jeiel@example.com');
@@ -78,7 +78,7 @@ describe('UsersService', () => {
         expect(usersRepository.save).toHaveBeenCalledWith(mockUser);
     });
 
-    it('deve lançar NotFoundException se o usuário não existir', async () => {
+    it('throws NotFoundException when the user does not exist', async () => {
         usersRepository.findOne.mockResolvedValue(null);
 
         await expect(
@@ -86,7 +86,7 @@ describe('UsersService', () => {
         ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('deve retornar dados paginados em findAll', async () => {
+    it('returns paginated data from findAll', async () => {
         queryBuilder.getManyAndCount.mockResolvedValue([[mockUser], 1]);
 
         const result = await usersService.findAll({
@@ -105,7 +105,7 @@ describe('UsersService', () => {
         expect(queryBuilder.take).toHaveBeenCalledWith(10);
     });
 
-    it('deve aplicar busca e filtro por role em findAll', async () => {
+    it('applies search and role filters in findAll', async () => {
         queryBuilder.getManyAndCount.mockResolvedValue([[mockUser], 1]);
 
         await usersService.findAll({
@@ -126,7 +126,7 @@ describe('UsersService', () => {
         );
     });
 
-    it('deve atualizar um usuário existente', async () => {
+    it('updates an existing user', async () => {
         usersRepository.findOne.mockResolvedValue(mockUser);
         usersRepository.save.mockImplementation(
             async (user: UserEntity) => user,
@@ -147,7 +147,7 @@ describe('UsersService', () => {
         );
     });
 
-    it('deve remover um usuário existente', async () => {
+    it('deletes an existing user', async () => {
         usersRepository.findOne.mockResolvedValue(mockUser);
         usersRepository.remove.mockResolvedValue(mockUser);
 
@@ -155,11 +155,11 @@ describe('UsersService', () => {
 
         expect(usersRepository.remove).toHaveBeenCalledWith(mockUser);
         expect(result).toEqual({
-            message: 'Usuário removido com sucesso',
+            message: 'User deleted successfully',
         });
     });
 
-    it('deve atualizar o avatar de um usuário', async () => {
+    it('updates a user avatar', async () => {
         usersRepository.findOne.mockResolvedValue(mockUser);
         usersRepository.save.mockImplementation(
             async (user: UserEntity) => user,
