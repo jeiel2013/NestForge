@@ -2374,3 +2374,18 @@ test('rejects invalid project names before creating files', { concurrency: false
         assert.deepEqual(await fs.readdir(tempDir), []);
     });
 });
+
+test('does not overwrite an existing project directory', { concurrency: false }, async () => {
+    await withTempDirectory(async (tempDir) => {
+        const projectName = 'existing-project';
+        const sentinelPath = path.join(tempDir, projectName, 'keep.txt');
+        await fs.outputFile(sentinelPath, 'keep this file');
+
+        await assert.rejects(
+            () => generateProject(makeOptions({ projectName })),
+            /directory already exists/,
+        );
+
+        assert.equal(await fs.readFile(sentinelPath, 'utf8'), 'keep this file');
+    });
+});
