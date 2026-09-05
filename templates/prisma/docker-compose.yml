@@ -10,6 +10,10 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    # nestforge:feature:database:mongodb
+    environment:
+      DATABASE_URL: mongodb://mongodb:27017/nestforge?replicaSet=rs0
+    # nestforge:feature:database:mongodb:end
     depends_on:
       # nestforge:feature:database:postgres
       - postgres
@@ -17,6 +21,9 @@ services:
       # nestforge:feature:database:mysql
       - mysql
       # nestforge:feature:database:mysql:end
+      # nestforge:feature:database:mongodb
+      - mongodb
+      # nestforge:feature:database:mongodb:end
       - redis
     volumes:
       - ./src:/app/src
@@ -53,6 +60,23 @@ services:
       - mysql_data:/var/lib/mysql
   # nestforge:feature:database:mysql:end
 
+  # nestforge:feature:database:mongodb
+  mongodb:
+    image: mongo:8
+    container_name: nestforge-mongodb
+    restart: unless-stopped
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"try { rs.status().ok } catch (error) { rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'mongodb:27017'}]}).ok }\" | grep 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  # nestforge:feature:database:mongodb:end
+
   redis:
     image: redis:7-alpine
     container_name: nestforge-redis
@@ -76,3 +100,7 @@ volumes:
 volumes:
   mysql_data:
   # nestforge:feature:database:mysql:end
+  # nestforge:feature:database:mongodb
+volumes:
+  mongodb_data:
+  # nestforge:feature:database:mongodb:end
