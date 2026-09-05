@@ -68,7 +68,7 @@ describe('SessionService', () => {
 
         expect(session.destroy).toHaveBeenCalledOnce();
         expect(result).toEqual({
-            message: 'Logout realizado com sucesso',
+            message: 'Logout completed successfully',
         });
     });
 });
