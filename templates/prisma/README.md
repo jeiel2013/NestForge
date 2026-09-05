@@ -17,7 +17,7 @@ NestForge is a NestJS starter designed to accelerate the beginning of serious ba
 - 🌐 **OAuth** — Google and GitHub, integrated with the selected token or session strategy
 - 👥 **RBAC** — Roles (Admin, Manager, User) and granular Permissions
 - 🛡️ **Security** — Helmet, CORS, Rate Limiting, validation, and serialization with Zod
-- 🗄️ **Database** — Prisma with PostgreSQL, MySQL, or SQLite
+- 🗄️ **Database** — Prisma with PostgreSQL, MySQL, SQLite, or MongoDB
 - 📨 **Email** — queues with BullMQ + Redis, locally tested with Mailpit
 - 📄 **Automatic documentation** — Swagger
 - 🪵 **Structured logs** — Pino
@@ -31,7 +31,7 @@ NestForge is a NestJS starter designed to accelerate the beginning of serious ba
 |---|---|
 | Framework | NestJS + TypeScript |
 | ORM | Prisma |
-| Database | PostgreSQL, MySQL, or SQLite |
+| Database | PostgreSQL, MySQL, SQLite, or MongoDB |
 | Cache / Queues | Redis + BullMQ |
 | Authentication | JWT, Session/Cookies, or OAuth with Passport |
 | Validation | Zod + nestjs-zod (schemas automatically become DTOs + Swagger) |
@@ -73,14 +73,19 @@ cp .env.example .env
 docker compose up
 ```
 
-This starts the API, PostgreSQL, Redis, and Mailpit (email interface at `http://localhost:8025`).
+This starts the API, the selected database, Redis, and Mailpit (email interface at `http://localhost:8025`). MongoDB runs as a single-node replica set for transaction support.
 
 ### Running locally
 
 ```bash
 npm install
 cp .env.example .env
+# nestforge:feature:database:relational
 npx prisma migrate dev
+# nestforge:feature:database:relational:end
+# nestforge:feature:database:mongodb
+npm run prisma:push
+# nestforge:feature:database:mongodb:end
 npx prisma db seed
 npm run start:dev
 ```
@@ -234,15 +239,14 @@ npm run test:e2e      # integration tests (E2E)
 npm run test:cov      # coverage
 ```
 
-E2E tests (`test/*.e2e-spec.ts`) start the real application (Nest + Prisma + Redis) and call its endpoints with `supertest`, using an isolated database (`.env.test`, the `nestforge_test` database — never the development database). Before running them for the first time:
+E2E tests (`test/*.e2e-spec.ts`) start the real application (Nest + Prisma + Redis) and call its endpoints with `supertest`, using an isolated database (`.env.test`, the `nestforge_test` database — never the development database). Before running them for the first time, start the selected database and Redis:
 
 ```bash
-createdb nestforge_test   # or: psql -U nestforge -c "CREATE DATABASE nestforge_test;"
-docker compose up -d postgres redis
+docker compose up -d
 npm run test:e2e
 ```
 
-The `pretest:e2e` script automatically applies migrations to this database before every run. Each test cleans the tables before running (`test/utils/clean-database.ts`), so nothing needs to be reset manually between runs. Current coverage includes the complete authentication flow (registration, login, refresh, logout, duplicate email, invalid credentials) and user CRUD with RBAC (ADMIN can do everything, USER can read but cannot create, `/users/me`, and access without a token).
+The `pretest:e2e` script automatically applies migrations for relational databases or pushes the Prisma schema for MongoDB before every run. Each test cleans the database before running (`test/utils/clean-database.ts`), so nothing needs to be reset manually between runs. Current coverage includes the complete authentication flow (registration, login, refresh, logout, duplicate email, invalid credentials) and user CRUD with RBAC (ADMIN can do everything, USER can read but cannot create, `/users/me`, and access without a token).
 
 Unit tests (`src/**/*.spec.ts`) run in isolation with Prisma and `ioredis` mocked (`vi.fn()` / `vi.mock()`), so they do not require a real database or Redis. Current coverage includes `AuthService` (registration/login), `UsersService` (complete CRUD + pagination + confirmation through `instanceToPlain` that `passwordHash` is not leaked during serialization), `RolesGuard` and `PermissionsGuard` (allowing/blocking, including multiple permissions required at the same time), and health indicators (`PrismaHealthIndicator`, `RedisHealthIndicator`).
 
