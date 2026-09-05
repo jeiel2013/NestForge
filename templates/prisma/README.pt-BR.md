@@ -17,7 +17,7 @@ NestForge é um boilerplate de NestJS pensado para acelerar o início de projeto
 - 🌐 **OAuth** — Google e GitHub, integrado à estratégia de token ou sessão escolhida
 - 👥 **RBAC** — Roles (Admin, Manager, User) e Permissions granulares
 - 🛡️ **Segurança** — Helmet, CORS, Rate Limiting, validação e serialização com Zod
-- 🗄️ **Banco de dados** — Prisma com PostgreSQL, MySQL ou SQLite
+- 🗄️ **Banco de dados** — Prisma com PostgreSQL, MySQL, SQLite ou MongoDB
 - 📨 **E-mails** — filas com BullMQ + Redis, testado localmente com Mailpit
 - 📄 **Documentação automática** — Swagger
 - 🪵 **Logs estruturados** — Pino
@@ -31,7 +31,7 @@ NestForge é um boilerplate de NestJS pensado para acelerar o início de projeto
 |---|---|
 | Framework | NestJS + TypeScript |
 | ORM | Prisma |
-| Banco | PostgreSQL, MySQL ou SQLite |
+| Banco | PostgreSQL, MySQL, SQLite ou MongoDB |
 | Cache / Filas | Redis + BullMQ |
 | Autenticação | JWT, Session/Cookies ou OAuth com Passport |
 | Validação | Zod + nestjs-zod (schemas viram DTO + Swagger automaticamente) |
@@ -73,14 +73,19 @@ cp .env.example .env
 docker compose up
 ```
 
-Isso sobe: API, PostgreSQL, Redis e Mailpit (interface de e-mail em `http://localhost:8025`).
+Isso sobe a API, o banco selecionado, Redis e Mailpit (interface de e-mail em `http://localhost:8025`). O MongoDB funciona como replica set de nó único para permitir transações.
 
 ### Rodando localmente
 
 ```bash
 npm install
 cp .env.example .env
+# nestforge:feature:database:relational
 npx prisma migrate dev
+# nestforge:feature:database:relational:end
+# nestforge:feature:database:mongodb
+npm run prisma:push
+# nestforge:feature:database:mongodb:end
 npx prisma db seed
 npm run start:dev
 ```
@@ -234,15 +239,14 @@ npm run test:e2e      # integração (e2e)
 npm run test:cov      # cobertura
 ```
 
-Os testes e2e (`test/*.e2e-spec.ts`) sobem a aplicação real (Nest + Prisma + Redis) e batem nos endpoints com `supertest`, usando um banco isolado (`.env.test`, banco `nestforge_test` — nunca o de desenvolvimento). Antes de rodar pela primeira vez:
+Os testes e2e (`test/*.e2e-spec.ts`) sobem a aplicação real (Nest + Prisma + Redis) e batem nos endpoints com `supertest`, usando um banco isolado (`.env.test`, banco `nestforge_test` — nunca o de desenvolvimento). Antes de rodar pela primeira vez, inicie o banco selecionado e o Redis:
 
 ```bash
-createdb nestforge_test   # ou: psql -U nestforge -c "CREATE DATABASE nestforge_test;"
-docker compose up -d postgres redis
+docker compose up -d
 npm run test:e2e
 ```
 
-O script `pretest:e2e` já aplica as migrations nesse banco automaticamente antes de cada rodada. Cada teste limpa as tabelas antes de rodar (`test/utils/clean-database.ts`), então não precisa zerar nada manualmente entre execuções. Hoje cobrem o fluxo de autenticação completo (registro, login, refresh, logout, e-mail duplicado, credenciais inválidas) e o CRUD de usuários com RBAC (ADMIN consegue tudo, USER lê mas não cria, `/users/me`, acesso sem token).
+O script `pretest:e2e` aplica as migrations nos bancos relacionais ou envia o schema Prisma ao MongoDB antes de cada rodada. Cada teste limpa o banco antes de rodar (`test/utils/clean-database.ts`), então não precisa zerar nada manualmente entre execuções. Hoje cobrem o fluxo de autenticação completo (registro, login, refresh, logout, e-mail duplicado, credenciais inválidas) e o CRUD de usuários com RBAC (ADMIN consegue tudo, USER lê mas não cria, `/users/me`, acesso sem token).
 
 Os testes unitários (`src/**/*.spec.ts`) rodam isolados, com Prisma e `ioredis` mockados (`vi.fn()` / `vi.mock()`) — não precisam de banco nem Redis de verdade. Hoje cobrem: `AuthService` (registro/login), `UsersService` (CRUD completo + paginação + confirma que o `passwordHash` não vaza na serialização via `instanceToPlain`), `RolesGuard` e `PermissionsGuard` (liberação/bloqueio, inclusive com múltiplas permissões exigidas ao mesmo tempo) e os indicadores de saúde (`PrismaHealthIndicator`, `RedisHealthIndicator`).
 
