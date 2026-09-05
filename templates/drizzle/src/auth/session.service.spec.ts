@@ -31,7 +31,7 @@ describe('SessionService', () => {
         };
     }
 
-    it('regenera, preenche e salva a sessão', async () => {
+    it('regenerates, populates, and saves the session', async () => {
         const { request, session } = createRequest();
         const user: SessionUser = {
             id: 'user-1',
@@ -51,7 +51,7 @@ describe('SessionService', () => {
         });
     });
 
-    it('emite e salva um novo token CSRF', async () => {
+    it('issues and saves a new CSRF token', async () => {
         const { request, session } = createRequest();
 
         const result = await sessionService.issueCsrfToken(request);
@@ -61,7 +61,7 @@ describe('SessionService', () => {
         expect(session.save).toHaveBeenCalledOnce();
     });
 
-    it('destrói a sessão atual', async () => {
+    it('destroys the current session', async () => {
         const { request, session } = createRequest();
 
         const result = await sessionService.destroy(request);
