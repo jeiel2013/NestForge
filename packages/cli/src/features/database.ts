@@ -4,10 +4,11 @@ import path from 'node:path';
 type DatabaseChoice =
     | 'postgres'
     | 'mysql'
-    | 'sqlite';
+    | 'sqlite'
+    | 'mongodb';
 
 interface DatabaseUrlConfig {
-    provider: 'postgresql' | 'mysql' | 'sqlite';
+    provider: 'postgresql' | 'mysql' | 'sqlite' | 'mongodb';
     devUrl: string;
     testUrl: string;
 }
@@ -35,6 +36,13 @@ const DATABASE_CONFIG: Record<
         devUrl: 'file:./dev.db',
         testUrl: 'file:./test.db',
     },
+    mongodb: {
+        provider: 'mongodb',
+        devUrl:
+            'mongodb://localhost:27017/nestforge?replicaSet=rs0',
+        testUrl:
+            'mongodb://localhost:27017/nestforge_test?replicaSet=rs0',
+    },
 };
 
 export async function applyDatabaseConfig(
@@ -55,6 +63,10 @@ export async function applyDatabaseConfig(
         targetDir,
         config.provider,
     );
+
+    if (databaseChoice === 'mongodb') {
+        await updateMongoSchema(targetDir);
+    }
 
     await updateDatabaseType(
         targetDir,
@@ -171,5 +183,44 @@ async function updateDatabaseUrl(
         filePath,
         updated,
         'utf-8',
+    );
+}
+
+async function updateMongoSchema(
+    targetDir: string,
+): Promise<void> {
+    const schemaPath = path.join(
+        targetDir,
+        'prisma',
+        'schema.prisma',
+    );
+
+    if (!(await fs.pathExists(schemaPath))) {
+        return;
+    }
+
+    const schema = await fs.readFile(
+        schemaPath,
+        'utf8',
+    );
+
+    const updated = schema
+        .replaceAll(
+            '@id @default(uuid())',
+            '@id @default(auto()) @map("_id") @db.ObjectId',
+        )
+        .replace(
+            /id\s+String\s+@id\r?\n\s+sid String @unique/,
+            'id  String @id @map("_id")\n  sid String @unique',
+        )
+        .replace(
+            /userId(\s+)String(?!\s+@db\.ObjectId)/g,
+            'userId$1String @db.ObjectId',
+        );
+
+    await fs.writeFile(
+        schemaPath,
+        updated,
+        'utf8',
     );
 }
