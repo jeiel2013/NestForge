@@ -2104,6 +2104,38 @@ test('gera Prisma com MongoDB e Session/Cookies', { concurrency: false }, async 
     );
 });
 
+test('gera Prisma com MongoDB em JavaScript', { concurrency: false }, async () => {
+    await withGeneratedProject(
+        makeOptions({
+            projectName: 'prisma-mongodb-javascript',
+            language: 'javascript',
+            orm: 'prisma',
+            database: 'mongodb',
+            features: ['validation'],
+            authStrategy: 'jwt',
+        }),
+        async (targetDir) => {
+            const packageJson = await fs.readJson(path.join(targetDir, 'package.json'));
+            const schema = await readFile(
+                path.join(targetDir, 'prisma', 'schema.prisma'),
+                'utf8',
+            );
+            const generatedFiles = await listFilesRecursively(targetDir);
+
+            assert.equal(generatedFiles.some((file) => file.endsWith('.ts')), false);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'src', 'main.js')), true);
+            assert.equal(await fs.pathExists(path.join(targetDir, 'prisma', 'seed.js')), true);
+            assert.match(schema, /provider\s*=\s*"mongodb"/);
+            assert.equal(packageJson.scripts['prisma:push'], 'prisma db push');
+            assert.equal(packageJson.scripts['prisma:seed'], 'node prisma/seed.js');
+            assert.equal(
+                packageJson.scripts['test:e2e'],
+                'dotenv -e .env.test -- vitest run --config ./vitest.e2e.config.js',
+            );
+        },
+    );
+});
+
 test('gera projeto TypeScript sem ORM, banco ou autenticação', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
