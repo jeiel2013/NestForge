@@ -24,7 +24,7 @@ describe('RedisHealthIndicator', () => {
         disconnectMock.mockReset();
     });
 
-    it('retorna status up quando o PING responde PONG', async () => {
+    it('returns an up status when PING returns PONG', async () => {
         connectMock.mockResolvedValue(undefined);
         pingMock.mockResolvedValue('PONG');
 
@@ -35,7 +35,7 @@ describe('RedisHealthIndicator', () => {
         expect(disconnectMock).toHaveBeenCalled();
     });
 
-    it('lança HealthCheckError quando o PING não responde PONG', async () => {
+    it('throws HealthCheckError when PING does not return PONG', async () => {
         connectMock.mockResolvedValue(undefined);
         pingMock.mockResolvedValue('ALGO_INESPERADO');
 
@@ -44,7 +44,7 @@ describe('RedisHealthIndicator', () => {
         await expect(indicator.isHealthy('redis')).rejects.toBeInstanceOf(HealthCheckError);
     });
 
-    it('lança HealthCheckError quando a conexão falha', async () => {
+    it('throws HealthCheckError when the connection fails', async () => {
         connectMock.mockRejectedValue(new Error('ECONNREFUSED'));
 
         const indicator = new RedisHealthIndicator();
