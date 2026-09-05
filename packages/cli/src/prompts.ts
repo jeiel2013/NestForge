@@ -1,6 +1,7 @@
 import { intro, outro, text, select, confirm, isCancel, cancel } from '@clack/prompts';
 import gradient from 'gradient-string';
 import pc from 'picocolors';
+import { validateProjectName } from './project-name.js';
 
 export type OrmChoice = 'prisma' | 'typeorm' | 'drizzle' | 'none';
 export type LanguageChoice = 'typescript' | 'javascript';
@@ -54,6 +55,7 @@ export async function runPrompts(): Promise<ProjectOptions> {
         message: 'What is your project name?',
         placeholder: 'my-nest-api',
         defaultValue: 'my-nest-api',
+        validate: (value) => validateProjectName(value ?? ''),
     });
     handleCancel(projectName);
 
