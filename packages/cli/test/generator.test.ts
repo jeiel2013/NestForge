@@ -2024,6 +2024,57 @@ test(
     },
 );
 
+test('gera Prisma com MongoDB e autenticação JWT', { concurrency: false }, async () => {
+    await withGeneratedProject(
+        makeOptions({
+            projectName: 'prisma-mongodb',
+            orm: 'prisma',
+            database: 'mongodb',
+            features: ['docker', 'swagger', 'validation'],
+            authStrategy: 'jwt',
+            accessControl: true,
+        }),
+        async (targetDir) => {
+            const packageJson = await fs.readJson(path.join(targetDir, 'package.json'));
+            const schema = await readFile(
+                path.join(targetDir, 'prisma', 'schema.prisma'),
+                'utf8',
+            );
+            const envExample = await readFile(path.join(targetDir, '.env.example'), 'utf8');
+            const envTest = await readFile(path.join(targetDir, '.env.test'), 'utf8');
+            const compose = await readFile(path.join(targetDir, 'docker-compose.yml'), 'utf8');
+            const workflow = await readFile(
+                path.join(targetDir, '.github', 'workflows', 'ci.yml'),
+                'utf8',
+            );
+
+            assert.match(schema, /provider\s*=\s*"mongodb"/);
+            assert.equal(
+                schema.match(/@default\(auto\(\)\) @map\("_id"\) @db\.ObjectId/g)?.length,
+                5,
+            );
+            assert.equal(schema.match(/userId\s+String @db\.ObjectId/g)?.length, 4);
+            assert.doesNotMatch(schema, /@db\.Text|model Session/);
+            assert.match(
+                envExample,
+                /DATABASE_URL="mongodb:\/\/localhost:27017\/nestforge\?replicaSet=rs0"/,
+            );
+            assert.match(envTest, /mongodb:\/\/localhost:27017\/nestforge_test\?replicaSet=rs0/);
+            assert.equal(packageJson.scripts['prisma:push'], 'prisma db push');
+            assert.equal(packageJson.scripts['prisma:migrate'], undefined);
+            assert.equal(packageJson.scripts['prisma:deploy'], undefined);
+            assert.equal(packageJson.dependencies.pg, undefined);
+            assert.equal(packageJson.dependencies.mysql2, undefined);
+            assert.equal(packageJson.dependencies['better-sqlite3'], undefined);
+            assert.match(compose, /^\s{2}mongodb:/m);
+            assert.doesNotMatch(compose, /^\s{2}(postgres|mysql):/m);
+            assert.match(workflow, /Start MongoDB replica set/);
+            assert.match(workflow, /npx prisma db push/);
+            assert.doesNotMatch(workflow, /prisma migrate deploy/);
+        },
+    );
+});
+
 test('gera projeto TypeScript sem ORM, banco ou autenticação', { concurrency: false }, async () => {
     await withGeneratedProject(
         makeOptions({
@@ -2143,8 +2194,16 @@ test('recusa opções ainda não implementadas sem criar projeto', { concurrency
         [string, Partial<ProjectOptions>]
     > = [
             [
-                'MongoDB',
+                'TypeORM-MongoDB',
                 {
+                    orm: 'typeorm',
+                    database: 'mongodb',
+                },
+            ],
+            [
+                'Drizzle-MongoDB',
+                {
+                    orm: 'drizzle',
                     database: 'mongodb',
                 },
             ],
