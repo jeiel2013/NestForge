@@ -2354,3 +2354,23 @@ test('rejects invalid, unsafe, and reserved project names', () => {
         assert.match(validateProjectName(projectName) ?? '', expectedMessage);
     }
 });
+
+test('rejects invalid project names before creating files', { concurrency: false }, async () => {
+    await withTempDirectory(async (tempDir) => {
+        const invalidNames = [
+            '../outside-project',
+            path.resolve(tempDir, 'absolute-project'),
+            'Invalid Project',
+            'node_modules',
+        ];
+
+        for (const projectName of invalidNames) {
+            await assert.rejects(
+                () => generateProject(makeOptions({ projectName })),
+                /Invalid project name:/,
+            );
+        }
+
+        assert.deepEqual(await fs.readdir(tempDir), []);
+    });
+});
