@@ -25,12 +25,12 @@ export function validateProjectName(projectName: string): string | undefined {
         return 'Project name cannot be "." or "..".';
     }
 
-    if (projectName.includes('/') || projectName.includes('\\')) {
-        return 'Project name cannot contain path separators.';
-    }
-
     if (projectName.startsWith('@')) {
         return 'Scoped package names are not supported as project names.';
+    }
+
+    if (projectName.includes('/') || projectName.includes('\\')) {
+        return 'Project name cannot contain path separators.';
     }
 
     if (projectName !== projectName.toLowerCase()) {
