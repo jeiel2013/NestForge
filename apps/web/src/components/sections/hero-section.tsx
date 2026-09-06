@@ -2,6 +2,7 @@ import { ArrowUpRight, Github } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { CopyCommand } from '@/components/shared/copy-command';
 import { Button } from '@/components/ui/button';
+import { scrollToSection } from '@/lib/scroll-to-section';
 
 const titleLines = [
   ['Forge', 'your', 'NestJS', 'foundation.'],
@@ -55,16 +56,20 @@ export function HeroSection() {
         </p>
 
         <div className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center gap-6">
-          <div className="w-full">
+          <div className="hero-command-enter w-full">
             <CopyCommand command="npx nestforge" />
             <p className="mt-3 font-mono text-xs text-white/35">
               Install globally with npm i -g nestforge-generator
             </p>
           </div>
 
-          <div className="flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row">
+          <div className="hero-actions-enter flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row">
             <Button asChild size="lg">
-              <a className="w-full sm:w-auto" href="#workflow">
+              <a
+                className="w-full sm:w-auto"
+                href="#workflow"
+                onClick={(event) => scrollToSection(event, '#workflow')}
+              >
                 See how it works
                 <ArrowUpRight className="size-4" />
               </a>
