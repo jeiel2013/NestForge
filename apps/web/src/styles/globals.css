@@ -1,10 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@100;200;300;400&family=Inter:wght@200;300;400&family=JetBrains+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@100;200;300;400&family=Inter:wght@200;300;400&family=JetBrains+Mono:wght@300;400;500&family=Space+Grotesk:wght@500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-brand: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --color-background: #070707;
   --color-foreground: #f7f7f5;
   --color-surface: #0e0e0f;
@@ -109,6 +110,19 @@ a:focus-visible {
 .ember-text {
   color: transparent;
   background: linear-gradient(100deg, #ffffff 12%, #ff9b5e 56%, #ef233c 96%);
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.brand-wordmark {
+  font-family: var(--font-brand);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+}
+
+.brand-forge-text {
+  color: transparent;
+  background: linear-gradient(100deg, #ff9b5e, #ef233c 72%);
   background-clip: text;
   -webkit-background-clip: text;
 }
