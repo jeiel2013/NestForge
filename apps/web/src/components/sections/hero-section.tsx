@@ -5,8 +5,18 @@ import { Button } from '@/components/ui/button';
 import { scrollToSection } from '@/lib/scroll-to-section';
 
 const titleLines = [
-  ['Forge', 'your', 'NestJS', 'foundation.'],
-  ['Ship', 'what', 'matters.'],
+  [
+    { text: 'Forge' },
+    { text: 'your' },
+    { text: 'NestJS' },
+    { text: 'foundation.' },
+  ],
+  [
+    { text: 'NestForge', accent: true },
+    { text: 'handles' },
+    { text: 'the' },
+    { text: 'rest.' },
+  ],
 ];
 
 const description =
@@ -26,16 +36,19 @@ export function HeroSection() {
           <h1 className="flex w-full flex-col items-center font-display text-5xl font-thin leading-none tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
             {titleLines.map((line, lineIndex) => (
               <span
-                key={line.join('-')}
+                key={line.map(({ text }) => text).join('-')}
                 className={lineIndex === 1 ? 'mt-2 flex flex-wrap justify-center gap-x-4 gap-y-2 text-white/90' : 'flex flex-wrap justify-center gap-x-4 gap-y-2'}
               >
                 {line.map((word) => {
                   const index = titleWordIndex++;
 
                   return (
-                    <span key={word} className="hero-word-clip">
-                      <span className="hero-title-word" style={animationDelay(index)}>
-                        {word}
+                    <span key={word.text} className="hero-word-clip">
+                      <span
+                        className={word.accent ? 'hero-title-word ember-text' : 'hero-title-word'}
+                        style={animationDelay(index)}
+                      >
+                        {word.text}
                       </span>
                     </span>
                   );
