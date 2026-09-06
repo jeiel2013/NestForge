@@ -129,6 +129,45 @@ a:focus-visible {
   animation-delay: 300ms;
 }
 
+.hero-word-clip {
+  display: inline-flex;
+  overflow: hidden;
+}
+
+.hero-title-word,
+.hero-description-word {
+  display: inline-block;
+  transform: translateY(110%);
+  will-change: transform;
+}
+
+.hero-title-word {
+  animation: hero-word-reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(200ms + var(--word-index) * 50ms);
+}
+
+.hero-description-word {
+  animation: hero-word-reveal 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(600ms + var(--word-index) * 15ms);
+}
+
+.ambient-beam {
+  transform: translateY(-100%);
+  will-change: transform;
+}
+
+.ambient-beam-primary {
+  animation: ambient-beam-primary 4.5s linear infinite;
+}
+
+.ambient-beam-secondary {
+  animation: ambient-beam-secondary 6s linear 2s infinite;
+}
+
+.copy-feedback {
+  animation: copy-feedback 350ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -137,6 +176,35 @@ a:focus-visible {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes hero-word-reveal {
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes ambient-beam-primary {
+  to {
+    transform: translateY(500%);
+  }
+}
+
+@keyframes ambient-beam-secondary {
+  to {
+    transform: translateY(400%);
+  }
+}
+
+@keyframes copy-feedback {
+  from {
+    opacity: 0;
+    transform: translateY(45%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -150,5 +218,13 @@ a:focus-visible {
   .fade-up-delay-2,
   .fade-up-delay-3 {
     animation: none;
+  }
+
+  .hero-title-word,
+  .hero-description-word,
+  .ambient-beam,
+  .copy-feedback {
+    animation: none;
+    transform: none;
   }
 }
