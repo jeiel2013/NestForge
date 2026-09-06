@@ -14,7 +14,13 @@ export function FinalCtaSection() {
         <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-white/50">
           Generate the foundation, inspect every file, and make it yours. NestForge is open source and built in public.
         </p>
-        <CopyCommand command="npx nestforge" className="mx-auto mt-9 max-w-xl" />
+        <CopyCommand
+          commands={[
+            { label: 'Install', command: 'npm i nestforge-generator' },
+            { label: 'Run', command: 'npx nestforge' },
+          ]}
+          className="mx-auto mt-9 max-w-xl"
+        />
         <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
           <Button asChild size="lg">
             <a href="https://www.npmjs.com/package/nestforge-generator" target="_blank" rel="noreferrer">
