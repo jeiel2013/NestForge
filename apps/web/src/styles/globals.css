@@ -307,4 +307,10 @@ a:focus-visible {
     transform: none;
     filter: none;
   }
+
+  .hero-command-enter,
+  .hero-actions-enter,
+  .mobile-navigation-enter {
+    opacity: 1;
+  }
 }
