@@ -68,6 +68,14 @@ async function main() {
 
         note(steps.join('\n'), 'Next steps');
 
+        note(
+            [
+                'Enjoying NestForge? Visit the repository, leave a star, and help the project grow:',
+                'https://github.com/jeiel2013/NestForge',
+            ].join('\n'),
+            'Support NestForge',
+        );
+
         outro(pc.green(`✅ Project "${options.projectName}" created successfully!`));
     } catch (error) {
         log.error(error instanceof Error ? error.message : String(error));
