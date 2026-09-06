@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@100;200;300;400&family=Inter:wght@200;300;400&family=JetBrains+Mono:wght@300;400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -142,6 +142,7 @@ a:focus-visible {
 }
 
 .hero-title-word {
+  font-weight: 100;
   animation: hero-word-reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: calc(200ms + var(--word-index) * 50ms);
 }
