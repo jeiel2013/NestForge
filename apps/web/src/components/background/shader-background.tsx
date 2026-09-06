@@ -175,6 +175,7 @@ export function ShaderBackground() {
     const currentMouse = { ...targetMouse };
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const startedAt = performance.now();
+    let previousFrame = startedAt;
 
     const resize = () => {
       const pixelRatio = Math.min(window.devicePixelRatio, 2);
@@ -183,16 +184,20 @@ export function ShaderBackground() {
       gl.viewport(0, 0, canvas.width, canvas.height);
     };
 
-    const updateMouse = (event: PointerEvent) => {
+    const updateMouse = (event: MouseEvent) => {
       targetMouse.x = event.clientX / window.innerWidth;
       targetMouse.y = 1 - event.clientY / window.innerHeight;
     };
 
     const render = (now: number) => {
-      currentMouse.x += (targetMouse.x - currentMouse.x) * 0.035;
-      currentMouse.y += (targetMouse.y - currentMouse.y) * 0.035;
+      const elapsed = Math.min(now - previousFrame, 100);
+      const mouseEase = 1 - Math.exp(-elapsed / 480);
+      previousFrame = now;
 
-      gl.uniform1f(timeLocation, (now - startedAt) / 1000);
+      currentMouse.x += (targetMouse.x - currentMouse.x) * mouseEase;
+      currentMouse.y += (targetMouse.y - currentMouse.y) * mouseEase;
+
+      gl.uniform1f(timeLocation, ((now - startedAt) / 1000) * 0.6);
       gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
       gl.uniform2f(mouseLocation, currentMouse.x, currentMouse.y);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -205,12 +210,12 @@ export function ShaderBackground() {
     resize();
     render(startedAt);
     window.addEventListener('resize', resize);
-    window.addEventListener('pointermove', updateMouse, { passive: true });
+    window.addEventListener('mousemove', updateMouse, { passive: true });
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
       window.removeEventListener('resize', resize);
-      window.removeEventListener('pointermove', updateMouse);
+      window.removeEventListener('mousemove', updateMouse);
       if (positionBuffer) gl.deleteBuffer(positionBuffer);
       if (program) gl.deleteProgram(program);
       if (vertexShader) gl.deleteShader(vertexShader);
@@ -221,7 +226,7 @@ export function ShaderBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-0 h-full w-full opacity-75"
+      className="pointer-events-none fixed inset-0 z-0 h-full w-full"
       aria-hidden="true"
     />
   );
