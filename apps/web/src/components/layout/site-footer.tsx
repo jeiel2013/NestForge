@@ -5,8 +5,8 @@ export function SiteFooter() {
     <footer className="border-t border-white/10 bg-black/40">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-10 sm:px-8 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="font-display text-base font-medium tracking-[-0.03em]">
-            Nest<span className="text-brand">Forge</span>
+          <p className="brand-wordmark text-lg">
+            Nest<span className="brand-forge-text">Forge</span>
           </p>
           <p className="mt-1 text-xs text-white/35">Open-source NestJS project generator · MIT License</p>
         </div>
