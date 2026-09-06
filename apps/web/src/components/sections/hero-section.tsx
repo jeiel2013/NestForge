@@ -57,10 +57,12 @@ export function HeroSection() {
 
         <div className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center gap-6">
           <div className="hero-command-enter w-full">
-            <CopyCommand command="npx nestforge" />
-            <p className="mt-3 font-mono text-xs text-white/35">
-              Install globally with npm i -g nestforge-generator
-            </p>
+            <CopyCommand
+              commands={[
+                { label: 'Install', command: 'npm i nestforge-generator' },
+                { label: 'Run', command: 'npx nestforge' },
+              ]}
+            />
           </div>
 
           <div className="hero-actions-enter flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row">
