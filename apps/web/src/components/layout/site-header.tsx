@@ -40,8 +40,8 @@ export function SiteHeader() {
           }}
         >
           <img src={logo} alt="" className="size-9 rounded-lg object-cover" />
-          <span className="font-display text-base font-medium tracking-[-0.03em]">
-            Nest<span className="text-brand">Forge</span>
+          <span className="brand-wordmark text-lg">
+            Nest<span className="brand-forge-text">Forge</span>
           </span>
         </a>
 
