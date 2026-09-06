@@ -1,5 +1,4 @@
 import { ArrowUpRight, Github, Sparkles } from 'lucide-react';
-import logo from '../../../assets/logo.png';
 import { CopyCommand } from '@/components/shared/copy-command';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,8 +6,8 @@ import { Button } from '@/components/ui/button';
 export function HeroSection() {
   return (
     <section id="top" className="relative overflow-hidden border-b border-white/10">
-      <div className="mx-auto grid min-h-[calc(100vh-4.5rem)] max-w-7xl items-center lg:grid-cols-[1.08fr_0.92fr]">
-        <div className="relative z-10 px-5 py-24 sm:px-8 sm:py-32 lg:border-r lg:border-white/10 lg:py-36">
+      <div className="mx-auto flex min-h-[calc(100vh-4.5rem)] max-w-7xl items-center">
+        <div className="relative z-10 w-full px-5 py-24 sm:px-8 sm:py-32 lg:py-36">
           <Badge className="fade-up">
             <Sparkles className="size-3.5 text-ember" />
             Open source · MIT
@@ -44,21 +43,6 @@ export function HeroSection() {
               </a>
             </Button>
           </div>
-        </div>
-
-        <div className="relative hidden min-h-[calc(100vh-4.5rem)] items-center justify-center overflow-hidden lg:flex">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(239,35,60,0.18),transparent_56%)]" />
-          <div className="absolute left-8 top-8 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-white/25">
-            Interactive generator
-          </div>
-          <div className="absolute bottom-8 right-8 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-white/25">
-            NestJS · TypeScript · Open source
-          </div>
-          <img
-            src={logo}
-            alt="NestForge dragon and anvil mark"
-            className="relative z-10 w-[92%] max-w-2xl object-contain drop-shadow-[0_0_70px_rgba(239,35,60,0.2)]"
-          />
         </div>
       </div>
     </section>
