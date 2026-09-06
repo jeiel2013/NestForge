@@ -1,3 +1,4 @@
+import { AmbientGrid } from '@/components/background/ambient-grid';
 import { ShaderBackground } from '@/components/background/shader-background';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
@@ -12,7 +13,8 @@ function App() {
   return (
     <div className="min-h-screen bg-transparent text-foreground">
       <ShaderBackground />
-      <div className="relative z-10">
+      <AmbientGrid />
+      <div className="relative z-10 mx-auto w-full max-w-7xl">
         <SiteHeader />
         <main>
           <HeroSection />
