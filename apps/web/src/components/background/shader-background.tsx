@@ -173,7 +173,6 @@ export function ShaderBackground() {
     const mouseLocation = gl.getUniformLocation(program, 'u_mouse');
     const targetMouse = { x: 0.5, y: 0.5 };
     const currentMouse = { ...targetMouse };
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const startedAt = performance.now();
     let previousFrame = startedAt;
 
@@ -202,9 +201,7 @@ export function ShaderBackground() {
       gl.uniform2f(mouseLocation, currentMouse.x, currentMouse.y);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-      if (!reducedMotion) {
-        animationFrame = window.requestAnimationFrame(render);
-      }
+      animationFrame = window.requestAnimationFrame(render);
     };
 
     resize();
