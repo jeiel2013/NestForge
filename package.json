@@ -5,6 +5,7 @@
   "description": "NestForge monorepo — CLI and production-ready NestJS starter templates",
   "license": "MIT",
   "workspaces": [
+    "apps/*",
     "packages/*"
   ],
   "scripts": {
