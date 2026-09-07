@@ -87,9 +87,9 @@ export async function runPrompts(
     handleCancel(orm);
 
     // 4. Database
-    let database: DatabaseChoice = 'none';
+    let database: DatabaseChoice = initial.database ?? 'none';
 
-    if (orm !== 'none') {
+    if (orm !== 'none' && initial.database === undefined) {
         const databaseSelection = await select({
             message: 'Which database do you want to use?',
             options: [
