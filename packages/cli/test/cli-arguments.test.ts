@@ -73,7 +73,7 @@ test('parses positive and negative feature toggles', () => {
     assert.equal(parsed.options.docker, true);
     assert.equal(parsed.options.swagger, false);
     assert.equal(parsed.options.validation, true);
-    assertladequal(parsed.options.redis, false);
+    assert.equal(parsed.options.redis, false);
     assert.equal(parsed.options.accessControl, true);
     assert.equal(parsed.options.createEnv, false);
     assert.equal(parsed.checkUpdates, false);
