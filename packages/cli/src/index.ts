@@ -5,7 +5,7 @@ import path from 'node:path';
 import { runPrompts } from './prompts.js';
 import { generateProject } from './generator.js';
 import { handleUpdateNotification } from './update-notifier.js';
-import { parseCliArguments } from './cli-arguments.js';
+import { parseCliArguments, readCliArgumentVector } from './cli-arguments.js';
 import { CLI_HELP } from './cli-help.js';
 import { readPackageInfo } from './package-info.js';
 import { CAPABILITIES } from './capabilities.js';
@@ -22,7 +22,7 @@ async function main() {
 }
 
 async function run() {
-    const cli = parseCliArguments(process.argv.slice(2));
+    const cli = parseCliArguments(readCliArgumentVector());
 
     if (cli.command === 'help') {
         console.log(CLI_HELP);
