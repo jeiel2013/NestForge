@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { parseCliArguments } from '../src/cli-arguments.js';
+import {
+    parseCliArguments,
+    readCliArgumentVector,
+} from '../src/cli-arguments.js';
 
 test('parses informational commands', () => {
     assert.equal(parseCliArguments(['--help']).command, 'help');
@@ -52,4 +55,49 @@ test('accepts --name and the --yes shorthand', () => {
 
     assert.equal(parsed.options.projectName, 'my-api');
     assert.equal(parsed.nonInteractive, true);
+});
+
+test('parses positive and negative feature toggles', () => {
+    const parsed = parseCliArguments([
+        'my-api',
+        '--docker',
+        '--no-swagger',
+        '--validation',
+        '--no-redis',
+        '--access-control',
+        '--no-env',
+        '--no-update-check',
+        '--no-banner',
+    ]);
+
+    assert.equal(parsed.options.docker, true);
+    assert.equal(parsed.options.swagger, false);
+    assert.equal(parsed.options.validation, true);
+    assertladequal(parsed.options.redis, false);
+    assert.equal(parsed.options.accessControl, true);
+    assert.equal(parsed.options.createEnv, false);
+    assert.equal(parsed.checkUpdates, false);
+    assert.equal(parsed.showBanner, false);
+});
+
+test('rejects invalid choices and contradictory toggles', () => {
+    assert.throws(
+        () => parseCliArguments(['my-api', '--orm', 'unknown']),
+        /Invalid value for --orm/,
+    );
+    assert.throws(
+        () => parseCliArguments(['my-api', '--docker', '--no-docker']),
+        /cannot be used together/,
+    );
+});
+
+test('restores arguments preserved by the updater', () => {
+    assert.deepEqual(
+        readCliArgumentVector(['fallback'], '["my-api","--yes"]'),
+        ['my-api', '--yes'],
+    );
+    assert.deepEqual(
+        readCliArgumentVector(['fallback'], 'invalid'),
+        ['fallback'],
+    );
 });
