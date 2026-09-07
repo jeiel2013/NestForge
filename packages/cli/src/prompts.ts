@@ -75,15 +75,15 @@ export async function runPrompts(
     handleCancel(language);
 
     // 3. ORM selection
-    const orm = await select({
-        message: 'Choose the ORM/Query Builder:',
-        options: [
-            { value: 'prisma', label: 'Prisma', hint: 'Recommended' },
-            { value: 'typeorm', label: 'TypeORM' },
-            { value: 'drizzle', label: 'Drizzle ORM' },
-            { value: 'none', label: 'None' },
-        ],
-    });
+    const orm = initial.orm ?? await select({
+            message: 'Choose the ORM/Query Builder:',
+            options: [
+                { value: 'prisma', label: 'Prisma', hint: 'Recommended' },
+                { value: 'typeorm', label: 'TypeORM' },
+                { value: 'drizzle', label: 'Drizzle ORM' },
+                { value: 'none', label: 'None' },
+            ],
+        });
     handleCancel(orm);
 
     // 4. Database
