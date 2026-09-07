@@ -97,6 +97,29 @@ export function parseCliArguments(args: string[]): ParsedCliArguments {
     };
 }
 
+export function readCliArgumentVector(
+    args: string[] = process.argv.slice(2),
+    restartedArgs: string | undefined = process.env.NESTFORGE_RESTART_ARGS,
+): string[] {
+    if (!restartedArgs) {
+        return args;
+    }
+
+    try {
+        const parsed = JSON.parse(restartedArgs) as unknown;
+        if (
+            Array.isArray(parsed) &&
+            parsed.every((argument) => typeof argument === 'string')
+        ) {
+            return parsed;
+        }
+    } catch {
+        // Ignore malformed external environment values.
+    }
+
+    return args;
+}
+
 function readToggle(
     values: Record<string, unknown>,
     name: string,
