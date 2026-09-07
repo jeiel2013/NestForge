@@ -129,10 +129,10 @@ export async function runPrompts(
     handleCancel(wantsValidation);
     if (wantsValidation) features.push('validation');
 
-    const wantsRedis = await confirm({
-        message: 'Do you want to include Redis (cache/queues + email through BullMQ)?',
-        initialValue: true,
-    });
+    const wantsRedis = initial.redis ?? await confirm({
+            message: 'Do you want to include Redis (cache/queues + email through BullMQ)?',
+            initialValue: true,
+        });
     handleCancel(wantsRedis);
     if (wantsRedis) features.push('redis');
 
