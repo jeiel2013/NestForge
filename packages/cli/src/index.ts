@@ -10,6 +10,7 @@ import { CLI_HELP } from './cli-help.js';
 import { readPackageInfo } from './package-info.js';
 import { CAPABILITIES } from './capabilities.js';
 import { formatDoctorReport, runDoctorChecks } from './doctor.js';
+import { resolveNonInteractiveOptions } from './project-options.js';
 
 async function main() {
     const cli = parseCliArguments(process.argv.slice(2));
@@ -47,7 +48,11 @@ async function main() {
         return;
     }
 
-    const options = await runPrompts();
+    const options = cli.nonInteractive
+        ? resolveNonInteractiveOptions(cli.options)
+        : await runPrompts(cli.options, {
+            showBanner: cli.showBanner,
+        });
 
     try {
         const targetDir = await generateProject(options);
