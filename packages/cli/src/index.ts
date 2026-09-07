@@ -7,12 +7,19 @@ import { generateProject } from './generator.js';
 import { handleUpdateNotification } from './update-notifier.js';
 import { parseCliArguments } from './cli-arguments.js';
 import { CLI_HELP } from './cli-help.js';
+import { readPackageInfo } from './package-info.js';
 
 async function main() {
     const cli = parseCliArguments(process.argv.slice(2));
 
     if (cli.command === 'help') {
         console.log(CLI_HELP);
+        return;
+    }
+
+    if (cli.command === 'version') {
+        const packageInfo = await readPackageInfo();
+        console.log(packageInfo.version);
         return;
     }
 
