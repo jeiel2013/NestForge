@@ -8,6 +8,7 @@ import { handleUpdateNotification } from './update-notifier.js';
 import { parseCliArguments } from './cli-arguments.js';
 import { CLI_HELP } from './cli-help.js';
 import { readPackageInfo } from './package-info.js';
+import { CAPABILITIES } from './capabilities.js';
 
 async function main() {
     const cli = parseCliArguments(process.argv.slice(2));
@@ -20,6 +21,11 @@ async function main() {
     if (cli.command === 'version') {
         const packageInfo = await readPackageInfo();
         console.log(packageInfo.version);
+        return;
+    }
+
+    if (cli.command === 'list') {
+        console.log(CAPABILITIES);
         return;
     }
 
