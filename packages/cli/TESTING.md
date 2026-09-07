@@ -40,7 +40,7 @@ npm test
 This command runs:
 
 ```bash
-tsx --test test/generator.test.ts test/update-check.test.ts
+tsx --test test/generator.test.ts test/update-check.test.ts test/cli-arguments.test.ts test/project-options.test.ts
 ```
 
 The suite automatically validates:
@@ -74,12 +74,26 @@ The suite automatically validates:
 * offline fallback and reminder dismissal;
 * update, continue, and dismiss-today choices;
 * Windows, Linux, and macOS update commands.
+* parsing of informational and generation flags;
+* positive and negative feature toggles;
+* restoration of arguments after an automatic update;
+* non-interactive defaults and compatibility validation.
 
 Expected result:
 
 ```text
-pass 33
+pass 44
 fail 0
+```
+
+You can also inspect the public commands manually:
+
+```bash
+npm run dev -- --help
+npm run dev -- --version
+npm run dev -- --list
+npm run dev -- --doctor
+npm run dev -- my-api --yes --no-update-check
 ```
 
 The number of tests may increase as new cases are added. The main criterion is that no tests fail.
