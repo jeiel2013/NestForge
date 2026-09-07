@@ -19,17 +19,33 @@ interface UpdateNotifierOptions {
     runLatest?: () => Promise<boolean>;
 }
 
-export function getNpxExecutable(
+export function getUpdateProcess(
     platform: NodeJS.Platform = process.platform,
-): string {
-    return platform === 'win32' ? 'npx.cmd' : 'npx';
+): { command: string; args: string[] } {
+    if (platform === 'win32') {
+        return {
+            command: process.env.ComSpec ?? 'cmd.exe',
+            args: [
+                '/d',
+                '/s',
+                '/c',
+                'npx --yes nestforge-generator@latest',
+            ],
+        };
+    }
+
+    return {
+        command: 'npx',
+        args: ['--yes', 'nestforge-generator@latest'],
+    };
 }
 
 export async function runLatestVersion(): Promise<boolean> {
     return new Promise((resolve) => {
+        const updateProcess = getUpdateProcess();
         const child = spawn(
-            getNpxExecutable(),
-            ['--yes', 'nestforge-generator@latest'],
+            updateProcess.command,
+            updateProcess.args,
             {
                 stdio: 'inherit',
                 shell: false,
