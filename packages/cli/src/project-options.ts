@@ -36,3 +36,50 @@ export function assertCompatibleOptionInput(input: ProjectOptionInput): void {
         throw new Error('Access control requires an authentication strategy.');
     }
 }
+
+export function resolveNonInteractiveOptions(input: ProjectOptionInput): ProjectOptions {
+    assertCompatibleOptionInput(input);
+
+    if (!input.projectName) {
+        throw new Error('A project name is required in non-interactive mode.');
+    }
+
+    const orm = input.orm ?? DEFAULT_PROJECT_OPTIONS.orm;
+    const database = orm === 'none'
+        ? 'none'
+        : input.database ?? DEFAULT_PROJECT_OPTIONS.database;
+    const authStrategy = orm === 'none'
+        ? 'none'
+        : input.authStrategy ?? DEFAULT_PROJECT_OPTIONS.authStrategy;
+    const accessControl = authStrategy === 'none'
+        ? false
+        : input.accessControl ?? DEFAULT_PROJECT_OPTIONS.accessControl;
+
+    const featureInput = {
+        docker: input.docker ?? DEFAULT_PROJECT_OPTIONS.docker,
+        swagger: input.swagger ?? DEFAULT_PROJECT_OPTIONS.swagger,
+        validation: input.validation ?? DEFAULT_PROJECT_OPTIONS.validation,
+        redis: input.redis ?? DEFAULT_PROJECT_OPTIONS.redis,
+    };
+
+    const resolved: ProjectOptions = {
+        projectName: input.projectName,
+        language: input.language ?? DEFAULT_PROJECT_OPTIONS.language,
+        orm,
+        database,
+        features: buildFeatureList(featureInput),
+        authStrategy,
+        accessControl,
+        createEnv: input.createEnv ?? DEFAULT_PROJECT_OPTIONS.createEnv,
+    };
+
+    assertCompatibleOptionInput({
+        ...input,
+        orm: resolved.orm,
+        database: resolved.database,
+        authStrategy: resolved.authStrategy,
+        accessControl: resolved.accessControl,
+    });
+
+    return resolved;
+}
