@@ -40,7 +40,7 @@ npm test
 Esse comando executa:
 
 ```bash
-tsx --test test/generator.test.ts test/update-check.test.ts
+tsx --test test/generator.test.ts test/update-check.test.ts test/cli-arguments.test.ts test/project-options.test.ts
 ```
 
 A suíte valida automaticamente:
@@ -74,12 +74,26 @@ A suíte valida automaticamente:
 * funcionamento offline e ocultação do lembrete;
 * escolhas de atualizar, continuar e não lembrar hoje;
 * comandos de atualização para Windows, Linux e macOS.
+* interpretação das flags informativas e de geração;
+* toggles positivos e negativos dos recursos;
+* restauração dos argumentos depois de uma atualização automática;
+* defaults não interativos e validação de compatibilidade.
 
 Resultado esperado:
 
 ```text
-pass 33
+pass 44
 fail 0
+```
+
+Os comandos públicos também podem ser conferidos manualmente:
+
+```bash
+npm run dev -- --help
+npm run dev -- --version
+npm run dev -- --list
+npm run dev -- --doctor
+npm run dev -- minha-api --yes --no-update-check
 ```
 
 A quantidade de testes pode aumentar conforme novos casos forem adicionados. O critério principal é não existir teste com falha.
