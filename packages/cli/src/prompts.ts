@@ -122,10 +122,10 @@ export async function runPrompts(
     handleCancel(wantsSwagger);
     if (wantsSwagger) features.push('swagger');
 
-    const wantsValidation = await confirm({
-        message: 'Do you want to enable global validation with Zod?',
-        initialValue: true,
-    });
+    const wantsValidation = initial.validation ?? await confirm({
+            message: 'Do you want to enable global validation with Zod?',
+            initialValue: true,
+        });
     handleCancel(wantsValidation);
     if (wantsValidation) features.push('validation');
 
