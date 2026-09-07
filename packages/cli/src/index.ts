@@ -13,6 +13,15 @@ import { formatDoctorReport, runDoctorChecks } from './doctor.js';
 import { resolveNonInteractiveOptions } from './project-options.js';
 
 async function main() {
+    try {
+        await run();
+    } catch (error) {
+        log.error(error instanceof Error ? error.message : String(error));
+        process.exitCode = 1;
+    }
+}
+
+async function run() {
     const cli = parseCliArguments(process.argv.slice(2));
 
     if (cli.command === 'help') {
@@ -125,7 +134,7 @@ async function main() {
         outro(pc.green(`✅ Project "${options.projectName}" created successfully!`));
     } catch (error) {
         log.error(error instanceof Error ? error.message : String(error));
-        process.exit(1);
+        process.exitCode = 1;
     }
 }
 
