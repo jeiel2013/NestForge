@@ -165,10 +165,10 @@ export async function runPrompts(
     }
 
     // 8. Automatic .env creation
-    const createEnv = await confirm({
-        message: 'Do you want to create the .env file automatically (from .env.example)?',
-        initialValue: true,
-    });
+    const createEnv = initial.createEnv ?? await confirm({
+            message: 'Do you want to create the .env file automatically (from .env.example)?',
+            initialValue: true,
+        });
     handleCancel(createEnv);
 
     outro(pc.green('All set! Generating the project...'));
