@@ -4,8 +4,15 @@ import pc from 'picocolors';
 import path from 'node:path';
 import { runPrompts } from './prompts.js';
 import { generateProject } from './generator.js';
+import { handleUpdateNotification } from './update-notifier.js';
 
 async function main() {
+    const updateResult = await handleUpdateNotification();
+
+    if (updateResult === 'restarted') {
+        return;
+    }
+
     const options = await runPrompts();
 
     try {
