@@ -5,8 +5,17 @@ import path from 'node:path';
 import { runPrompts } from './prompts.js';
 import { generateProject } from './generator.js';
 import { handleUpdateNotification } from './update-notifier.js';
+import { parseCliArguments } from './cli-arguments.js';
+import { CLI_HELP } from './cli-help.js';
 
 async function main() {
+    const cli = parseCliArguments(process.argv.slice(2));
+
+    if (cli.command === 'help') {
+        console.log(CLI_HELP);
+        return;
+    }
+
     const updateResult = await handleUpdateNotification();
 
     if (updateResult === 'restarted') {
