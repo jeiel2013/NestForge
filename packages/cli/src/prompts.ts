@@ -46,8 +46,13 @@ function handleCancel(value: unknown): void {
     }
 }
 
-export async function runPrompts(): Promise<ProjectOptions> {
-    showBanner();
+export async function runPrompts(
+    initial: ProjectOptionInput = {},
+    settings: { showBanner?: boolean } = {},
+): Promise<ProjectOptions> {
+    if (settings.showBanner !== false) {
+        showBanner();
+    }
     intro(pc.bgMagenta(pc.black(' NestForge ')));
 
     // 1. Project name
