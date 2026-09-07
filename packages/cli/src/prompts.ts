@@ -56,12 +56,12 @@ export async function runPrompts(
     intro(pc.bgMagenta(pc.black(' NestForge ')));
 
     // 1. Project name
-    const projectName = await text({
-        message: 'What is your project name?',
-        placeholder: 'my-nest-api',
-        defaultValue: 'my-nest-api',
-        validate: (value) => validateProjectName(value ?? ''),
-    });
+    const projectName = initial.projectName ?? await text({
+            message: 'What is your project name?',
+            placeholder: 'my-nest-api',
+            defaultValue: 'my-nest-api',
+            validate: (value) => validateProjectName(value ?? ''),
+        });
     handleCancel(projectName);
 
     // 2. Language
