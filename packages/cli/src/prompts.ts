@@ -10,6 +10,7 @@ import type {
     ProjectOptionInput,
     ProjectOptions,
 } from './options.js';
+import { assertCompatibleOptionInput } from './project-options.js';
 
 export type {
     AuthStrategyChoice,
@@ -50,6 +51,8 @@ export async function runPrompts(
     initial: ProjectOptionInput = {},
     settings: { showBanner?: boolean } = {},
 ): Promise<ProjectOptions> {
+    assertCompatibleOptionInput(initial);
+
     if (settings.showBanner !== false) {
         showBanner();
     }
