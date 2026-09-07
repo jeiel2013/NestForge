@@ -16,6 +16,16 @@ Run the locally installed CLI:
 npx nestforge
 ```
 
+## Automatic update check
+
+When the CLI starts, it checks the npm registry for a newer stable version. If an update is available, you can:
+
+- download the latest version with `npx` and restart the CLI;
+- continue with the currently installed version;
+- hide the reminder until the next local day.
+
+Registry metadata is cached for six hours in `~/.nestforge/update-check.json`. Network and cache failures are ignored so that the generator remains available offline.
+
 For the testing guide, CLI prompts, and complete checklist, see [`TESTING.md`](TESTING.md).
 
 ## What already works
