@@ -49,6 +49,12 @@ export async function runLatestVersion(): Promise<boolean> {
             {
                 stdio: 'inherit',
                 shell: false,
+                env: {
+                    ...process.env,
+                    NESTFORGE_RESTART_ARGS: JSON.stringify(
+                        process.argv.slice(2),
+                    ),
+                },
             },
         );
 
