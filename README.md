@@ -16,6 +16,8 @@ Run the locally installed CLI:
 npx nestforge
 ```
 
+At startup, the CLI checks npm for a newer stable release. It can download and restart with the latest version, continue with the installed version, or hide the reminder until the next day. The check is cached and never blocks offline use.
+
 ## Repository structure
 
 ```text
