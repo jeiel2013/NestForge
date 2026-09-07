@@ -115,10 +115,10 @@ export async function runPrompts(
     handleCancel(wantsDocker);
     if (wantsDocker) features.push('docker');
 
-    const wantsSwagger = await confirm({
-        message: 'Do you want to include Swagger/OpenAPI documentation?',
-        initialValue: true,
-    });
+    const wantsSwagger = initial.swagger ?? await confirm({
+            message: 'Do you want to include Swagger/OpenAPI documentation?',
+            initialValue: true,
+        });
     handleCancel(wantsSwagger);
     if (wantsSwagger) features.push('swagger');
 
