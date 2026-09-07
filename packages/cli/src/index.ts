@@ -9,6 +9,7 @@ import { parseCliArguments } from './cli-arguments.js';
 import { CLI_HELP } from './cli-help.js';
 import { readPackageInfo } from './package-info.js';
 import { CAPABILITIES } from './capabilities.js';
+import { formatDoctorReport, runDoctorChecks } from './doctor.js';
 
 async function main() {
     const cli = parseCliArguments(process.argv.slice(2));
@@ -26,6 +27,15 @@ async function main() {
 
     if (cli.command === 'list') {
         console.log(CAPABILITIES);
+        return;
+    }
+
+    if (cli.command === 'doctor') {
+        const report = await runDoctorChecks();
+        console.log(formatDoctorReport(report));
+        if (!report.healthy) {
+            process.exitCode = 1;
+        }
         return;
     }
 
