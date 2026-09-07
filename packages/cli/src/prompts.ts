@@ -154,8 +154,8 @@ export async function runPrompts(
     }
 
     // 7. Access control (only applicable when authentication is enabled)
-    let accessControl = false;
-    if (authStrategy !== 'none') {
+    let accessControl = initial.accessControl ?? false;
+    if (authStrategy !== 'none' && initial.accessControl === undefined) {
         const wantsAccessControl = await confirm({
             message: '🛡️  Do you want to include access control (RBAC + Permissions)?',
             initialValue: true,
