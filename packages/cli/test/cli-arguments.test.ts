@@ -15,3 +15,41 @@ test('rejects multiple informational commands', () => {
         /Use only one command/,
     );
 });
+
+test('parses a complete non-interactive generation', () => {
+    const parsed = parseCliArguments([
+        'my-api',
+        '--non-interactive',
+        '--language',
+        'javascript',
+        '--orm',
+        'drizzle',
+        '--database',
+        'sqlite',
+        '--auth',
+        'session',
+    ]);
+
+    assert.equal(parsed.command, 'generate');
+    assert.equal(parsed.nonInteractive, true);
+    assert.deepEqual(parsed.options, {
+        projectName: 'my-api',
+        language: 'javascript',
+        orm: 'drizzle',
+        database: 'sqlite',
+        authStrategy: 'session',
+        docker: undefined,
+        swagger: undefined,
+        validation: undefined,
+        redis: undefined,
+        accessControl: undefined,
+        createEnv: undefined,
+    });
+});
+
+test('accepts --name and the --yes shorthand', () => {
+    const parsed = parseCliArguments(['--name', 'my-api', '-y']);
+
+    assert.equal(parsed.options.projectName, 'my-api');
+    assert.equal(parsed.nonInteractive, true);
+});
