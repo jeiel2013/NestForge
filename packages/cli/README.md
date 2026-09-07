@@ -16,6 +16,34 @@ Run the locally installed CLI:
 npx nestforge
 ```
 
+## Command-line usage
+
+Running `npx nestforge` without arguments starts the complete interactive flow. You can also provide part of the configuration and answer only the remaining prompts:
+
+```bash
+npx nestforge my-api --orm prisma --database postgres
+```
+
+Use `--yes` or `--non-interactive` to generate without prompts. Omitted options use the documented defaults: TypeScript, Prisma, PostgreSQL, JWT, all optional features enabled, access control enabled, and automatic `.env` creation.
+
+```bash
+npx nestforge my-api --yes
+npx nestforge my-api --non-interactive --orm drizzle --database sqlite --no-redis
+```
+
+Available utility commands:
+
+```bash
+npx nestforge --help
+npx nestforge --version
+npx nestforge --list
+npx nestforge --doctor
+```
+
+Generation flags include `--language`, `--orm`, `--database`, `--auth`, `--docker`, `--swagger`, `--validation`, `--redis`, `--access-control`, and `--env`. Boolean features also accept the corresponding `--no-*` form. Use `--no-update-check` to skip the registry check and `--no-banner` to hide the banner.
+
+Invalid values, contradictory toggles, and unsupported combinations terminate with an error instead of silently changing the requested configuration.
+
 ## Automatic update check
 
 When the CLI starts, it checks the npm registry for a newer stable version. If an update is available, you can:
