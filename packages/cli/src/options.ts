@@ -35,3 +35,16 @@ export const AUTH_STRATEGY_CHOICES = ['jwt', 'session', 'oauth', 'none'] as cons
 
 export const FEATURE_NAMES = ['docker', 'swagger', 'validation', 'redis'] as const;
 export type FeatureName = (typeof FEATURE_NAMES)[number];
+
+export const DEFAULT_PROJECT_OPTIONS = {
+    language: 'typescript',
+    orm: 'prisma',
+    database: 'postgres',
+    docker: true,
+    swagger: true,
+    validation: true,
+    redis: true,
+    authStrategy: 'jwt',
+    accessControl: true,
+    createEnv: true,
+} as const satisfies Omit<ProjectOptionInput, 'projectName'>;
