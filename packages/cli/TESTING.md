@@ -40,7 +40,7 @@ npm test
 This command runs:
 
 ```bash
-tsx --test test/generator.test.ts
+tsx --test test/generator.test.ts test/update-check.test.ts
 ```
 
 The suite automatically validates:
@@ -69,12 +69,16 @@ The suite automatically validates:
 * migration script configuration;
 * marker processing;
 * generation without an ORM in TypeScript and JavaScript;
-* rejection of MongoDB with unsupported ORMs and invalid no-ORM combinations.
+* rejection of MongoDB with unsupported ORMs and invalid no-ORM combinations;
+* update detection and registry cache reuse;
+* offline fallback and reminder dismissal;
+* update, continue, and dismiss-today choices;
+* Windows, Linux, and macOS update commands.
 
 Expected result:
 
 ```text
-pass 19
+pass 33
 fail 0
 ```
 

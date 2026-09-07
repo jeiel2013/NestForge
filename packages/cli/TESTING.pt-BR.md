@@ -40,7 +40,7 @@ npm test
 Esse comando executa:
 
 ```bash
-tsx --test test/generator.test.ts
+tsx --test test/generator.test.ts test/update-check.test.ts
 ```
 
 A suíte valida automaticamente:
@@ -69,12 +69,16 @@ A suíte valida automaticamente:
 * configuração dos scripts de migrations;
 * processamento dos marcadores;
 * geração sem ORM em TypeScript e JavaScript;
-* recusa de MongoDB com ORMs incompatíveis e combinações inválidas sem ORM.
+* recusa de MongoDB com ORMs incompatíveis e combinações inválidas sem ORM;
+* detecção de atualizações e reutilização do cache do registro;
+* funcionamento offline e ocultação do lembrete;
+* escolhas de atualizar, continuar e não lembrar hoje;
+* comandos de atualização para Windows, Linux e macOS.
 
 Resultado esperado:
 
 ```text
-pass 19
+pass 33
 fail 0
 ```
 
