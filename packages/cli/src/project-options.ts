@@ -27,4 +27,12 @@ export function assertCompatibleOptionInput(input: ProjectOptionInput): void {
     if (input.orm === 'none' && input.accessControl === true) {
         throw new Error('Access control is not available without an ORM.');
     }
+
+    if (input.database === 'mongodb' && input.orm && input.orm !== 'prisma') {
+        throw new Error('MongoDB is currently available only with Prisma.');
+    }
+
+    if (input.authStrategy === 'none' && input.accessControl === true) {
+        throw new Error('Access control requires an authentication strategy.');
+    }
 }
