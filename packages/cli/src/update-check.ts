@@ -125,11 +125,15 @@ export async function checkForUpdate(
             );
 
         if (!hasFreshCache) {
-            await writeCache(cachePath, {
-                ...cache,
-                checkedAt: now,
-                latestVersion,
-            });
+            try {
+                await writeCache(cachePath, {
+                    ...cache,
+                    checkedAt: now,
+                    latestVersion,
+                });
+            } catch {
+                // The update can still be offered without a writable cache.
+            }
         }
 
         return semver.gt(latestVersion, currentVersion)
