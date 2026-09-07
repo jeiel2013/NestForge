@@ -16,6 +16,16 @@ Execute a CLI instalada localmente:
 npx nestforge
 ```
 
+## Verificação automática de atualizações
+
+Quando a CLI inicia, ela consulta o registro do npm em busca de uma versão estável mais recente. Se houver uma atualização, você pode:
+
+* baixar a versão mais recente com `npx` e reiniciar a CLI;
+* continuar com a versão instalada atualmente;
+* ocultar o lembrete até o próximo dia no horário local.
+
+Os metadados do registro ficam em cache durante seis horas em `~/.nestforge/update-check.json`. Falhas de rede ou de cache são ignoradas para que o gerador continue disponível offline.
+
 Para o guia de testes, perguntas da CLI e checklist completo, consulte [`TESTING.pt-BR.md`](TESTING.pt-BR.md).
 
 ## O que já funciona
