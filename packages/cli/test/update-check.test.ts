@@ -9,7 +9,7 @@ import {
     dismissUpdatesForToday,
 } from '../src/update-check.js';
 import {
-    getNpxExecutable,
+    getUpdateProcess,
     handleUpdateNotification,
 } from '../src/update-notifier.js';
 
@@ -201,8 +201,21 @@ test('stores the dismissal when the user asks not to be reminded today', async (
     assert.equal(result, 'continue');
 });
 
-test('uses the platform-specific npx executable', () => {
-    assert.equal(getNpxExecutable('win32'), 'npx.cmd');
-    assert.equal(getNpxExecutable('linux'), 'npx');
-    assert.equal(getNpxExecutable('darwin'), 'npx');
+test('uses a platform-safe process to start the latest version', () => {
+    const windowsProcess = getUpdateProcess('win32');
+    const linuxProcess = getUpdateProcess('linux');
+    const macOsProcess = getUpdateProcess('darwin');
+
+    assert.match(windowsProcess.command, /(?:cmd\.exe|cmd)$/i);
+    assert.deepEqual(windowsProcess.args, [
+        '/d',
+        '/s',
+        '/c',
+        'npx --yes nestforge-generator@latest',
+    ]);
+    assert.deepEqual(linuxProcess, {
+        command: 'npx',
+        args: ['--yes', 'nestforge-generator@latest'],
+    });
+    assert.deepEqual(macOsProcess, linuxProcess);
 });
