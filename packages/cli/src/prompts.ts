@@ -2,22 +2,22 @@ import { intro, outro, text, select, confirm, isCancel, cancel } from '@clack/pr
 import gradient from 'gradient-string';
 import pc from 'picocolors';
 import { validateProjectName } from './project-name.js';
+import type {
+    AuthStrategyChoice,
+    DatabaseChoice,
+    LanguageChoice,
+    OrmChoice,
+    ProjectOptionInput,
+    ProjectOptions,
+} from './options.js';
 
-export type OrmChoice = 'prisma' | 'typeorm' | 'drizzle' | 'none';
-export type LanguageChoice = 'typescript' | 'javascript';
-export type DatabaseChoice = 'postgres' | 'mysql' | 'sqlite' | 'mongodb' | 'none';
-export type AuthStrategyChoice = 'jwt' | 'session' | 'oauth' | 'none';
-
-export interface ProjectOptions {
-    projectName: string;
-    language: LanguageChoice;
-    orm: OrmChoice;
-    database: DatabaseChoice;
-    features: string[];
-    authStrategy: AuthStrategyChoice;
-    accessControl: boolean;
-    createEnv: boolean;
-}
+export type {
+    AuthStrategyChoice,
+    DatabaseChoice,
+    LanguageChoice,
+    OrmChoice,
+    ProjectOptions,
+} from './options.js';
 
 // red -> orange, the NestJS colors
 const nestforgeGradient = gradient(['#e0234e', '#ff8a65']);
