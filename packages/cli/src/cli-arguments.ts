@@ -38,6 +38,18 @@ export function parseCliArguments(args: string[]): ParsedCliArguments {
             auth: { type: 'string' },
             'non-interactive': { type: 'boolean' },
             yes: { type: 'boolean', short: 'y' },
+            docker: { type: 'boolean' },
+            'no-docker': { type: 'boolean' },
+            swagger: { type: 'boolean' },
+            'no-swagger': { type: 'boolean' },
+            validation: { type: 'boolean' },
+            'no-validation': { type: 'boolean' },
+            redis: { type: 'boolean' },
+            'no-redis': { type: 'boolean' },
+            'access-control': { type: 'boolean' },
+            'no-access-control': { type: 'boolean' },
+            env: { type: 'boolean' },
+            'no-env': { type: 'boolean' },
         },
     });
 
@@ -70,11 +82,33 @@ export function parseCliArguments(args: string[]): ParsedCliArguments {
             orm: parseChoice(values.orm, ORM_CHOICES, '--orm') as OrmChoice | undefined,
             database: parseChoice(values.database, DATABASE_CHOICES, '--database') as DatabaseChoice | undefined,
             authStrategy: parseChoice(values.auth, AUTH_STRATEGY_CHOICES, '--auth') as AuthStrategyChoice | undefined,
+            docker: readToggle(values, 'docker'),
+            swagger: readToggle(values, 'swagger'),
+            validation: readToggle(values, 'validation'),
+            redis: readToggle(values, 'redis'),
+            accessControl: readToggle(values, 'access-control'),
+            createEnv: readToggle(values, 'env'),
         },
         nonInteractive: Boolean(values['non-interactive'] || values.yes),
         checkUpdates: true,
         showBanner: true,
     };
+}
+
+function readToggle(
+    values: Record<string, unknown>,
+    name: string,
+): boolean | undefined {
+    const enabled = values[name] === true;
+    const disabled = values[`no-${name}`] === true;
+
+    if (enabled && disabled) {
+        throw new Error(`Options --${name} and --no-${name} cannot be used together.`);
+    }
+
+    if (enabled) return true;
+    if (disabled) return false;
+    return undefined;
 }
 
 function parseChoice<T extends string>(
