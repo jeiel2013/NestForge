@@ -46,6 +46,26 @@ export async function runDoctorChecks(): Promise<DoctorReport> {
     };
 }
 
+export function formatDoctorReport(report: DoctorReport): string {
+    const symbols: Record<DoctorStatus, string> = {
+        pass: '✓',
+        warning: '!',
+        fail: '✗',
+    };
+
+    return [
+        'NestForge doctor',
+        '',
+        ...report.checks.map(
+            (check) => `${symbols[check.status]} ${check.label}: ${check.detail}`,
+        ),
+        '',
+        report.healthy
+            ? 'Environment ready.'
+            : 'Resolve the failed checks before generating a project.',
+    ].join('\n');
+}
+
 function checkCommand(
     label: string,
     args: string[],
