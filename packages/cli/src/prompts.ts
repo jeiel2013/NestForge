@@ -137,9 +137,9 @@ export async function runPrompts(
     if (wantsRedis) features.push('redis');
 
     // 6. Authentication strategy
-    let authStrategy: AuthStrategyChoice = 'none';
+    let authStrategy: AuthStrategyChoice = initial.authStrategy ?? 'none';
 
-    if (orm !== 'none') {
+    if (orm !== 'none' && initial.authStrategy === undefined) {
         const authStrategySelection = await select({
             message: 'Which authentication strategy do you want to use?',
             options: [
