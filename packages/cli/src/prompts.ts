@@ -108,10 +108,10 @@ export async function runPrompts(
     // 5. Additional features (one yes/no prompt at a time)
     const features: string[] = [];
 
-    const wantsDocker = await confirm({
-        message: 'Do you want to add Docker?',
-        initialValue: true,
-    });
+    const wantsDocker = initial.docker ?? await confirm({
+            message: 'Do you want to add Docker?',
+            initialValue: true,
+        });
     handleCancel(wantsDocker);
     if (wantsDocker) features.push('docker');
 
