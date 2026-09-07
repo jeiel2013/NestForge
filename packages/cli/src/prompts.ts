@@ -65,13 +65,13 @@ export async function runPrompts(
     handleCancel(projectName);
 
     // 2. Language
-    const language = await select({
-        message: 'TypeScript or JavaScript?',
-        options: [
-            { value: 'typescript', label: 'TypeScript', hint: 'Recommended' },
-            { value: 'javascript', label: 'JavaScript' },
-        ],
-    });
+    const language = initial.language ?? await select({
+            message: 'TypeScript or JavaScript?',
+            options: [
+                { value: 'typescript', label: 'TypeScript', hint: 'Recommended' },
+                { value: 'javascript', label: 'JavaScript' },
+            ],
+        });
     handleCancel(language);
 
     // 3. ORM selection
