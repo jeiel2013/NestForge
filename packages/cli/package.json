@@ -19,7 +19,7 @@
     "build": "tsc -p tsconfig.json && npm run copy:templates",
     "copy:templates": "node scripts/copy-templates.mjs",
     "dev": "tsx src/index.ts",
-    "test": "tsx --test test/generator.test.ts test/update-check.test.ts",
+    "test": "tsx --test test/generator.test.ts test/update-check.test.ts test/cli-arguments.test.ts test/project-options.test.ts",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "prepack": "npm run build",
     "prepublishOnly": "npm test"
