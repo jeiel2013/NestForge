@@ -39,7 +39,9 @@ async function main() {
         return;
     }
 
-    const updateResult = await handleUpdateNotification();
+    const updateResult = cli.checkUpdates
+        ? await handleUpdateNotification()
+        : 'continue';
 
     if (updateResult === 'restarted') {
         return;
