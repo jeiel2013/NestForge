@@ -50,6 +50,8 @@ export function parseCliArguments(args: string[]): ParsedCliArguments {
             'no-access-control': { type: 'boolean' },
             env: { type: 'boolean' },
             'no-env': { type: 'boolean' },
+            'no-update-check': { type: 'boolean' },
+            'no-banner': { type: 'boolean' },
         },
     });
 
@@ -90,8 +92,8 @@ export function parseCliArguments(args: string[]): ParsedCliArguments {
             createEnv: readToggle(values, 'env'),
         },
         nonInteractive: Boolean(values['non-interactive'] || values.yes),
-        checkUpdates: true,
-        showBanner: true,
+        checkUpdates: values['no-update-check'] !== true,
+        showBanner: values['no-banner'] !== true,
     };
 }
 
