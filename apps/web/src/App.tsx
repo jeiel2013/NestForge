@@ -14,9 +14,11 @@ import { LandingPage } from '@/pages/landing-page';
 import { NotFoundPage } from '@/pages/not-found-page';
 import { sitePaths } from '@/lib/routes';
 import { usePathname } from '@/lib/use-pathname';
+import { useDocumentMetadata } from '@/lib/use-document-metadata';
 
 function App() {
   const pathname = usePathname();
+  useDocumentMetadata(pathname);
 
   if (pathname === sitePaths.home) {
     return <LandingPage />;
