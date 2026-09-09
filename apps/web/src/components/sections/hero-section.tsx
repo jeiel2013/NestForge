@@ -1,8 +1,10 @@
-import { ArrowUpRight, Github } from 'lucide-react';
+import { ArrowUpRight, BookOpen, Github } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { CopyCommand } from '@/components/shared/copy-command';
 import { Button } from '@/components/ui/button';
 import { scrollToSection } from '@/lib/scroll-to-section';
+import { SiteLink } from '@/components/shared/site-link';
+import { sitePaths } from '@/lib/routes';
 
 const titleLines = [
   [
@@ -80,14 +82,14 @@ export function HeroSection() {
 
           <div className="hero-actions-enter flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row">
             <Button asChild size="lg">
-              <a
+              <SiteLink
                 className="w-full sm:w-auto"
-                href="#workflow"
-                onClick={(event) => scrollToSection(event, '#workflow')}
+                to={sitePaths.docs}
               >
-                See how it works
+                <BookOpen className="size-4" />
+                Read the docs
                 <ArrowUpRight className="size-4" />
-              </a>
+              </SiteLink>
             </Button>
             <Button asChild variant="outline" size="lg">
               <a
@@ -101,6 +103,13 @@ export function HeroSection() {
                 <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </a>
             </Button>
+            <button
+              type="button"
+              className="text-sm text-white/45 transition-colors hover:text-white"
+              onClick={(event) => scrollToSection(event, '#workflow')}
+            >
+              See how it works
+            </button>
           </div>
         </div>
       </div>
