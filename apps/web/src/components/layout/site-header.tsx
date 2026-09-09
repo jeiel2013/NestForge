@@ -4,6 +4,8 @@ import logo from '../../../assets/logo.png';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { scrollToSection } from '@/lib/scroll-to-section';
+import { SiteLink } from '@/components/shared/site-link';
+import { sitePaths } from '@/lib/routes';
 
 const links = [
   { href: '#features', label: 'Features' },
@@ -46,6 +48,12 @@ export function SiteHeader() {
         </a>
 
         <nav className="hidden items-center gap-8 md:flex" aria-label="Primary navigation">
+          <SiteLink
+            to={sitePaths.docs}
+            className="header-anchor relative py-2 text-sm text-white/55 transition-colors hover:text-white"
+          >
+            Documentation
+          </SiteLink>
           {links.map((link) => (
             <a
               key={link.href}
@@ -95,6 +103,13 @@ export function SiteHeader() {
       {menuOpen && (
         <nav className="mobile-navigation-enter border-t border-white/10 bg-black px-5 py-5 md:hidden" aria-label="Mobile navigation">
           <div className="flex flex-col gap-2">
+            <SiteLink
+              to={sitePaths.docs}
+              className="rounded-lg px-3 py-3 text-sm text-white/70 transition-[background-color,color,transform] duration-300 hover:translate-x-1 hover:bg-white/5 hover:text-white"
+              onClick={() => setMenuOpen(false)}
+            >
+              Documentation
+            </SiteLink>
             {links.map((link) => (
               <a
                 key={link.href}
