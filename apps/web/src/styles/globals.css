@@ -82,6 +82,70 @@ a:focus-visible {
   background: rgba(239, 35, 60, 0.45);
 }
 
+.doc-prose {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.doc-prose > * + * {
+  margin-top: 1.25rem;
+}
+
+.doc-prose h3 {
+  margin-top: 2rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.doc-prose ul,
+.doc-prose ol {
+  padding-left: 1.35rem;
+}
+
+.doc-prose ul {
+  list-style: disc;
+}
+
+.doc-prose ol {
+  list-style: decimal;
+}
+
+.doc-prose li {
+  padding-left: 0.3rem;
+}
+
+.doc-prose li + li {
+  margin-top: 0.55rem;
+}
+
+.doc-prose code {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.35rem;
+  background: rgba(255, 255, 255, 0.055);
+  padding: 0.12rem 0.35rem;
+  color: rgba(255, 255, 255, 0.82);
+  font-family: var(--font-mono);
+  fontval: 0.875em;
+}
+
+.doc-prose pre code,
+.doc-prose table code {
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.doc-prose a {
+  color: #ff9b5e;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 155, 94, 0.35);
+  text-underline-offset: 0.22em;
+}
+
 .frame-corners {
   position: relative;
 }
