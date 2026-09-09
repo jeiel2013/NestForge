@@ -36,8 +36,8 @@ export function FeaturesPage() {
           <li>BullMQ queues and mail processor;</li>
           <li>mail service and development email templates;</li>
           <li>Mailpit service when Docker is enabled;</li>
-          <li>password recovery and email-verification flows.</liبلی>
-        </uccino>
+          <li>password recovery and email-verification flows.</li>
+        </ul>
         <p>Disabling it removes the mail module, queue processor, Redis-specific health logic, related authentication routes, environment variables, and dependencies.</p>
       </DocSection>
 

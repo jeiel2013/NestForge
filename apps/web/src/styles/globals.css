@@ -129,7 +129,7 @@ a:focus-visible {
   padding: 0.12rem 0.35rem;
   color: rgba(255, 255, 255, 0.82);
   font-family: var(--font-mono);
-  fontval: 0.875em;
+  font-size: 0.875em;
 }
 
 .doc-prose pre code,

@@ -1,4 +1,4 @@
-importsch { DocsLayout } from '@/components/docs/docs-layout';
+import { DocsLayout } from '@/components/docs/docs-layout';
 import { AuthenticationPage } from '@/pages/docs/authentication-page';
 import { CliPage } from '@/pages/docs/cli-page';
 import { CompatibilityPage } from '@/pages/docs/compatibility-page';
