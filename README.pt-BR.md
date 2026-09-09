@@ -4,6 +4,12 @@
 
 Monorepo do NestForge: uma CLI interativa que gera projetos NestJS prontos para produção com autenticação, autorização, banco de dados, filas, observabilidade, testes e documentação.
 
+## Demonstração
+
+<p align="center">
+  <img src="docs/assets/nestforge-15s.gif" alt="CLI do NestForge gerando um projeto NestJS" width="900" />
+</p>
+
 Instale o pacote localmente:
 
 ```bash
