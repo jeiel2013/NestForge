@@ -103,13 +103,13 @@ export function HeroSection() {
                 <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </a>
             </Button>
-            <button
-              type="button"
+            <a
+              href="#workflow"
               className="text-sm text-white/45 transition-colors hover:text-white"
               onClick={(event) => scrollToSection(event, '#workflow')}
             >
               See how it works
-            </button>
+            </a>
           </div>
         </div>
       </div>
