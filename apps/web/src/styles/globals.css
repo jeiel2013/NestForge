@@ -146,6 +146,21 @@ a:focus-visible {
   text-underline-offset: 0.22em;
 }
 
+@media (max-width: 639px) {
+  .doc-prose {
+    font-size: 0.975rem;
+    line-height: 1.75;
+  }
+
+  .doc-prose > * + * {
+    margin-top: 1rem;
+  }
+
+  .doc-prose pre {
+    margin-inline: -0.25rem;
+  }
+}
+
 .frame-corners {
   position: relative;
 }
