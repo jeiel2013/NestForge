@@ -4,6 +4,12 @@
 
 NestForge monorepo: an interactive CLI that generates production-ready NestJS projects with authentication, authorization, databases, queues, observability, tests, and documentation.
 
+## Demo
+
+<p align="center">
+  <img src="docs/assets/nestforge-15s.gif" alt="NestForge CLI generating a NestJS project" width="900" />
+</p>
+
 Install the package locally:
 
 ```bash
