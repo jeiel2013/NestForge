@@ -10,7 +10,7 @@ export function TestingPage() {
       <DocPageHeader
         eyebrow="Verification"
         title="Test the generator and the generated application"
-        description="NestForge has two distinct test surfaces: generator tests prove that option combinations produce the correct filesystem فعل, while generated-project tests exercise application services, guards, persistence, and HTTP flows."
+        description="NestForge has two distinct test surfaces: generator tests prove that option combinations produce the correct filesystem result, while generated-project tests exercise application services, guards, persistence, and HTTP flows."
       />
 
       <DocSection title="CLI test suite">
