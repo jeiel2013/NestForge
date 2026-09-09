@@ -2,7 +2,6 @@ import { ArrowUpRight, BookOpen, Github } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { CopyCommand } from '@/components/shared/copy-command';
 import { Button } from '@/components/ui/button';
-import { scrollToSection } from '@/lib/scroll-to-section';
 import { SiteLink } from '@/components/shared/site-link';
 import { sitePaths } from '@/lib/routes';
 
@@ -103,13 +102,6 @@ export function HeroSection() {
                 <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </a>
             </Button>
-            <a
-              href="#workflow"
-              className="text-sm text-white/45 transition-colors hover:text-white"
-              onClick={(event) => scrollToSection(event, '#workflow')}
-            >
-              See how it works
-            </a>
           </div>
         </div>
       </div>
