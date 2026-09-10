@@ -95,7 +95,7 @@ export async function generateProject(options: ProjectOptions): Promise<string> 
 
     await fs.copy(templateDir, targetDir);
 
-    const enabledFeatures = buildEnabledFeatures(features, accessControl, database, authStrategy);
+    const enabledFeatures = buildEnabledFeatures(features, accessControl, database, authStrategy, language);
 
     await applyDockerToggle(targetDir, enabledFeatures);
     if (orm !== 'none') {
@@ -124,8 +124,11 @@ function buildEnabledFeatures(
     accessControl: boolean,
     database: string,
     authStrategy: string,
+    language: string,
 ): Set<string> {
     const enabled = new Set(features);
+
+    enabled.add(`language:${language}`);
 
     if (accessControl) {
         enabled.add('rbac');
