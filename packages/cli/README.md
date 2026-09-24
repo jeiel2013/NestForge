@@ -48,7 +48,7 @@ Invalid values, contradictory toggles, and unsupported combinations terminate wi
 
 When the CLI starts, it checks the npm registry for a newer stable version. If an update is available, you can:
 
-- download the latest version with `npx` and restart the CLI;
+- install the detected version in the current project and restart the CLI from that local installation;
 - continue with the currently installed version;
 - hide the reminder until the next local day.
 

@@ -16,12 +16,20 @@ interface UpdateNotifierOptions {
     check?: typeof checkForUpdate;
     prompt?: (update: UpdateInfo) => Promise<UpdateChoice>;
     dismiss?: typeof dismissUpdatesForToday;
-    runLatest?: () => Promise<boolean>;
+    runLatest?: (update: UpdateInfo) => Promise<boolean>;
 }
 
-export function getUpdateProcess(
+interface ChildProcessCommand {
+    command: string;
+    args: string[];
+}
+
+export function getUpdateInstallProcess(
+    latestVersion: string,
     platform: NodeJS.Platform = process.platform,
-): { command: string; args: string[] } {
+): ChildProcessCommand {
+    const packageSpec = `nestforge-generator@${latestVersion}`;
+
     if (platform === 'win32') {
         return {
             command: process.env.ComSpec ?? 'cmd.exe',
@@ -29,32 +37,50 @@ export function getUpdateProcess(
                 '/d',
                 '/s',
                 '/c',
-                'npx --yes nestforge-generator@latest',
+                `npm install ${packageSpec}`,
+            ],
+        };
+    }
+
+    return {
+        command: 'npm',
+        args: ['install', packageSpec],
+    };
+}
+
+export function getUpdateRestartProcess(
+    platform: NodeJS.Platform = process.platform,
+): ChildProcessCommand {
+    if (platform === 'win32') {
+        return {
+            command: process.env.ComSpec ?? 'cmd.exe',
+            args: [
+                '/d',
+                '/s',
+                '/c',
+                'npx --no-install nestforge',
             ],
         };
     }
 
     return {
         command: 'npx',
-        args: ['--yes', 'nestforge-generator@latest'],
+        args: ['--no-install', 'nestforge'],
     };
 }
 
-export async function runLatestVersion(): Promise<boolean> {
+function runChildProcess(
+    childProcess: ChildProcessCommand,
+    env: NodeJS.ProcessEnv = process.env,
+): Promise<boolean> {
     return new Promise((resolve) => {
-        const updateProcess = getUpdateProcess();
         const child = spawn(
-            updateProcess.command,
-            updateProcess.args,
+            childProcess.command,
+            childProcess.args,
             {
                 stdio: 'inherit',
                 shell: false,
-                env: {
-                    ...process.env,
-                    NESTFORGE_RESTART_ARGS: JSON.stringify(
-                        process.argv.slice(2),
-                    ),
-                },
+                env,
             },
         );
 
@@ -71,6 +97,28 @@ export async function runLatestVersion(): Promise<boolean> {
         child.once('error', () => finish(false));
         child.once('exit', (code) => finish(code === 0));
     });
+}
+
+export async function runLatestVersion(
+    update: UpdateInfo,
+): Promise<boolean> {
+    const installed = await runChildProcess(
+        getUpdateInstallProcess(update.latestVersion),
+    );
+
+    if (!installed) {
+        return false;
+    }
+
+    return runChildProcess(
+        getUpdateRestartProcess(),
+        {
+            ...process.env,
+            NESTFORGE_RESTART_ARGS: JSON.stringify(
+                process.argv.slice(2),
+            ),
+        },
+    );
 }
 
 async function promptForUpdate(
@@ -133,17 +181,17 @@ export async function handleUpdateNotification(
             return 'continue';
         }
 
-        log.info('Downloading the latest NestForge version...');
+        log.info(`Installing NestForge ${update.latestVersion} in the current project...`);
         const updated = await (
             options.runLatest ?? runLatestVersion
-        )();
+        )(update);
 
         if (updated) {
             return 'restarted';
         }
 
         log.warn(
-            'The update could not be started. Continuing with the current version.',
+            'The update could not be installed or restarted. Continuing with the current version.',
         );
         return 'continue';
     } catch {

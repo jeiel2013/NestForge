@@ -22,7 +22,7 @@ Execute a CLI instalada localmente:
 npx nestforge
 ```
 
-Ao iniciar, a CLI verifica no npm se existe uma versão estável mais recente. Ela pode baixar e reiniciar com a versão mais nova, continuar com a versão instalada ou ocultar o lembrete até o dia seguinte. A verificação usa cache e nunca impede o uso offline.
+Ao iniciar, a CLI verifica no npm se existe uma versão estável mais recente. Ela pode instalar a versão detectada no projeto atual e reiniciar usando essa instalação local, continuar com a versão instalada ou ocultar o lembrete até o dia seguinte. A verificação usa cache e nunca impede o uso offline.
 
 ## Estrutura do repositório
 

@@ -48,7 +48,7 @@ Valores inválidos, toggles contraditórios e combinações não suportadas ence
 
 Quando a CLI inicia, ela consulta o registro do npm em busca de uma versão estável mais recente. Se houver uma atualização, você pode:
 
-* baixar a versão mais recente com `npx` e reiniciar a CLI;
+* instalar a versão detectada no projeto atual e reiniciar a CLI usando a instalação local;
 * continuar com a versão instalada atualmente;
 * ocultar o lembrete até o próximo dia no horário local.
 
