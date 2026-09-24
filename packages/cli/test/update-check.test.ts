@@ -9,7 +9,8 @@ import {
     dismissUpdatesForToday,
 } from '../src/update-check.js';
 import {
-    getUpdateProcess,
+    getUpdateInstallProcess,
+    getUpdateRestartProcess,
     handleUpdateNotification,
 } from '../src/update-notifier.js';
 
@@ -135,6 +136,7 @@ test('suppresses update reminders until the next local day', async () => {
 
 test('updates and restarts when the user accepts the update', async () => {
     let startedLatestVersion = false;
+    let requestedUpdate: { currentVersion: string; latestVersion: string } | undefined;
 
     const result = await handleUpdateNotification({
         readCurrentPackage: async () => ({
@@ -146,13 +148,18 @@ test('updates and restarts when the user accepts the update', async () => {
             latestVersion: '0.5.0',
         }),
         prompt: async () => 'update',
-        runLatest: async () => {
+        runLatest: async (update) => {
             startedLatestVersion = true;
+            requestedUpdate = update;
             return true;
         },
     });
 
     assert.equal(startedLatestVersion, true);
+    assert.deepEqual(requestedUpdate, {
+        currentVersion: '0.4.1',
+        latestVersion: '0.5.0',
+    });
     assert.equal(result, 'restarted');
 });
 
@@ -201,21 +208,40 @@ test('stores the dismissal when the user asks not to be reminded today', async (
     assert.equal(result, 'continue');
 });
 
-test('uses a platform-safe process to start the latest version', () => {
-    const windowsProcess = getUpdateProcess('win32');
-    const linuxProcess = getUpdateProcess('linux');
-    const macOsProcess = getUpdateProcess('darwin');
+test('uses a platform-safe process to install the detected version locally', () => {
+    const windowsProcess = getUpdateInstallProcess('0.5.0', 'win32');
+    const linuxProcess = getUpdateInstallProcess('0.5.0', 'linux');
+    const macOsProcess = getUpdateInstallProcess('0.5.0', 'darwin');
 
     assert.match(windowsProcess.command, /(?:cmd\.exe|cmd)$/i);
     assert.deepEqual(windowsProcess.args, [
         '/d',
         '/s',
         '/c',
-        'npx --yes nestforge-generator@latest',
+        'npm install nestforge-generator@0.5.0',
+    ]);
+    assert.deepEqual(linuxProcess, {
+        command: 'npm',
+        args: ['install', 'nestforge-generator@0.5.0'],
+    });
+    assert.deepEqual(macOsProcess, linuxProcess);
+});
+
+test('restarts from the locally installed NestForge binary', () => {
+    const windowsProcess = getUpdateRestartProcess('win32');
+    const linuxProcess = getUpdateRestartProcess('linux');
+    const macOsProcess = getUpdateRestartProcess('darwin');
+
+    assert.match(windowsProcess.command, /(?:cmd\.exe|cmd)$/i);
+    assert.deepEqual(windowsProcess.args, [
+        '/d',
+        '/s',
+        '/c',
+        'npx --no-install nestforge',
     ]);
     assert.deepEqual(linuxProcess, {
         command: 'npx',
-        args: ['--yes', 'nestforge-generator@latest'],
+        args: ['--no-install', 'nestforge'],
     });
     assert.deepEqual(macOsProcess, linuxProcess);
 });
